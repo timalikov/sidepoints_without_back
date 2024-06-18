@@ -79,7 +79,7 @@ async def find(interaction: discord.Interaction, username: str):
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
     else:
         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
-#
+
 async def get_guild_invite_link(guild_id):
     guild = bot.get_guild(guild_id)
     if guild:

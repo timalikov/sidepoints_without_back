@@ -34,7 +34,7 @@ class DiscordServiceFetcher:
                     "serviceTitle": service["serviceTitle"],
                     "serviceDescription": service["serviceDescription"],
                     "servicePrice": service["servicePrice"],
-                    "serviceImage": service["profileImage"],
+                    "serviceImage": service["serviceImage"],
                     "serviceTypeId": service["serviceTypeId"],
                     "serviceId": service["serviceId"]
                 } for index, service in enumerate(data['_embedded']['discordServices'])
@@ -102,7 +102,7 @@ class DiscordServiceFetcher:
                     "serviceTitle": service["serviceTitle"],
                     "serviceDescription": service["serviceDescription"],
                     "servicePrice": service["servicePrice"],
-                    "serviceImage": service["profileImage"],
+                    "serviceImage": service["serviceImage"],
                     "serviceTypeId": service["serviceTypeId"],
                     "serviceId": service["serviceId"]
                 }

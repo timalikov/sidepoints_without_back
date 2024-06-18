@@ -26,32 +26,20 @@ async def send_push_notifications(order_id):
     # all_user_ids = await Profile_Database.get_user_ids_by_task_id(task_id)
     userData = DiscordServiceFetcher(serviceTypeId=task_id)
     userData.fetch_services()
-    # Get all user IDs from Profile_Database
-    # all_user_ids = await Profile_Database.get_all_user_ids()
 
     # Get the pushed user IDs for the given order_id
     pushed_user_ids = await Order_Database.get_pushed_user_ids(order_id)
 
-    # Filter out users who have already been pushed
-    # users_to_push = [user_id for user_id in all_user_ids if user_id not in pushed_user_ids]
-
-    # users_to_push = ['930005621728763904', '689328299247534080', '676632838455427092']
-
-    # Limit to 20 users
-    # users_to_push = random.sample(users_to_push, min(20, len(users_to_push)))
-
-    # Send push notifications
     tasks = []
 
-    for _ in range(20):  # Loop 20 times
+    for _ in range(20):
         time.sleep(1)
         current_user = userData.get_next()
         if current_user:  # Check if get_next() returns a valid user
             discord_id = current_user["discordId"]
-            tasks.append(process_user_push(order_id, discord_id, current_user))
+            await process_user_push(order_id, discord_id, current_user)
+            # tasks.append(process_user_push(order_id, discord_id, current_user))
 
-    await asyncio.gather(*tasks)
-    # tasks = [process_user_push(order_id, user_id) for user_id in users_to_push]
     # await asyncio.gather(*tasks)
 
 async def process_user_push(order_id, user_id, current_user):
@@ -68,9 +56,6 @@ async def process_user_push(order_id, user_id, current_user):
 
             task_desc = TASK_DESCRIPTIONS[task_id]
 
-            # print("CUSTOMER NAME: ", customer_data["name"])
-            # customer_language = customer_data.get("language", "N/A")
-            # customer_language = "EN"
             main_link = await get_guild_invite_link(MAIN_GUILD_ID)
 
             await user.send(content=f"New Order Summon Alert: {task_desc}.\n You have a new order summon for a {task_desc}.\nAccept to send your profile to the user.\nPlease ensure to join our server using the link below: {main_link}", view=button)
@@ -97,7 +82,6 @@ async def update_push_count(order_id):
 
 async def iterative_push_notifications():
     while True:
-        await asyncio.sleep(15)
         # Get all active order IDs
         active_order_ids = await Order_Database.get_active_order_ids()
         # Send push notifications for each active order ID
