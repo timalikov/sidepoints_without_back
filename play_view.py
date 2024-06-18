@@ -25,8 +25,8 @@ class PlayView(View):
         self.no_user = False
         if username is not None:
             self.service = self.userData.find(username)
-            self.user_discord_id = self.service.get("")
             if self.service != False:
+                self.user_discord_id = self.service.get("")
                 self.profile_embed = create_profile_embed(self.service)
             else:
                 self.no_user = True
