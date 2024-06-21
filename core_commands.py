@@ -3,7 +3,7 @@ from discord import app_commands
 from play_view import PlayView
 from profile_view import ProfileView
 from bot_instance import get_bot
-from background_tasks import delete_old_channels, post_user_profiles
+from background_tasks import delete_old_channels, post_user_profiles, delete_all_threads_and_clear_csv
 #post_weekly_leaderboard
 
 #delete_all_threads_and_clear_csv
@@ -107,10 +107,10 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
 
 @bot.event
 async def on_ready():
-    delete_old_channels.start()
+    # delete_old_channels.start()
     # post_weekly_leaderboard.start()
     await bot.tree.sync()
-    # await delete_all_threads_and_clear_csv()
+    await delete_all_threads_and_clear_csv()
     post_user_profiles.start()
     print(f'We have logged in as {bot.user}')
 
