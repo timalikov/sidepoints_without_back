@@ -182,8 +182,8 @@ class UserProfileView(discord.ui.View):
         serviceId = self.profile_data["serviceId"]
         discordServerId = interaction.guild.id
         # payment_link = f"https://sidekick.fans/payment/test"
-        payment_link = f"https://app.sidekick.fans/services/{serviceId}?discordServerId={discordServerId}"
-
+        # payment_link = f"https://app.sidekick.fans/services/{serviceId}?discordServerId={discordServerId}"
+        payment_link = f"https://apptest.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
         try:
             await interaction.response.send_message(
                 f"To participate in this session, please complete your payment here: {payment_link}",
