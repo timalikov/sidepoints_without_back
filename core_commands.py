@@ -105,6 +105,21 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     await interaction.followup.send(f"Your Kickers summon order successfully placed. \nPlease check your DM for Kicker summon responses. Please wait further instructions and join to our server using the link below\n{main_link}", ephemeral=True)
 
 
+@bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
+@app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),
+                               app_commands.Choice(name="Unsubscribe", value=0),
+                               ])
+async def subscribe9(interaction: discord.Interaction, choices: app_commands.Choice[int]):
+    await interaction.response.defer(ephemeral=True)
+    # order_data = {
+    #     'user_id': interaction.user.id,
+    #     'task_id': choices.value
+    # }
+    # await Order_Database.set_user_data(order_data)
+    # main_link = await get_guild_invite_link(MAIN_GUILD_ID)
+    await interaction.followup.send(f"you have chosen {choices.value}", ephemeral=True)
+
+
 @bot.event
 async def on_ready():
     # delete_old_channels.start()

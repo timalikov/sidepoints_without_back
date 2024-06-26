@@ -111,4 +111,25 @@ class DiscordServiceFetcher:
         else:
             response.raise_for_status()
 
+    def find_by_id(self, discordId):
+        url_to_send = f"{self.base_url}/search/profileNameStartsWith?discordId={discordId}"
+        response = requests.get(url_to_send)
+        if response.status_code == 200:
+            data = response.json()
+            if '_embedded' in data and 'discordServices' in data['_embedded'] and data['_embedded']['discordServices']:
+                service = data['_embedded']['discordServices'][0]
+                return {
+                    "discordId": service["discordId"],
+                    "profileUsername": service["profileUsername"],
+                    "serviceTitle": service["serviceTitle"],
+                    "serviceDescription": service["serviceDescription"],
+                    "servicePrice": service["servicePrice"],
+                    "serviceImage": service["serviceImage"],
+                    "serviceTypeId": service["serviceTypeId"],
+                    "serviceId": service["serviceId"]
+                }
+            else:
+                return False
+        else:
+            response.raise_for_status()
 print(DiscordServiceFetcher().find("hotanthinh113"))
