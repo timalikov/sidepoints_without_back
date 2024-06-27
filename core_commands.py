@@ -117,7 +117,10 @@ async def subscribe9(interaction: discord.Interaction, choices: app_commands.Cho
     # }
     # await Order_Database.set_user_data(order_data)
     # main_link = await get_guild_invite_link(MAIN_GUILD_ID)
-    await interaction.followup.send(f"you have chosen {choices.value}", ephemeral=True)
+    if choices.value == 1:
+        await interaction.followup.send(f"You have successfully subscribed to the order command. Each time the /order command is used by users, you will receive a notification.", ephemeral=True)
+    else:
+        await interaction.followup.send(f"You have unsubscribed from the order command.", ephemeral=True)
 
 
 @bot.event
