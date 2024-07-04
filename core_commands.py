@@ -1,9 +1,10 @@
 import discord
 from discord import app_commands
 from play_view import PlayView
-from profile_view import ProfileView
+from profile_view import ProfileView, WalletView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles, delete_all_threads_and_clear_csv
+from sql_subscriber import Subscribers_Database
 #post_weekly_leaderboard
 
 #delete_all_threads_and_clear_csv
@@ -12,6 +13,7 @@ from sql_order import Order_Database
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
+
 ##### To get list of users who are currently online #####
 async def list_online_users(guild):
     if guild is None:
@@ -109,27 +111,41 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
 @app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),
                                app_commands.Choice(name="Unsubscribe", value=0),
                                ])
-async def subscribe9(interaction: discord.Interaction, choices: app_commands.Choice[int]):
+async def subscribe(interaction: discord.Interaction, choices: app_commands.Choice[int]):
     await interaction.response.defer(ephemeral=True)
-    # order_data = {
-    #     'user_id': interaction.user.id,
-    #     'task_id': choices.value
-    # }
-    # await Order_Database.set_user_data(order_data)
-    # main_link = await get_guild_invite_link(MAIN_GUILD_ID)
     if choices.value == 1:
+        await Subscribers_Database.set_user_data(interaction.user.id)
         await interaction.followup.send(f"You have successfully subscribed to the order command. Each time the /order command is used by users, you will receive a notification.", ephemeral=True)
     else:
+        await Subscribers_Database.delete_user_data(interaction.user.id)
         await interaction.followup.send(f"You have unsubscribed from the order command.", ephemeral=True)
 
+@bot.tree.command(name="wallet", description="Use this command to access your wallet.")
+async def wallet(interaction: discord.Interaction):
+    guild = interaction.guild
+    # Check if the user is a member of the guild
+    member = guild.get_member(interaction.user.id)
+    if member:
+        view = WalletView()
+        await interaction.response.send_message("Welcome onboard!\nClick on Go to Wallet to see your wallet", view=view, ephemeral=True)
+        return
+    else:
+        await interaction.response.defer(ephemeral=True)
+        try:
+            # Create an invite that expires in 24 hours with a maximum of 10 uses
+            invite = await guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
+            await interaction.response.send_message(f"You must join our main guild to access your profile. Please join using this invite: {invite.url}", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
+            print(e)  # For debugging purposes
 
 @bot.event
 async def on_ready():
     # delete_old_channels.start()
     # post_weekly_leaderboard.start()
     await bot.tree.sync()
-    await delete_all_threads_and_clear_csv()
-    post_user_profiles.start()
+    # await delete_all_threads_and_clear_csv()
+    # post_user_profiles.start()
     print(f'We have logged in as {bot.user}')
 
 def run():
