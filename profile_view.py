@@ -8,4 +8,5 @@ class ProfileView(discord.ui.View):
 
 class WalletView(discord.ui.View):
     def __init__(self):
+        super().__init__(timeout=None)
         self.add_item(discord.ui.Button(label="Go to Wallet", url="https://app.sidekick.fans/manage", style=discord.ButtonStyle.url))
