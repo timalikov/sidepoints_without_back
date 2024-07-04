@@ -132,4 +132,5 @@ class DiscordServiceFetcher:
                 return False
         else:
             response.raise_for_status()
+
 print(DiscordServiceFetcher().find("hotanthinh113"))
