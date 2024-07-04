@@ -141,11 +141,11 @@ async def wallet(interaction: discord.Interaction):
 
 @bot.event
 async def on_ready():
-    # delete_old_channels.start()
+    delete_old_channels.start()
     # post_weekly_leaderboard.start()
     await bot.tree.sync()
     # await delete_all_threads_and_clear_csv()
-    # post_user_profiles.start()
+    post_user_profiles.start()
     print(f'We have logged in as {bot.user}')
 
 def run():
