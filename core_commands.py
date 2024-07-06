@@ -60,8 +60,11 @@ async def list_all_users_with_online_status(guild):
 @app_commands.choices(choices=[app_commands.Choice(name="All players", value="ALL"),
                                app_commands.Choice(name="Buddy", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
                                app_commands.Choice(name="Coaching", value="88169d78-85b4-4fa3-8298-3df020f13a6f"),
-                               app_commands.Choice(name="Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
-                               app_commands.Choice(name="Mobile", value="439d8a72-8b8b-4a56-bb32-32c6e5d918ec")
+                               app_commands.Choice(name="Just Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
+                               app_commands.Choice(name="Mobile", value="439d8a72-8b8b-4a56-bb32-32c6e5d918ec"),
+                               app_commands.Choice(name="Watch Youtube", value="d3ae39d2-fd86-41d7-bc38-0b582ce338b5"),
+                               app_commands.Choice(name="Play Games", value="79bf303a-318b-4815-bd56-7b0b49ae7bff"),
+                               app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9")
                                ])
 async def play(interaction: discord.Interaction, choices: app_commands.Choice[str]):
     await interaction.response.defer(ephemeral=True)
@@ -91,10 +94,14 @@ async def get_guild_invite_link(guild_id):
     return None
 
 @bot.tree.command(name="order", description="Use this command to post your service request and summon Kickers to take the order.")
-@app_commands.choices(choices=[app_commands.Choice(name="Buddy", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
+@app_commands.choices(choices=[app_commands.Choice(name="All players", value="ALL"),
+                               app_commands.Choice(name="Buddy", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
                                app_commands.Choice(name="Coaching", value="88169d78-85b4-4fa3-8298-3df020f13a6f"),
-                               app_commands.Choice(name="Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
-                               app_commands.Choice(name="Mobile", value="439d8a72-8b8b-4a56-bb32-32c6e5d918ec")
+                               app_commands.Choice(name="Just Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
+                               app_commands.Choice(name="Mobile", value="439d8a72-8b8b-4a56-bb32-32c6e5d918ec"),
+                               app_commands.Choice(name="Watch Youtube", value="d3ae39d2-fd86-41d7-bc38-0b582ce338b5"),
+                               app_commands.Choice(name="Play Games", value="79bf303a-318b-4815-bd56-7b0b49ae7bff"),
+                               app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9")
                                ])
 async def order(interaction: discord.Interaction, choices: app_commands.Choice[str]):
     await interaction.response.defer(ephemeral=True)
