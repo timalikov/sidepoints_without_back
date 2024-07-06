@@ -10,6 +10,7 @@ def create_profile_embed(profile_data):
     embed.add_field(name="Category", value=f"{profile_data['serviceTitle']}", inline=True)
     return embed
 
+
 def create_forum_embed(profile_data, category):
     embed = discord.Embed(
         title=profile_data['name'],
