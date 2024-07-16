@@ -10,6 +10,8 @@ from message_constructors import create_profile_embed
 import os
 from bot_instance import get_bot
 from getServices import DiscordServiceFetcher
+from sql_profile import log_to_database
+
 bot = get_bot()
 load_dotenv()
 
@@ -40,16 +42,16 @@ class PlayView(View):
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_user")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await log_to_database(interaction.user.id, "play_user")
         serviceId = self.service["serviceId"]
         discordServerId = interaction.guild.id
-        # payment_link = f"https://sidekick.fans/payment/test"
         payment_link = f"https://app.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
-        # payment_link = f"https://apptest.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
         await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        log_to_database(interaction.user.id, "next_user")
         self.service = self.userData.get_next()
         self.profile_embed = create_profile_embed(self.service)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
@@ -57,6 +59,7 @@ class PlayView(View):
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+
         user_id = self.service["discordId"]
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
 
@@ -77,6 +80,7 @@ class PlayView(View):
     @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_user")
     async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await log_to_database(interaction.user.id, "chat_user")
         user_id = self.service["discordId"]
         member = interaction.guild.get_member(int(user_id))
         if member:

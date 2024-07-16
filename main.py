@@ -10,7 +10,7 @@ if __name__ == "__main__":
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
 
-    # Start the web3 process
+    # Start the web3_interaction process
     process = Process(target=web3_test.main)
     process.start()
 
@@ -20,5 +20,4 @@ if __name__ == "__main__":
     # Start the push notifications in a separate thread
     # push_notifications_thread = threading.Thread(target=push_order.start_push_notifications)
     # push_notifications_thread.start()
-
     flask_app.run(host='0.0.0.0', port=PORT_ID)

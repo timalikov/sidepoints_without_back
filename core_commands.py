@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import discord
 from discord import app_commands
 from play_view import PlayView
@@ -5,11 +7,15 @@ from profile_view import ProfileView, WalletView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles, delete_all_threads_and_clear_csv
 from sql_subscriber import Subscribers_Database
+from sql_profile import log_to_database
+
 #post_weekly_leaderboard
 
 #delete_all_threads_and_clear_csv
 from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN
 from sql_order import Order_Database
+from views.exist_service import Profile_Exist
+from views.wallet_view import Wallet_exist
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -29,24 +35,39 @@ async def profile(interaction: discord.Interaction):
     #     await interaction.response.send_message("Error: Main guild not found.", ephemeral=True)
     #     return
 
+    await interaction.response.defer(ephemeral=True)
+    await log_to_database(interaction.user.id, "/profile")
     guild = interaction.guild
-    # Check if the user is a member of the guild
-    member = guild.get_member(interaction.user.id)
-    if member:
-        # print("HE IS A MEMBER")
-        view = ProfileView()
-        await interaction.response.send_message("Welcome onboard!\nClick on go to profile to set up or edit your profile", view=view, ephemeral=True)
-        return
+    # # Check if the user is a member of the guild
+    # member = guild.get_member(interaction.user.id)
+    # # Log the interaction
+    # print(interaction.user.id)
+    # await log_to_database(interaction.user.id, "profile")
+    profile_exist = Profile_Exist(str(interaction.user.id))
+
+    await profile_exist.initialize()
+
+    if profile_exist.no_user:
+        await interaction.followup.send("Looks like you haven't create a profile with us! Please jump to the link below and create your profile!.\nhttps://app.sidekick.fans/services/create", ephemeral=True)
     else:
-        await interaction.response.defer(ephemeral=True)
-        # Generate an invite link if the user is not in the guild
-        try:
-            # Create an invite that expires in 24 hours with a maximum of 10 uses
-            invite = await guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
-            await interaction.response.send_message(f"You must join our main guild to access your profile. Please join using this invite: {invite.url}", ephemeral=True)
-        except Exception as e:
-            await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
-            print(e)  # For debugging purposes
+        await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
+
+    # await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+    # if member:
+    #     # print("HE IS A MEMBER")
+    #     view = ProfileView()
+    #     await interaction.response.send_message("Welcome onboard!\nClick on go to profile to set up or edit your profile", view=view, ephemeral=True)
+    #     return
+    # else:
+    #     await interaction.response.defer(ephemeral=True)
+    #     # Generate an invite link if the user is not in the guildawait profile_exist.initialize()
+    #     try:
+    #         # Create an invite that expires in 24 hours with a maximum of 10 uses
+    #         invite = await guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
+    #         await interaction.response.send_message(f"You must join our main guild to access your profile. Please join using this invite: {invite.url}", ephemeral=True)
+    #     except Exception as e:
+    #         await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
+    #         print(e)
 
 
 async def list_all_users_with_online_status(guild):
@@ -69,6 +90,7 @@ async def list_all_users_with_online_status(guild):
 async def play(interaction: discord.Interaction, choices: app_commands.Choice[str]):
     await interaction.response.defer(ephemeral=True)
     view = PlayView(user_choice=choices.value)
+    await log_to_database(interaction.user.id, "/go")
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
     else:
@@ -80,6 +102,7 @@ async def play(interaction: discord.Interaction, choices: app_commands.Choice[st
 async def find(interaction: discord.Interaction, username: str):
     await interaction.response.defer(ephemeral=True)
     view = PlayView(user_choice="ALL", username=username)
+    await log_to_database(interaction.user.id, "/find")
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
     else:
@@ -104,6 +127,7 @@ async def get_guild_invite_link(guild_id):
                                app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9")
                                ])
 async def order(interaction: discord.Interaction, choices: app_commands.Choice[str]):
+    await log_to_database(interaction.user.id, "/order")
     await interaction.response.defer(ephemeral=True)
     order_data = {
         'user_id': interaction.user.id,
@@ -119,6 +143,7 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
                                app_commands.Choice(name="Unsubscribe", value=0),
                                ])
 async def subscribe(interaction: discord.Interaction, choices: app_commands.Choice[int]):
+    await log_to_database(interaction.user.id, "/subscribe")
     await interaction.response.defer(ephemeral=True)
     if choices.value == 1:
         await Subscribers_Database.set_user_data(interaction.user.id)
@@ -129,12 +154,13 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
 
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
+    await log_to_database(interaction.user.id, "/wallet")
     guild = interaction.guild
     # Check if the user is a member of the guild
     member = guild.get_member(interaction.user.id)
     if member:
-        view = WalletView()
-        await interaction.response.send_message("Welcome onboard!\nClick on Go to Wallet to see your wallet", view=view, ephemeral=True)
+        view = Wallet_exist()
+        await interaction.response.send_message("Welcome to SideKick!\nClick on Wallet 🏦 to manage it.\nClick on Top Up 💵 to add funds.\nClick on Balance 📊 to view your USDT balance.", view=view, ephemeral=True)
         return
     else:
         await interaction.response.defer(ephemeral=True)
@@ -144,7 +170,13 @@ async def wallet(interaction: discord.Interaction):
             await interaction.response.send_message(f"You must join our main guild to access your profile. Please join using this invite: {invite.url}", ephemeral=True)
         except Exception as e:
             await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
-            print(e)  # For debugging purposes
+            print(e)
+
+@bot.tree.command(name="tasks", description="Use this command to access your tasks.")
+async def tasks(interaction: discord.Interaction):
+    await log_to_database(interaction.user.id, "/tasks")
+    await interaction.response.send_message("For available tasks press the link below:\nhttps://app.sidekick.fans/tasks", ephemeral=True)
+
 
 @bot.event
 async def on_ready():

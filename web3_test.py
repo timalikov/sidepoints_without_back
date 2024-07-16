@@ -1,21 +1,21 @@
-# from web3 import Web3
+# from web3_interaction import Web3
 # import asyncio
 # import json
 # import aiohttp
 # from config import PORT_ID
 # # connection to the Binance Smart Chain testnet
 # bsc = "https://opbnb-mainnet-rpc.bnbchain.org"
-# web3 = Web3(Web3.HTTPProvider(bsc))
+# web3_interaction = Web3(Web3.HTTPProvider(bsc))
 # with open('usdt_abi.json', 'r') as abi_definition:
 #     contract_abi = json.load(abi_definition)
 # # ensure the connection is successful
-# assert web3.is_connected(), "Web3 connection failed"
+# assert web3_interaction.is_connected(), "Web3 connection failed"
 #
 # # contract address and ABI
 # contract_address = '0xAcb68Eab051BCE90B3d76B21fd871dadd6da332b'
 #
 # # a contract instance
-# contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+# contract = web3_interaction.eth.contract(address=contract_address, abi=contract_abi)
 #
 # async def handle_event(event):
 #     uuid = event['args']['challengeId']
@@ -127,7 +127,6 @@ def process_messages():
 
         for message in messages:
             send_message_to_endpoint(message, port_id)
-
         time.sleep(5)
 
 def main():

@@ -16,21 +16,6 @@ SERVER_ID_LIST = []
 
 LEADER_BOT_CHANNEL_LIST = [1242448780801081475, 1240912296981561405, 1242449117461086290]
 
-
-# APP_CHOICES = {
-#     "All players": 10,
-#     "Coaching [1 hour]": 1,
-#     "Gaming Buddy [1 hour]": 2,
-#     "Share a dance video [2 mins]": 3,
-#     "Sing a song [3 min]": 4,  # Updated from "Sing a song [30 seconds]"
-#     "Stream Together [30 mins]": 5,
-#     "Creative Brainstorm [1 hour]": 7,
-#     "Web3Class": 101,
-#     "Other": 8,
-#     "Web3 Master Course": 100
-# }
-
-
 APP_CHOICES = {
     "BUDDY": "57c86488-8935-4a13-bae0-5ca8783e205d",
     "COACHING": "88169d78-85b4-4fa3-8298-3df020f13a6f",
@@ -51,33 +36,6 @@ TASK_DESCRIPTIONS = {
     "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9": "Virtual Date"
 }
 
-# Map categories to forum tags
-# CATEGORY_TO_TAG = {
-#     "All players": "All players",
-#     "Coaching [1 hour]": "Coaching",
-#     "Gaming Buddy [1 hour]": "Gaming Buddy",
-#     "Share a dance video [2 mins]": "Share a dance video",
-#     "Sing a song [3 min]": "Sing a song",
-#     "Stream Together [30 mins]": "Stream Together",
-#     "Chatting [1 hour]": "Chatting",
-#     "Web3Class": "Web3Class",
-#     "Other": "Other",
-#     "Web3 Master Course": "Web3 Master Course"
-# }
-
-# Map categories to forum tags
-# CATEGORY_TO_TAG = {
-#     "All players": "All players",
-#     "Coaching [1 hour]": "Coaching",
-#     "Gaming Buddy [1 hour]": "Gaming Buddy",
-#     "Share a dance video [2 mins]": "Share a dance video",
-#     "Sing a song [3 min]": "Sing a song",
-#     "Stream Together [30 mins]": "Stream Together",
-#     "Chatting [1 hour]": "Chatting",
-#     "Web3Class": "Web3Class",
-#     "Other": "Other",
-#     "Web3 Master Course": "Web3 Master Course"
-# }
 
 CATEGORY_TO_TAG = {
     "57c86488-8935-4a13-bae0-5ca8783e205d": "BUDDY",
