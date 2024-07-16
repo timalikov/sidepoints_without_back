@@ -91,7 +91,6 @@ async def play(interaction: discord.Interaction, choices: app_commands.Choice[st
     view = PlayView(user_choice=choices.value)
     await log_to_database(interaction.user.id, "/go")
 
-
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
     else:
