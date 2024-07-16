@@ -1,0 +1,532 @@
+[
+    {
+        "type": "constructor",
+        "inputs": [
+            {
+                "name": "_bridge",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_remoteToken",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_name",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "_symbol",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "Approval",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "spender",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "value",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false,
+        "signature": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+    },
+    {
+        "name": "Burn",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false,
+        "signature": "0xcc16f5dbb4873280815c1ee09dbd06736cffcc184412cf7a71a0fdb75d397ca5"
+    },
+    {
+        "name": "Mint",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false,
+        "signature": "0x0f6798a560793a54c3bcfe86a93cde1e73087d944c0ea20544137d4121396885"
+    },
+    {
+        "name": "Transfer",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "from",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "to",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "value",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false,
+        "signature": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+    },
+    {
+        "name": "BRIDGE",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "value": "0x4200000000000000000000000000000000000010",
+                "internalType": "address"
+            }
+        ],
+        "constant": true,
+        "signature": "0xee9a31a2",
+        "stateMutability": "view"
+    },
+    {
+        "name": "REMOTE_TOKEN",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "value": "0x55d398326f99059fF775485246999027B3197955",
+                "internalType": "address"
+            }
+        ],
+        "constant": true,
+        "signature": "0x033964be",
+        "stateMutability": "view"
+    },
+    {
+        "name": "allowance",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "spender",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "constant": true,
+        "signature": "0xdd62ed3e",
+        "stateMutability": "view"
+    },
+    {
+        "name": "approve",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "spender",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "signature": "0x095ea7b3",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "balanceOf",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "constant": true,
+        "signature": "0x70a08231",
+        "stateMutability": "view"
+    },
+    {
+        "name": "bridge",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "value": "0x4200000000000000000000000000000000000010",
+                "internalType": "address"
+            }
+        ],
+        "constant": true,
+        "signature": "0xe78cea92",
+        "stateMutability": "view"
+    },
+    {
+        "name": "burn",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "_from",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_amount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "signature": "0x9dc29fac",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "decimals",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8",
+                "value": "18",
+                "internalType": "uint8"
+            }
+        ],
+        "constant": true,
+        "signature": "0x313ce567",
+        "stateMutability": "view"
+    },
+    {
+        "name": "decreaseAllowance",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "spender",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "subtractedValue",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "signature": "0xa457c2d7",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "increaseAllowance",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "spender",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "addedValue",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "signature": "0x39509351",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "l1Token",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "value": "0x55d398326f99059fF775485246999027B3197955",
+                "internalType": "address"
+            }
+        ],
+        "constant": true,
+        "signature": "0xc01e1bd6",
+        "stateMutability": "view"
+    },
+    {
+        "name": "l2Bridge",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "value": "0x4200000000000000000000000000000000000010",
+                "internalType": "address"
+            }
+        ],
+        "constant": true,
+        "signature": "0xae1f6aaf",
+        "stateMutability": "view"
+    },
+    {
+        "name": "mint",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "_to",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_amount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "signature": "0x40c10f19",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "name",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "string",
+                "value": "Tether USD",
+                "internalType": "string"
+            }
+        ],
+        "constant": true,
+        "signature": "0x06fdde03",
+        "stateMutability": "view"
+    },
+    {
+        "name": "remoteToken",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "value": "0x55d398326f99059fF775485246999027B3197955",
+                "internalType": "address"
+            }
+        ],
+        "constant": true,
+        "signature": "0xd6c0b2c4",
+        "stateMutability": "view"
+    },
+    {
+        "name": "supportsInterface",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "_interfaceId",
+                "type": "bytes4",
+                "internalType": "bytes4"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "constant": true,
+        "signature": "0x01ffc9a7",
+        "stateMutability": "pure"
+    },
+    {
+        "name": "symbol",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "string",
+                "value": "USDT",
+                "internalType": "string"
+            }
+        ],
+        "constant": true,
+        "signature": "0x95d89b41",
+        "stateMutability": "view"
+    },
+    {
+        "name": "totalSupply",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "value": "0",
+                "internalType": "uint256"
+            }
+        ],
+        "constant": true,
+        "signature": "0x18160ddd",
+        "stateMutability": "view"
+    },
+    {
+        "name": "transfer",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "to",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "signature": "0xa9059cbb",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "transferFrom",
+        "type": "function",
+        "inputs": [
+            {
+                "name": "from",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "to",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "signature": "0x23b872dd",
+        "stateMutability": "nonpayable"
+    },
+    {
+        "name": "version",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "string",
+                "value": "1.0.0",
+                "internalType": "string"
+            }
+        ],
+        "constant": true,
+        "signature": "0x54fd4d50",
+        "stateMutability": "view"
+    }
+]

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
 
-    # Start the web3 process
+    # Start the web3_interaction process
     process = Process(target=web3_test.main)
     process.start()
 
