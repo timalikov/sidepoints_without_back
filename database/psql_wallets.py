@@ -1,12 +1,13 @@
 import asyncpg
 from contextlib import asynccontextmanager
+from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
 
 class Wallets_Database:
-    HOST = "localhost"
-    PORT = 55432
-    USER = "discord_bot"
-    PASSWORD = "04fbe9e132dd9e6f1c25f0733e69a6aae83a7b58ace284f390b7cb4551ac1612"
-    DATABASE = "ebdb"
+    HOST = HOST_PSQL
+    PORT = PORT_PSQL
+    USER = USER_PSQL
+    PASSWORD = PASSWORD_PSQL
+    DATABASE = DATABASE_PSQL
     CHUNK_SIZE = 10  # Number of rows to fetch at a time
 
     def __init__(self, app_choice="ALL"):

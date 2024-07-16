@@ -46,3 +46,9 @@ CATEGORY_TO_TAG = {
     "79bf303a-318b-4815-bd56-7b0b49ae7bff": "Play Games",
     "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9": "Virtual Date"
 }
+
+HOST_PSQL = os.getenv('HOST_PSQL').strip()
+USER_PSQL = os.getenv('USER_AWS_PSQL').strip()
+PASSWORD_PSQL = os.getenv('PASSWORD_PSQL').strip()
+DATABASE_PSQL = os.getenv('DATABASE_PSQL').strip()
+PORT_PSQL = os.getenv('PORT_PSQL').strip()
