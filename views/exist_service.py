@@ -4,7 +4,7 @@ from sql_forum_posted import ForumUserPostDatabase
 # from sql_profile import Profile_Database
 from discord.ui import View
 # from datetime import datetime
-from config import APP_CHOICES
+from config import APP_CHOICES, HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed_2
 import os
