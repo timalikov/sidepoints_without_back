@@ -39,9 +39,21 @@ class PlayView(View):
             else:
                 self.no_user = True
 
+    async def is_member_of_main_guild(self, user_id):
+        main_guild = bot.get_guild(main_guild_id)
+        if main_guild is None:
+            return False
+        member = main_guild.get_member(user_id)
+        return member is not None
+
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_user")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        is_member = await self.is_member_of_main_guild(interaction.user.id)
+        if not is_member:
+            await interaction.followup.send("Please join the server before proceeding: https://discord.gg/sidekick", ephemeral=True)
+            return
+
         await log_to_database(interaction.user.id, "play_user")
         serviceId = self.service["serviceId"]
         discordServerId = interaction.guild.id
