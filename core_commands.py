@@ -14,6 +14,7 @@ from sql_profile import log_to_database
 #delete_all_threads_and_clear_csv
 from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN
 from sql_order import Order_Database
+from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 
@@ -176,6 +177,17 @@ async def points(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/tasks")
     await interaction.response.send_message("For available tasks press the link below:\nhttps://app.sidekick.fans/tasks", ephemeral=True)
 
+
+@bot.tree.command(name="boost", description="Use this command to boost kickers!")
+async def boost(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    view = BoostView(user_choice="ALL")
+    await log_to_database(interaction.user.id, "/boost")
+
+    if view.no_user:
+        await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
+    else:
+        await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
 
 @bot.event
 async def on_ready():

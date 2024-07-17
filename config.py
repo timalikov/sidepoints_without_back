@@ -36,7 +36,6 @@ TASK_DESCRIPTIONS = {
     "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9": "Virtual Date"
 }
 
-
 CATEGORY_TO_TAG = {
     "57c86488-8935-4a13-bae0-5ca8783e205d": "BUDDY",
     "88169d78-85b4-4fa3-8298-3df020f13a6f": "COACHING",

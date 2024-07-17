@@ -29,6 +29,7 @@ class DiscordServiceFetcher:
             self.services = [
                 {
                     "index": index,
+                    "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
                     "discordId": service["discordId"],
                     "profileUsername": service["profileUsername"],
                     "serviceTitle": service["serviceTitle"],
@@ -98,6 +99,7 @@ class DiscordServiceFetcher:
                 service = data['_embedded']['discordServices'][0]
                 return {
                     "discordId": service["discordId"],
+                    "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
                     "profileUsername": service["profileUsername"],
                     "serviceTitle": service["serviceTitle"],
                     "serviceDescription": service["serviceDescription"],
@@ -120,6 +122,7 @@ class DiscordServiceFetcher:
                 service = data['_embedded']['discordServices'][0]
                 return {
                     "discordId": service["discordId"],
+                    "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
                     "profileUsername": service["profileUsername"],
                     "serviceTitle": service["serviceTitle"],
                     "serviceDescription": service["serviceDescription"],
