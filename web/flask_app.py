@@ -12,16 +12,19 @@ main_guild_id = config.MAIN_GUILD_ID
 bot = get_bot()
 app = Flask(__name__)
 
-@app.route('/server_user_counts', methods=['GET'])
+@app.route('/discord_api/server_user_counts', methods=['GET'])
 async def server_user_counts():
     user_counts = {}
     for guild in bot.guilds:
-        # Store both the guild name and member count in a dictionary as the value
         user_counts[guild.id] = {
             "guild_name": guild.name,
             "member_count": guild.member_count
         }
     return jsonify(user_counts), 200
+
+@app.route('/discord_api/health_check', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
 
 
 @app.route('/create_private_channel', methods=['POST'])
