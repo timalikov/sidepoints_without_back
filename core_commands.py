@@ -178,16 +178,16 @@ async def points(interaction: discord.Interaction):
     await interaction.response.send_message("For available tasks press the link below:\nhttps://app.sidekick.fans/tasks", ephemeral=True)
 
 
-@bot.tree.command(name="boost", description="Use this command to boost kickers!")
-async def boost(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
-    view = BoostView(user_choice="ALL")
-    await log_to_database(interaction.user.id, "/boost")
-
-    if view.no_user:
-        await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
-    else:
-        await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+# @bot.tree.command(name="boost", description="Use this command to boost kickers!")
+# async def boost(interaction: discord.Interaction):
+#     await interaction.response.defer(ephemeral=True)
+#     view = BoostView(user_choice="ALL")
+#     await log_to_database(interaction.user.id, "/boost")
+#
+#     if view.no_user:
+#         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
+#     else:
+#         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
 
 @bot.event
 async def on_ready():
