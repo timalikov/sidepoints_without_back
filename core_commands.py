@@ -172,6 +172,7 @@ async def wallet(interaction: discord.Interaction):
             await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
             print(e)
 
+
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
 async def points(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/tasks")
