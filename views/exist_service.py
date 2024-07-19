@@ -80,7 +80,6 @@ class Profile_Exist(View):
             else:
                 await interaction.response.send_message("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
 
-
     @discord.ui.button(label="Create a new service", style=discord.ButtonStyle.secondary, custom_id="create_service")
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)

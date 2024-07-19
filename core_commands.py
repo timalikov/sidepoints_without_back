@@ -172,22 +172,24 @@ async def wallet(interaction: discord.Interaction):
             await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
             print(e)
 
+
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
 async def points(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/tasks")
     await interaction.response.send_message("For available tasks press the link below:\nhttps://app.sidekick.fans/tasks", ephemeral=True)
 
 
-# @bot.tree.command(name="boost", description="Use this command to boost kickers!")
-# async def boost(interaction: discord.Interaction):
-#     await interaction.response.defer(ephemeral=True)
-#     view = BoostView(user_choice="ALL")
-#     await log_to_database(interaction.user.id, "/boost")
-#
-#     if view.no_user:
-#         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
-#     else:
-#         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+@bot.tree.command(name="boost", description="Use this command to boost kickers!")
+@app_commands.describe(username="The username to find.")
+async def boost(interaction: discord.Interaction, username: str):
+    await interaction.response.defer(ephemeral=True)
+    view = BoostView(user_name=username)
+    await view.initialize()
+    await log_to_database(interaction.user.id, "/boost")
+    if view.no_user:
+        await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
+    else:
+        await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
 
 @bot.event
 async def on_ready():
