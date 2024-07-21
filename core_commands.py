@@ -193,11 +193,12 @@ async def boost(interaction: discord.Interaction, username: str):
 
 @bot.event
 async def on_ready():
-    delete_old_channels.start()
+    # delete_old_channels.start()
+    bot.loop.create_task(delete_old_channels())
     # post_weekly_leaderboard.start()
     await bot.tree.sync()
     # await delete_all_threads_and_clear_csv()
-    post_user_profiles.start()
+    # post_user_profiles.start()
     print(f'We have logged in as {bot.user}')
 
 def run():
