@@ -198,7 +198,7 @@ async def on_ready():
     # post_weekly_leaderboard.start()
     await bot.tree.sync()
     # await delete_all_threads_and_clear_csv()
-    bot.loop.create_task(post_user_profiles.start())
+    # bot.loop.create_task(post_user_profiles.start())
     print(f'We have logged in as {bot.user}')
 
 def run():
