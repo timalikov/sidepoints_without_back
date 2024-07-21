@@ -6,8 +6,12 @@ import web3_test
 import push_order
 from flask_cors import CORS
 from config import PORT_ID
+import resource
 
 if __name__ == "__main__":
+    mem = 512 * 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
+
     # Start the bot in a separate thread
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
