@@ -56,6 +56,8 @@ import json
 import requests
 import time
 import boto3
+import resource
+import os
 
 import config
 
@@ -130,6 +132,10 @@ def process_messages():
         time.sleep(5)
 
 def main():
+    if os.path.isfile('/sys/fs/cgroup/memory/memory.limit_in_bytes'):
+        with open('/sys/fs/cgroup/memory/memory.limit_in_bytes') as limit:
+            mem = int(int(limit.read()) / 3)
+            resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
     process_messages()
 
 if __name__ == '__main__':

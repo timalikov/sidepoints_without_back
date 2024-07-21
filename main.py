@@ -7,10 +7,13 @@ import push_order
 from flask_cors import CORS
 from config import PORT_ID
 import resource
+import os
 
 if __name__ == "__main__":
-    mem = 512 * 1024 * 1024
-    resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
+    if os.path.isfile('/sys/fs/cgroup/memory/memory.limit_in_bytes'):
+        with open('/sys/fs/cgroup/memory/memory.limit_in_bytes') as limit:
+            mem = int(int(limit.read()) * 2 / 3)
+            resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
 
     # Start the bot in a separate thread
     bot_thread = threading.Thread(target=run_bot)
