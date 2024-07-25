@@ -46,7 +46,7 @@ class DoneButton(View):
             await interaction.response.send_message("Role not found.", ephemeral=True)
 
 # Example function to create a private channel
-async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, base_category_name = "Sidekick Chatrooms"):
+async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
     # Find the first available category that is not full
     category = None
@@ -70,24 +70,20 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     invite = await channel.create_invite(max_age=86400)
 
-    # game_date = challenge['date'].date() if isinstance(challenge['date'], datetime) else challenge['date']
-    # f"Funds will be transferred to the other party 72 hours after the challenge date.\n" +
-
-    # await channel.send(f"Welcome to the Side Quest Private Challenge Room!\n" +
-    #                    f"Your payment of ${challenge['price']} has been processed, and you can now arrange the perfect time for a game!\n" +
-    #                    f"The game is scheduled for {game_date}.\n" +
-    #                    "We hope you enjoy the games and the time spent together ❤️.\n" +
-    #                    f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
     await channel.send(f"Welcome to the Side Quest Private Session Room!\n" +
                        # f"Your payment of ${challenge['price']} has been processed, and you can now arrange the perfect time for a game!\n" +
                        # f"The game is scheduled for {game_date}.\n" +
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
                        f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
+    kicker_message = f"Hey {kickerUsername}, {challenger.name} has purchased {serviceName} session with you! Join the private channel between you and the user: {invite.url} to complete the session."
+    user_message = f"Your session {challenger.name} with {kickerUsername} is ready! Join the private channel between you and the kicker: {invite.url}"
     try:
-        await challenger.send(f"Your session is ready! Join the fight private channel: {invite.url}")
+        print("Kicker_message:", kicker_message)
+        print("User_message:", user_message)
+        await challenger.send('hi')
         if challenged.id != 1208433940050874429:
-            await challenged.send(f"You've been challenged! Join the fight private channel: {invite.url}")
-        print(f"Private arena text channel created: {channel.mention}. Invites sent.")
+            await challenged.send('hi')
+        # print(f"Private arena text channel created: {channel.mention}. Invites sent.")
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
@@ -114,7 +110,7 @@ async def send_challenge_invites(challenger, challenged, invite_url):
 async def revoke_channel_access(channel, member):
     await asyncio.sleep(3600)  # Sleep for one hour (3600 seconds)
     await channel.set_permissions(member, overwrite=None)  # Remove specific permissions for this member
-    print(f"Permissions revoked for {member.display_name} in channel {channel.name}.")
+    # print(f"Permissions revoked for {member.display_name} in channel {channel.name}.")
 
 async def join_or_create_private_discord_channel(bot, guild_id, challenge, challenger, challenged):
     guild = bot.get_guild(guild_id)
@@ -162,7 +158,7 @@ async def delete_old_channels():
             for channel in category.text_channels:
                 time_diff = current_time - channel.created_at
                 if time_diff > timedelta(hours=12):
-                    print(f"Deleting channel {channel.name} from guild {guild.name} as it is older than 24 hours.")
+                    # print(f"Deleting channel {channel.name} from guild {guild.name} as it is older than 24 hours.")
                     await channel.delete(reason="Cleanup: Channel older than 24 hours.")
 
 class UserProfileView(discord.ui.View):
@@ -207,15 +203,16 @@ async def delete_all_threads_and_clear_csv():
         if isinstance(forum_channel, discord.ForumChannel):
             for thread in forum_channel.threads:
                 await thread.delete()
-            print("All threads deleted successfully.")
+            # print("All threads deleted successfully.")
         else:
-            print("Forum channel not found or not a forum.")
+            pass
+            # print("Forum channel not found or not a forum.")
 
     # Clear the CSV file
     with open(posted_user_ids_file, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([])  # Write an empty row to clear the file
-    print("posted_user_ids.csv cleared successfully.")
+    # print("posted_user_ids.csv cleared successfully.")
 
 
 class Post_FORUM:
@@ -242,12 +239,12 @@ class Post_FORUM:
         view = UserProfileView(self.profile_data)
 
         tag_name = CATEGORY_TO_TAG.get(serviceTypeId)
-        print("The tag name: ", tag_name)
+        # print("The tag name: ", tag_name)
         tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
         if self.thread:
             first_message = await self.thread.fetch_message(self.thread.id)
             await first_message.edit(embed=embed, view=view)
-            print(f"Thread with profile for {self.profile_data['profileUsername']} updated successfully. Thread ID: {self.thread.id}")
+            # print(f"Thread with profile for {self.profile_data['profileUsername']} updated successfully. Thread ID: {self.thread.id}")
         else:
             # If the thread does not exist, create a new one
             thread_result = await self.forum_channel.create_thread(
@@ -262,7 +259,7 @@ class Post_FORUM:
             )
             thread_id = thread_result.thread.id
             await ForumUserPostDatabase.add_forum_post(self.forum_id, thread_id, self.profile_data["discordId"], self.guild_id)
-            print(f"Thread with profile for {self.profile_data['profileUsername']} posted successfully. Thread ID: {thread_id}")
+            # print(f"Thread with profile for {self.profile_data['profileUsername']} posted successfully. Thread ID: {thread_id}")
             await asyncio.sleep(4)
             return True
 
@@ -348,7 +345,8 @@ async def post_user_profiles():
                         temp_post = Post_FORUM(bot, profile_data, new_forum_channel, False)
                         await temp_post.post_user_profile()
             except Exception as e:
-                print(f"Failed to post or update profile for {profile_data['profileUsername']}: {e}")
+                pass
+                # print(f"Failed to post or update profile for {profile_data['profileUsername']}: {e}")
 
 
 # @tasks.loop(hours=24)
