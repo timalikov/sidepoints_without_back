@@ -20,8 +20,8 @@ if __name__ == "__main__":
     bot_thread.start()
 
     # Start the web3_interaction process
-    process = Process(target=web3_test.main)
-    process.start()
+    # process = Process(target=web3_test.main)
+    # process.start()
 
     # Start the Flask app
     flask_app = create_app()
