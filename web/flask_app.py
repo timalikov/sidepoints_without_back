@@ -46,7 +46,7 @@ def health_check():
     return jsonify({"status": "healthy"}), 200
 
 
-@app.route('/create_private_channel', methods=['POST'])
+@app.route('/discord_api/create_private_channel', methods=['POST'])
 async def handle_create_private_channel():
     data = request.json
     channelName = data.get('channelName')
@@ -92,7 +92,7 @@ async def handle_create_private_channel():
         return jsonify({"error": "Challenge ID not provided"}), 400
 
 
-@app.route('/challenges_last_week', methods=['GET'])
+@app.route('/discord_api/challenges_last_week', methods=['GET'])
 def get_challenges_last_week():
     # Get the 'days' parameter from the query string, defaulting to 7 if not provided
     days = request.args.get('days', default=7, type=int)
