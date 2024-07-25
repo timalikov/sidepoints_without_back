@@ -12,33 +12,33 @@ main_guild_id = config.MAIN_GUILD_ID
 bot = get_bot()
 app = Flask(__name__)
 
-# @app.route('/discord_api/server_user_counts', methods=['GET'])
-# async def server_user_counts():
-#     user_counts = {}
-#     total_members = 0
-#     for guild in bot.guilds:
-#         user_counts[guild.id] = {
-#             "guild_name": guild.name,
-#             "member_count": guild.member_count
-#         }
-#     return jsonify(user_counts), 200
-
 @app.route('/discord_api/server_user_counts', methods=['GET'])
 async def server_user_counts():
     user_counts = {}
-    total_member_count = 0
+    total_members = 0
     for guild in bot.guilds:
-        total_member_count += guild.member_count
-        # user_counts[guild.id] = {
-        #     "guild_name": guild.name,
-        #     "member_count": guild.member_count
-        # }
-
-    user_counts['1208438041174343690'] = {
-        "guild_name": total_member_count,
-        "member_count": total_member_count
-    }
+        user_counts[guild.id] = {
+            "guild_name": guild.name,
+            "member_count": guild.member_count
+        }
     return jsonify(user_counts), 200
+
+# @app.route('/discord_api/server_user_counts', methods=['GET'])
+# async def server_user_counts():
+#     user_counts = {}
+#     total_member_count = 0
+#     for guild in bot.guilds:
+#         total_member_count += guild.member_count
+#         # user_counts[guild.id] = {
+#         #     "guild_name": guild.name,
+#         #     "member_count": guild.member_count
+#         # }
+#
+#     user_counts['1208438041174343690'] = {
+#         "guild_name": "Sidekick [Beta]",
+#         "member_count": total_member_count
+#     }
+#     return jsonify(user_counts), 200
 
 
 @app.route('/discord_api/health_check', methods=['GET'])
@@ -52,6 +52,8 @@ async def handle_create_private_channel():
     channelName = data.get('channelName')
     customerId = data.get("customerId")
     kickerId = data.get("kickerId")
+    serviceName = data.get("serviceName")
+    kickerUsername = data.get("kickerUsername")
     if channelName:
         # guild = bot.get_guild(main_guild_id)
 
@@ -79,7 +81,7 @@ async def handle_create_private_channel():
         #     future = asyncio.run_coroutine_threadsafe(join_or_create_private_discord_channel(bot, guild_id, challenge, challenger, challenged), bot.loop)
         # else:
         #     future = asyncio.run_coroutine_threadsafe(create_private_discord_channel(bot, guild_id, challenge, channel_name, challenger, challenged), bot.loop)
-        future = asyncio.run_coroutine_threadsafe(create_private_discord_channel(bot, guild_id, channel_name, challenger, challenged), bot.loop)
+        future = asyncio.run_coroutine_threadsafe(create_private_discord_channel(bot, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername), bot.loop)
         success, response = future.result()  # This blocks until the coroutine completes
 
         if success:
