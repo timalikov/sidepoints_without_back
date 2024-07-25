@@ -78,11 +78,11 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     kicker_message = f"Hey {kickerUsername}, {challenger.name} has purchased {serviceName} session with you! Join the private channel between you and the user: {invite.url} to complete the session."
     user_message = f"Your session {challenger.name} with {kickerUsername} is ready! Join the private channel between you and the kicker: {invite.url}"
     try:
-        print("Kicker_message:", kicker_message)
-        print("User_message:", user_message)
-        await challenger.send('hi')
+        # print("Kicker_message:", kicker_message)
+        # print("User_message:", user_message)
+        await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
-            await challenged.send('hi')
+            await challenged.send(kicker_message)
         # print(f"Private arena text channel created: {channel.mention}. Invites sent.")
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
