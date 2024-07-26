@@ -75,8 +75,13 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
                        # f"The game is scheduled for {game_date}.\n" +
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
                        f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
-    kicker_message = f"Hey {kickerUsername}, {challenger.name} has purchased {serviceName} session with you! Join the private channel between you and the user: {invite.url} to complete the session."
-    user_message = f"Your session {challenger.name} with {kickerUsername} is ready! Join the private channel between you and the kicker: {invite.url}"
+    kicker_message = (f"Hey {kickerUsername}, {challenger.name} has purchased {serviceName} session with you!" +
+                      f"In case your user is inactive in the private channel, you can reach out to the kicker via discord username @{challenger.name}.\n" +
+                      f"Join the private channel between you and the user: {invite.url} to complete the session.")
+
+    user_message = (f"Your session {challenger.name} with {kickerUsername} is ready!" +
+                    f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
+                    f"Join the private channel between you and the kicker: {invite.url}")
     try:
         # print("Kicker_message:", kicker_message)
         # print("User_message:", user_message)
