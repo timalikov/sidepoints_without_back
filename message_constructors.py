@@ -2,7 +2,6 @@ import discord
 
 def create_profile_embed(profile_data):
     # Create the embed with the user's name and about section
-    print("The passed profile data: ", profile_data)
     embed = discord.Embed(title=profile_data['profileUsername'], description=profile_data['serviceDescription'])
     # Set the image to the user's picture
     embed.set_image(url=profile_data['serviceImage'])
@@ -13,7 +12,6 @@ def create_profile_embed(profile_data):
 
 def create_profile_embed_2(profile_data):
     # Create the embed with the user's name and about section
-    print("The passed profile data: ", profile_data)
     embed = discord.Embed(title=profile_data['profile_username'], description=profile_data['service_description'])
     # Set the image to the user's picture
     embed.set_image(url=profile_data['service_image'])

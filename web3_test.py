@@ -98,7 +98,8 @@ def receive_messages():
     return messages_list
 
 def send_message_to_endpoint(message_body, port_id):
-    url = f"http://localhost:{port_id}/create_private_channel"
+    # url = f"http://localhost:{port_id}/create_private_channel"
+    url = f"https://app.sidekick.fans/discord_api/create_private_channel"
     max_retries = 10
     retry_count = 0
     wait_time = 1
