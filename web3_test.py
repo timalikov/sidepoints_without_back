@@ -59,8 +59,6 @@ import boto3
 import resource
 import os
 
-import config
-
 client = boto3.client(
     'sqs',
     aws_access_key_id="AKIARQOJDAVZLXZGJB4Q",
@@ -123,7 +121,7 @@ def send_message_to_endpoint(message_body, port_id):
     return False
 
 def process_messages():
-    port_id = config.PORT_ID
+    port_id = 2028
 
     while True:
         messages = receive_messages()
