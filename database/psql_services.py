@@ -103,7 +103,7 @@ class Services_Database:
 
     async def get_services_by_discord_id(self, discord_id):
         async with self.get_connection() as conn:
-            query = "SELECT * FROM discord_services_all WHERE discord_id = $1;"
+            query = "SELECT * FROM discord_services WHERE discord_id = $1;"
             services = await conn.fetch(query, discord_id)
         return services
 

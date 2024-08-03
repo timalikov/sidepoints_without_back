@@ -98,25 +98,15 @@ def receive_messages():
 def send_message_to_endpoint(message_body, port_id):
     # url = f"http://localhost:{port_id}/create_private_channel"
     url = f"https://app.sidekick.fans/discord_api/create_private_channel"
-    max_retries = 10
-    retry_count = 0
-    wait_time = 1
-
-    while retry_count < max_retries:
-        try:
-            response = requests.post(url, json=message_body)
-            if response.status_code == 200:
-                print(f"Message sent successfully: {message_body}")
-                return True
-            else:
-                print(f"Failed to send message, status code: {response.status_code}")
-        except Exception as e:
-            print(f"Exception occurred: {e}")
-
-        retry_count += 1
-        time.sleep(wait_time)
-        wait_time *= 2
-
+    try:
+        response = requests.post(url, json=message_body)
+        if response.status_code == 200:
+            print(f"Message sent successfully: {message_body}")
+            return True
+        else:
+            print(f"Failed to send message, status code: {response.status_code}")
+    except Exception as e:
+        print(f"Exception occurred: {e}")
     print(f"Failed to create channel for message: {message_body['channelName']}")
     return False
 
