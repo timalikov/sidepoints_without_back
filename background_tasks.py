@@ -66,7 +66,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         challenger: discord.PermissionOverwrite(read_messages=True),
         challenged: discord.PermissionOverwrite(read_messages=True)
     }
-    channel = await category.create_text_channel(channel_name, overwrites=overwrites)
+    channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
     invite = await channel.create_invite(max_age=86400)
 
@@ -182,8 +182,6 @@ class UserProfileView(discord.ui.View):
 
         serviceId = self.profile_data["serviceId"]
         discordServerId = interaction.guild.id
-        # payment_link = f"https://sidekick.fans/payment/test"
-        # payment_link = f"https://app.sidekick.fans/services/{serviceId}?discordServerId={discordServerId}"
         payment_link = f"https://apptest.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
         try:
             await interaction.response.send_message(
@@ -216,9 +214,7 @@ async def delete_all_threads_and_clear_csv():
     # Clear the CSV file
     with open(posted_user_ids_file, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([])  # Write an empty row to clear the file
-    # print("posted_user_ids.csv cleared successfully.")
-
+        writer.writerow([])
 
 class Post_FORUM:
     def __init__(self, bot, profile_data, forum_channel, thread=False):
@@ -269,25 +265,91 @@ class Post_FORUM:
             await asyncio.sleep(4)
             return True
 
+# @tasks.loop(hours=24)
+# async def post_user_profiles():
+#     userData = DiscordServiceFetcher()
+#     userData.fetch_services()
+#     guild_ids = [1208438041174343690]
+#     # guild_ids = [805397679319810088]
+#     for guild_id in guild_ids:
+#         # print("It is posting")
+#         for i in range(0, userData.total_elements):
+#             guild = bot.get_guild(guild_id)
+#             profile_data = userData.get_next()
+#             existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(profile_data["discordId"], str(guild_id))
+#             try:
+#                 if existing_thread_id:
+#                     # print("Exist thread")
+#                     thread = await guild.fetch_channel(int(existing_thread_id))
+#
+#                     # Modification: Unarchive the thread if it is archived
+#                     if thread.archived:
+#                         await thread.edit(archived=False)
+#
+#                     forum_channel = thread.parent
+#                     temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
+#                     await temp_post.post_user_profile()
+#                 else:
+#                     # print("Hi all 2")
+#                     forum_list_id = await ForumsOfServerDatabase.get_forums_by_server(int(guild_id))
+#                     # print("The forum_list_id:", forum_list_id)
+#                     posted_check = False
+#                     for val in forum_list_id:
+#                         forum_channel = bot.get_channel(int(val))
+#                         list_of_threads = forum_channel.threads
+#                         if len(list_of_threads) <= 1000:
+#                             temp_post = Post_FORUM(bot, profile_data, forum_channel, False)
+#                             await temp_post.post_user_profile()
+#                             posted_check = True
+#                     if posted_check == False:
+#                         # print("New categorry")
+#                         base_category_name = "sidekick-card-category"
+#                         category = None
+#                         index = 1
+#                         while not category:
+#                             category_name = f"{base_category_name}-{index}"
+#                             category = discord.utils.get(guild.categories, name=category_name)
+#                             if category and len(category.channels) >= 50:
+#                                 category = None
+#                                 index += 1
+#                             elif not category:
+#                                 category = await guild.create_category(category_name)
+#                         # print("I am here URAAA")
+#                         values_list = list(CATEGORY_TO_TAG.values())
+#                         available_tags = [ForumTag(name=tag) for tag in values_list]
+#                         forum_ids = await ForumsOfServerDatabase.get_forums_by_server(server_id=str(guild_id))
+#
+#                         name_len = len(forum_ids)
+#                         new_channel_name = f"SideKick Cards {name_len}"
+#                         new_forum_channel = await guild.create_forum(
+#                             name=new_channel_name,
+#                             topic="SideKickers Cards",
+#                             category=category,
+#                             available_tags=available_tags,
+#                             overwrites={guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+#                         )
+#
+#                         # print("This is the new forum:", new_forum_channel)
+#                         await ForumsOfServerDatabase.add_forum(str(guild_id), str(new_forum_channel.id))
+#                         temp_post = Post_FORUM(bot, profile_data, new_forum_channel, False)
+#                         await temp_post.post_user_profile()
+#             except Exception as e:
+#                 pass
+                # print(f"Failed to post or update profile for {profile_data['profileUsername']}: {e}")
+
 @tasks.loop(hours=24)
 async def post_user_profiles():
-    # print("It started")
-    # all_user_ids = await Profile_Database.get_all_users_with_priority()
-
     userData = DiscordServiceFetcher()
     userData.fetch_services()
-    guild_ids = [1208438041174343690]
-    # guild_ids = [805397679319810088]
+    guild_ids = [guild.id for guild in bot.guilds]
+
     for guild_id in guild_ids:
-        # print("It is posting")
-        for i in range(0, userData.total_elements):
+        for i in range(min(100, userData.total_elements)):  # Limit to first 100 users
             guild = bot.get_guild(guild_id)
             profile_data = userData.get_next()
-            # print(profile_data)
             existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(profile_data["discordId"], str(guild_id))
             try:
                 if existing_thread_id:
-                    # print("Exist thread")
                     thread = await guild.fetch_channel(int(existing_thread_id))
 
                     # Modification: Unarchive the thread if it is archived
@@ -298,24 +360,16 @@ async def post_user_profiles():
                     temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
                     await temp_post.post_user_profile()
                 else:
-                    # print("Hi all 2")
                     forum_list_id = await ForumsOfServerDatabase.get_forums_by_server(int(guild_id))
-                    # print("The forum_list_id:", forum_list_id)
                     posted_check = False
                     for val in forum_list_id:
                         forum_channel = bot.get_channel(int(val))
                         list_of_threads = forum_channel.threads
                         if len(list_of_threads) <= 1000:
-                            # print('Less than 1000')
-                            # print("The bot:", bot)
-                            # print("The profile data:", profile_data)
-                            # print("The forum channel:", forum_channel)
                             temp_post = Post_FORUM(bot, profile_data, forum_channel, False)
-                            # print("The temp post:", temp_post)
                             await temp_post.post_user_profile()
                             posted_check = True
-                    if posted_check == False:
-                        # print("New categorry")
+                    if not posted_check:
                         base_category_name = "sidekick-card-category"
                         category = None
                         index = 1
@@ -327,17 +381,13 @@ async def post_user_profiles():
                                 index += 1
                             elif not category:
                                 category = await guild.create_category(category_name)
-                        # print("I am here URAAA")
+
                         values_list = list(CATEGORY_TO_TAG.values())
                         available_tags = [ForumTag(name=tag) for tag in values_list]
                         forum_ids = await ForumsOfServerDatabase.get_forums_by_server(server_id=str(guild_id))
 
                         name_len = len(forum_ids)
-                        # print("The length:", name_len)
                         new_channel_name = f"SideKick Cards {name_len}"
-                        # print("The channel name:", name_len)
-                        # print("The available tags: ", available_tags)
-                        # print("The guild:", guild)
                         new_forum_channel = await guild.create_forum(
                             name=new_channel_name,
                             topic="SideKickers Cards",
@@ -346,14 +396,11 @@ async def post_user_profiles():
                             overwrites={guild.default_role: discord.PermissionOverwrite(read_messages=False)}
                         )
 
-                        # print("This is the new forum:", new_forum_channel)
                         await ForumsOfServerDatabase.add_forum(str(guild_id), str(new_forum_channel.id))
                         temp_post = Post_FORUM(bot, profile_data, new_forum_channel, False)
                         await temp_post.post_user_profile()
             except Exception as e:
                 pass
-                # print(f"Failed to post or update profile for {profile_data['profileUsername']}: {e}")
-
 
 # @tasks.loop(hours=24)
 # async def post_weekly_leaderboard():

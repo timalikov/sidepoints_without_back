@@ -1,5 +1,4 @@
 from datetime import datetime
-from sql_challenge import SQLChallengeDatabase
 from bot_instance import get_bot
 # from sql_profile import Profile_Database
 from message_constructors import create_profile_embed
