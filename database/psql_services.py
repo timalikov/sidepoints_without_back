@@ -48,21 +48,6 @@ class Services_Database:
             yield conn
         await pool.close()
 
-    # async def fetch_chunk(self):
-    #     async with self.get_connection() as conn:
-    #         if self.user_name:
-    #             query = "SELECT * FROM discord_services LIMIT $1 OFFSET $2 ORDER BY profile_username;"
-    #             self.current_chunk = await conn.fetch(query, self.CHUNK_SIZE, self.current_offset)
-    #         else:
-    #             if self.app_choice == "ALL":
-    #                 query = "SELECT * FROM discord_services LIMIT $1 OFFSET $2;"
-    #                 self.current_chunk = await conn.fetch(query, self.CHUNK_SIZE, self.current_offset)
-    #             else:
-    #                 query = "SELECT * FROM discord_services WHERE service_type_id = $1 LIMIT $2 OFFSET $3;"
-    #                 self.current_chunk = await conn.fetch(query, APP_CHOICES[self.app_choice], self.CHUNK_SIZE, self.current_offset)
-    #     self.current_offset += self.CHUNK_SIZE
-    #     return self.current_chunk
-
     async def fetch_chunk(self):
         async with self.get_connection() as conn:
             if self.user_name:
@@ -106,28 +91,3 @@ class Services_Database:
             query = "SELECT * FROM discord_services WHERE discord_id = $1;"
             services = await conn.fetch(query, discord_id)
         return services
-
-# async def main():
-#     # Create an instance of Services_Database with user_name "puppy"
-#     services_db = Services_Database(user_name="Artur_Artur")
-#
-#     # Fetch the first chunk of data
-#     await services_db.fetch_chunk()
-#
-#     # Continuously get the next service every 1 second
-#     while True:
-#         next_service = await services_db.get_next_service()
-#
-#         # If no more services are available, break the loop
-#         if not next_service:
-#             print("No more services available.")
-#             break
-#
-#         # Print the next service
-#         print(next_service)
-#
-#         # Wait for 1 second before fetching the next service
-#         await asyncio.sleep(1)
-#
-# # Run the main function
-# asyncio.run(main())

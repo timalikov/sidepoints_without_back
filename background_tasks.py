@@ -7,14 +7,12 @@ from discord.ui import View
 from bot_instance import get_bot
 from discord.ext import tasks
 from button_constructors import ShareButton, ChatButton
-from config import MAIN_GUILD_ID, FORUM_ID, APP_CHOICES, LEADER_BOT_CHANNEL, CATEGORY_TO_TAG, LEADER_BOT_CHANNEL_LIST
+from config import MAIN_GUILD_ID, APP_CHOICES, CATEGORY_TO_TAG
 from getServices import DiscordServiceFetcher
-# from play_view import PlayView
-# from sql_challenge import SQLChallengeDatabase
 from sql_forum_server import ForumsOfServerDatabase
 from sql_profile import Profile_Database
 from sql_forum_posted import ForumUserPostDatabase  # Import the ForumUserPostDatabase class
-
+from database.psql_services import Services_Database
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
@@ -216,70 +214,68 @@ async def delete_all_threads_and_clear_csv():
         writer = csv.writer(file)
         writer.writerow([])
 
-class Post_FORUM:
-    def __init__(self, bot, profile_data, forum_channel, thread=False):
-        self.bot = bot
-        self.forum_channel = forum_channel
-        self.forum_id = forum_channel.id
-        self.guild_id = str(forum_channel.guild.id)
-        self.profile_data = profile_data
-        self.thread = thread
-    async def post_user_profile(self):
-        category = self.profile_data["serviceTitle"]
-        serviceTypeId = self.profile_data["serviceTypeId"]
-        task_id = APP_CHOICES.get(serviceTypeId, "Coaching")
-
-        embed = discord.Embed(
-            title=self.profile_data['profileUsername'],
-            description=f"Discord username: <@{int(self.profile_data['discordId'])}>\n\n {self.profile_data['serviceDescription']}"
-        )
-
-        # embed.set_author(name=f"@{self.profile_data['discord_username']}", url=f"https://discord.com/users/{self.profile_data['user_id']}")
-        embed.set_image(url=self.profile_data['serviceImage'])
-        embed.add_field(name="Price", value=f"${self.profile_data['servicePrice']}/hour", inline=True)
-        embed.add_field(name="Category", value=self.profile_data.get('serviceTitle', f'{category}'), inline=True)
-        view = UserProfileView(self.profile_data)
-
-        tag_name = CATEGORY_TO_TAG.get(serviceTypeId)
-        # print("The tag name: ", tag_name)
-        tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
-        if self.thread:
-            first_message = await self.thread.fetch_message(self.thread.id)
-            await first_message.edit(embed=embed, view=view)
-            # print(f"Thread with profile for {self.profile_data['profileUsername']} updated successfully. Thread ID: {self.thread.id}")
-        else:
-            # If the thread does not exist, create a new one
-            thread_result = await self.forum_channel.create_thread(
-                name=f"Profile: <@{self.profile_data['profileUsername']}>",
-                content="Click 'Go' to interact with this profile!",
-                embed=embed,
-                view=view,
-                reason="Automated individual profile showcase",
-                applied_tags=[tag] if tag else None,
-                auto_archive_duration=60,
-                allowed_mentions=discord.AllowedMentions.none()
-            )
-            thread_id = thread_result.thread.id
-            await ForumUserPostDatabase.add_forum_post(self.forum_id, thread_id, self.profile_data["discordId"], self.guild_id)
-            # print(f"Thread with profile for {self.profile_data['profileUsername']} posted successfully. Thread ID: {thread_id}")
-            await asyncio.sleep(4)
-            return True
-
+# class Post_FORUM:
+#     def __init__(self, bot, profile_data, forum_channel, thread=False):
+#         self.bot = bot
+#         self.forum_channel = forum_channel
+#         self.forum_id = forum_channel.id
+#         self.guild_id = str(forum_channel.guild.id)
+#         self.profile_data = profile_data
+#         self.thread = thread
+#     async def post_user_profile(self):
+#         category = self.profile_data["serviceTitle"]
+#         serviceTypeId = self.profile_data["serviceTypeId"]
+#         task_id = APP_CHOICES.get(serviceTypeId, "Coaching")
+#
+#         embed = discord.Embed(
+#             title=self.profile_data['profileUsername'],
+#             description=f"Discord username: <@{int(self.profile_data['discordId'])}>\n\n {self.profile_data['serviceDescription']}"
+#         )
+#
+#         # embed.set_author(name=f"@{self.profile_data['discord_username']}", url=f"https://discord.com/users/{self.profile_data['user_id']}")
+#         embed.set_image(url=self.profile_data['serviceImage'])
+#         embed.add_field(name="Price", value=f"${self.profile_data['servicePrice']}/hour", inline=True)
+#         embed.add_field(name="Category", value=self.profile_data.get('serviceTitle', f'{category}'), inline=True)
+#         view = UserProfileView(self.profile_data)
+#
+#         tag_name = CATEGORY_TO_TAG.get(serviceTypeId)
+#         # print("The tag name: ", tag_name)
+#         tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
+#         if self.thread:
+#             first_message = await self.thread.fetch_message(self.thread.id)
+#             await first_message.edit(embed=embed, view=view)
+#             # print(f"Thread with profile for {self.profile_data['profileUsername']} updated successfully. Thread ID: {self.thread.id}")
+#         else:
+#             # If the thread does not exist, create a new one
+#             thread_result = await self.forum_channel.create_thread(
+#                 name=f"Profile: <@{self.profile_data['profileUsername']}>",
+#                 content="Click 'Go' to interact with this profile!",
+#                 embed=embed,
+#                 view=view,
+#                 reason="Automated individual profile showcase",
+#                 applied_tags=[tag] if tag else None,
+#                 auto_archive_duration=60,
+#                 allowed_mentions=discord.AllowedMentions.none()
+#             )
+#             thread_id = thread_result.thread.id
+#             await ForumUserPostDatabase.add_forum_post(self.forum_id, thread_id, self.profile_data["discordId"], self.guild_id)
+#             # print(f"Thread with profile for {self.profile_data['profileUsername']} posted successfully. Thread ID: {thread_id}")
+#             await asyncio.sleep(4)
+#             return True
+#
 # @tasks.loop(hours=24)
 # async def post_user_profiles():
 #     userData = DiscordServiceFetcher()
 #     userData.fetch_services()
-#     guild_ids = [1208438041174343690]
-#     # guild_ids = [805397679319810088]
+#     guild_ids = [guild.id for guild in bot.guilds]
+#
 #     for guild_id in guild_ids:
-#         # print("It is posting")
-#         for i in range(0, userData.total_elements):
+#         for i in range(min(100, userData.total_elements)):  # Limit to first 100 users
 #             guild = bot.get_guild(guild_id)
 #             profile_data = userData.get_next()
 #             existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(profile_data["discordId"], str(guild_id))
 #             try:
 #                 if existing_thread_id:
-#                     # print("Exist thread")
 #                     thread = await guild.fetch_channel(int(existing_thread_id))
 #
 #                     # Modification: Unarchive the thread if it is archived
@@ -290,9 +286,7 @@ class Post_FORUM:
 #                     temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
 #                     await temp_post.post_user_profile()
 #                 else:
-#                     # print("Hi all 2")
 #                     forum_list_id = await ForumsOfServerDatabase.get_forums_by_server(int(guild_id))
-#                     # print("The forum_list_id:", forum_list_id)
 #                     posted_check = False
 #                     for val in forum_list_id:
 #                         forum_channel = bot.get_channel(int(val))
@@ -301,20 +295,19 @@ class Post_FORUM:
 #                             temp_post = Post_FORUM(bot, profile_data, forum_channel, False)
 #                             await temp_post.post_user_profile()
 #                             posted_check = True
-#                     if posted_check == False:
-#                         # print("New categorry")
-#                         base_category_name = "sidekick-card-category"
+#                     if not posted_check:
+#                         base_category_name = "SIDEKICK BOT"
 #                         category = None
 #                         index = 1
 #                         while not category:
-#                             category_name = f"{base_category_name}-{index}"
+#                             category_name = f"{base_category_name}"
 #                             category = discord.utils.get(guild.categories, name=category_name)
 #                             if category and len(category.channels) >= 50:
 #                                 category = None
 #                                 index += 1
 #                             elif not category:
 #                                 category = await guild.create_category(category_name)
-#                         # print("I am here URAAA")
+#
 #                         values_list = list(CATEGORY_TO_TAG.values())
 #                         available_tags = [ForumTag(name=tag) for tag in values_list]
 #                         forum_ids = await ForumsOfServerDatabase.get_forums_by_server(server_id=str(guild_id))
@@ -329,33 +322,82 @@ class Post_FORUM:
 #                             overwrites={guild.default_role: discord.PermissionOverwrite(read_messages=False)}
 #                         )
 #
-#                         # print("This is the new forum:", new_forum_channel)
 #                         await ForumsOfServerDatabase.add_forum(str(guild_id), str(new_forum_channel.id))
 #                         temp_post = Post_FORUM(bot, profile_data, new_forum_channel, False)
 #                         await temp_post.post_user_profile()
 #             except Exception as e:
 #                 pass
-                # print(f"Failed to post or update profile for {profile_data['profileUsername']}: {e}")
+
+class Post_FORUM:
+    def __init__(self, bot, profile_data, forum_channel, thread=False):
+        self.bot = bot
+        self.forum_channel = forum_channel
+        self.forum_id = forum_channel.id
+        self.guild_id = str(forum_channel.guild.id)
+        self.profile_data = profile_data
+        self.thread = thread
+
+    async def post_user_profile(self):
+        category = self.profile_data["serviceTitle"]
+        serviceTypeId = self.profile_data["serviceTypeId"]
+        task_id = APP_CHOICES.get(serviceTypeId, "Coaching")
+
+        embed = discord.Embed(
+            title=self.profile_data['profileUsername'],
+            description=f"Discord username: <@{int(self.profile_data['discordId'])}>\n\n {self.profile_data['serviceDescription']}"
+        )
+
+        embed.set_image(url=self.profile_data['serviceImage'])
+        embed.add_field(name="Price", value=f"${self.profile_data['servicePrice']}/hour", inline=True)
+        embed.add_field(name="Category", value=self.profile_data.get('serviceTitle', f'{category}'), inline=True)
+        view = UserProfileView(self.profile_data)
+
+        tag_name = CATEGORY_TO_TAG.get(serviceTypeId)
+        tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
+
+        if self.thread:
+            first_message = await self.thread.fetch_message(self.thread.id)
+            await first_message.edit(embed=embed, view=view)
+        else:
+            thread_result = await self.forum_channel.create_thread(
+                name=f"Profile: <@{self.profile_data['profileUsername']}>",
+                content="Click 'Go' to interact with this profile!",
+                embed=embed,
+                view=view,
+                reason="Automated individual profile showcase",
+                applied_tags=[tag] if tag else None,
+                auto_archive_duration=60,
+                allowed_mentions=discord.AllowedMentions.none()
+            )
+            thread_id = thread_result.thread.id
+            await ForumUserPostDatabase.add_forum_post(self.forum_id, thread_id, self.profile_data["discordId"],
+                                                       self.guild_id)
+            await asyncio.sleep(4)
+            return True
+
 
 @tasks.loop(hours=24)
 async def post_user_profiles():
-    userData = DiscordServiceFetcher()
-    userData.fetch_services()
+    bot = get_bot()  # Assuming you have a function to get your bot instance
+    services_db = Services_Database()
+
     guild_ids = [guild.id for guild in bot.guilds]
 
     for guild_id in guild_ids:
-        for i in range(min(100, userData.total_elements)):  # Limit to first 100 users
+        for i in range(100):  # Limit to first 100 users
+            profile_data = await services_db.get_next_service()
+            if not profile_data:
+                break
+
             guild = bot.get_guild(guild_id)
-            profile_data = userData.get_next()
-            existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(profile_data["discordId"], str(guild_id))
+            existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(profile_data["discordId"],
+                                                                                              str(guild_id))
+
             try:
                 if existing_thread_id:
                     thread = await guild.fetch_channel(int(existing_thread_id))
-
-                    # Modification: Unarchive the thread if it is archived
                     if thread.archived:
                         await thread.edit(archived=False)
-
                     forum_channel = thread.parent
                     temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
                     await temp_post.post_user_profile()
@@ -370,11 +412,11 @@ async def post_user_profiles():
                             await temp_post.post_user_profile()
                             posted_check = True
                     if not posted_check:
-                        base_category_name = "sidekick-card-category"
+                        base_category_name = "SIDEKICK BOT"
                         category = None
                         index = 1
                         while not category:
-                            category_name = f"{base_category_name}-{index}"
+                            category_name = f"{base_category_name}"
                             category = discord.utils.get(guild.categories, name=category_name)
                             if category and len(category.channels) >= 50:
                                 category = None
