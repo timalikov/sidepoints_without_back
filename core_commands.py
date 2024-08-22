@@ -49,7 +49,7 @@ async def profile(interaction: discord.Interaction):
     await profile_exist.initialize()
 
     if profile_exist.no_user:
-        await interaction.followup.send("Looks like you haven't create a profile with us! Please jump to the link below and create your profile!.\nhttps://app.sidekick.fans/services/create", ephemeral=True)
+        await interaction.followup.send("Looks like you haven't created a profile with us! Please click the link below to create your profile.\nhttps://app.sidekick.fans/profile", ephemeral=True)
     else:
         await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
 

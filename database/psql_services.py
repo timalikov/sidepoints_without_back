@@ -91,3 +91,19 @@ class Services_Database:
             query = "SELECT * FROM discord_services WHERE discord_id = $1;"
             services = await conn.fetch(query, discord_id)
         return services
+    
+    async def get_channel_ids(self):
+        async with self.get_connection() as conn:
+            query = "SELECT discord_id FROM discord_servers;"
+            records = await conn.fetch(query)
+        return records
+
+    # async def get_payment_link(self, discord_id):
+    #     async with self.get_connection() as conn:
+    #         query = "SELECT crypto_wallet FROM profile WHERE discord = $1;"
+    #         records = await conn.fetch(query, discord_id)
+    #         if records:
+    #             return records[0]['crypto_wallet']
+    #         else:
+    #             return None
+

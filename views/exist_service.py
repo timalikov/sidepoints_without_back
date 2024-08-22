@@ -31,11 +31,13 @@ class Profile_Exist(View):
         self.list_services = []
         self.index = 0
         self.profile_embed = None
+        # self.affiliate_channel_ids = []  
 
     async def initialize(self):
         self.list_services = await self.service_db.get_services_by_discord_id(self.discord_id)
         if self.list_services:
             self.profile_embed = create_profile_embed_2(self.list_services[self.index])
+            # self.affiliate_channel_ids = await self.service_db.get_channel_ids()
         else:
             self.no_user = True
 
@@ -65,20 +67,39 @@ class Profile_Exist(View):
         await interaction.response.defer(ephemeral=True)
 
         user_id = self.list_services[self.index]["discord_id"]
+
+        username = self.list_services[self.index]["profile_username"]
+        service_description = self.list_services[self.index]["service_description"]
+        category = self.list_services[self.index]["service_type_name"]
+        price = self.list_services[self.index]["service_price"]
+        service_image = self.list_services[self.index].get("service_image", None)  
+        serviceId = self.list_services[self.index]["service_id"]
+        discordServerId = interaction.guild.id
+        payment_link = f"https://app.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
+
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
 
-        if thread_id:
-            thread = await bot.fetch_channel(int(thread_id))
-            profile_link = thread.jump_url
-            if interaction.response.is_done():
-                await interaction.followup.send(f"Profile account: {profile_link}", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Profile account: {profile_link}", ephemeral=True)
+        embed = discord.Embed(
+            title=f"Username: {username}",
+            description=f"**Description:** {service_description}\n**Category:** {category}\n**Price:** ${price}\n**Payment Link:** {payment_link}"
+        )
+        if service_image:
+            embed.set_image(url=service_image) 
+
+        channel_ids = ['1267779156502904924']
+        for channel_id in channel_ids:
+            channel = await bot.fetch_channel(channel_id)
+            if channel:
+                try:
+                    await channel.send(embed=embed)
+                except Exception as e:
+                    print(f"Failed to send message to channel {channel_id}: {e}")
+
+        message = "Message has been shared across all affiliate channels."
+        if interaction.response.is_done():
+            await interaction.followup.send(message, ephemeral=True)
         else:
-            if interaction.response.is_done():
-                await interaction.followup.send("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
-            else:
-                await interaction.response.send_message("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
+            await interaction.response.send_message(message, ephemeral=True)
 
     @discord.ui.button(label="Create a new service", style=discord.ButtonStyle.secondary, custom_id="create_service")
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
