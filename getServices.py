@@ -7,7 +7,7 @@ class DiscordServiceFetcher:
         self.total_elements = 0
         self.page_size = 0
         self.page_number = 0
-        self.discord_id = None
+        self.discordId = None
         self.services = []
         self.current_index = 0
 
@@ -25,19 +25,19 @@ class DiscordServiceFetcher:
             self.total_elements = data['page']['totalElements']
             self.page_size = data['page']['size']
             self.page_number = data['page']['number']
-            self.discord_id = [service['discordId'] for service in data['_embedded']['discordServices']]
+            self.discordId = [service['discord_id'] for service in data['_embedded']['discordServices']]
             self.services = [
                 {
                     "index": index,
                     "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
-                    "discordId": service["discordId"],
-                    "profileUsername": service["profileUsername"],
-                    "serviceTitle": service["serviceTitle"],
-                    "serviceDescription": service["serviceDescription"],
-                    "servicePrice": service["servicePrice"],
-                    "serviceImage": service["serviceImage"],
-                    "serviceTypeId": service["serviceTypeId"],
-                    "serviceId": service["serviceId"]
+                    "discordId": service['discord_id'],
+                    "profileUsername": service['profile_username'],
+                    "serviceTitle": service['service_title'],
+                    "serviceDescription": service['service_description'],
+                    "servicePrice": service['service_price'],
+                    "serviceImage": service['service_image'],
+                    "serviceTypeId": service['service_type_id'],
+                    "serviceId": service['service_id']
                 } for index, service in enumerate(data['_embedded']['discordServices'])
             ]
         else:
@@ -51,7 +51,7 @@ class DiscordServiceFetcher:
             "totalElements": self.total_elements,
             "size": self.page_size,
             "page": self.page_number,
-            "discordId": self.discord_id
+            "discordId": self.discordId
         }
 
     def get_next(self):
@@ -79,11 +79,11 @@ class DiscordServiceFetcher:
     #         if '_embedded' in data and 'discordServices' in data['_embedded']:
     #             service = data['_embedded']['discordServices'][0]
     #             return {
-    #                 "profileUsername": service["profileUsername"],
-    #                 "serviceTitle": service["serviceTitle"],
-    #                 "serviceDescription": service["serviceDescription"],
-    #                 "servicePrice": service["servicePrice"],
-    #                 "serviceImage": service["serviceImage"]
+    #                 "profileUsername": service['profile_username'],
+    #                 "service_title": service['service_title'],
+    #                 "serviceDescription": service['service_description'],
+    #                 "servicePrice": service['service_price'],
+    #                 "serviceImage": service['service_image']
     #             }
     #         else:
     #             return None
@@ -98,15 +98,15 @@ class DiscordServiceFetcher:
             if '_embedded' in data and 'discordServices' in data['_embedded'] and data['_embedded']['discordServices']:
                 service = data['_embedded']['discordServices'][0]
                 return {
-                    "discordId": service["discordId"],
+                    "discordId": service['discord_id'],
                     "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
-                    "profileUsername": service["profileUsername"],
-                    "serviceTitle": service["serviceTitle"],
-                    "serviceDescription": service["serviceDescription"],
-                    "servicePrice": service["servicePrice"],
-                    "serviceImage": service["serviceImage"],
-                    "serviceTypeId": service["serviceTypeId"],
-                    "serviceId": service["serviceId"]
+                    "profileUsername": service['profile_username'],
+                    "serviceTitle": service['service_title'],
+                    "serviceDescription": service['service_description'],
+                    "servicePrice": service['service_price'],
+                    "serviceImage": service['service_image'],
+                    "serviceTypeId": service['service_type_id'],
+                    "serviceId": service['service_id']
                 }
             else:
                 return False
@@ -121,15 +121,15 @@ class DiscordServiceFetcher:
             if '_embedded' in data and 'discordServices' in data['_embedded'] and data['_embedded']['discordServices']:
                 service = data['_embedded']['discordServices'][0]
                 return {
-                    "discordId": service["discordId"],
+                    "discordId": service['discord_id'],
                     "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
-                    "profileUsername": service["profileUsername"],
-                    "serviceTitle": service["serviceTitle"],
-                    "serviceDescription": service["serviceDescription"],
-                    "servicePrice": service["servicePrice"],
-                    "serviceImage": service["serviceImage"],
-                    "serviceTypeId": service["serviceTypeId"],
-                    "serviceId": service["serviceId"]
+                    "profileUsername": service['profile_username'],
+                    "serviceTitle": service['service_title'],
+                    "serviceDescription": service['service_description'],
+                    "servicePrice": service['service_price'],
+                    "serviceImage": service['service_image'],
+                    "serviceTypeId": service['service_type_id'],
+                    "serviceId": service['service_id']
                 }
             else:
                 return False

@@ -1,18 +1,21 @@
-from datetime import datetime
-
+from typing import Union
 import discord
 from discord import app_commands
+import discord.ext
+import discord.ext.commands
 from play_view import PlayView
-from profile_view import ProfileView, WalletView
 from bot_instance import get_bot
-from background_tasks import delete_old_channels, post_user_profiles, delete_all_threads_and_clear_csv
+from background_tasks import delete_old_channels, post_user_profiles, Post_FORUM
 from sql_subscriber import Subscribers_Database
 from sql_profile import log_to_database
+from sql_forum_posted import ForumUserPostDatabase 
+from database.psql_services import Services_Database
+from models.forum import create_base_forum
 
 #post_weekly_leaderboard
 
 #delete_all_threads_and_clear_csv
-from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN
+from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, FORUM_NAME
 from sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
@@ -29,54 +32,56 @@ async def list_online_users(guild):
     online_member_ids = [member.id for member in online_members]
     return online_member_ids
 
+@bot.tree.command(name="forum", description="Just test command!")
+@discord.ext.commands.has_permissions(administrator=True)
+async def forum_command(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    guild: discord.guild.Guild = interaction.guild
+    forum_channels = guild.channels
+    forum_channel: discord.channel.ForumChannel = None
+    for channel in forum_channels:
+        if channel.name == FORUM_NAME and isinstance(channel, discord.channel.ForumChannel):
+            forum_channel = channel
+    if not forum_channel:
+        forum_channel = await create_base_forum(guild)
+    services_db = Services_Database()
+    for _ in range(100):
+        profile_data = await services_db.get_next_service()
+        if not profile_data:
+            break
+        existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(
+            user_id=profile_data['discord_id'], server_id=str(guild.id)
+        )
+        thread: Union[bool, discord.Thread] = False
+        if existing_thread_id:
+            try:
+                thread = await guild.fetch_channel(int(existing_thread_id))
+            except discord.errors.DiscordException:
+                await ForumUserPostDatabase.delete_row_by_server_and_user(
+                    user_id=profile_data['discord_id'], server_id=str(guild.id)
+                )
+        temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
+        await temp_post.post_user_profile()
+        await interaction.followup.send(content="Posts created!", ephemeral=True)
+
 @bot.tree.command(name="profile", description="Use this command if you wish to be part of the Sidekick Playmates network.")
 async def profile(interaction: discord.Interaction):
-    # guild = bot.get_guild(main_guild_id)
-    # if guild is None:
-    #     await interaction.response.send_message("Error: Main guild not found.", ephemeral=True)
-    #     return
-
     await interaction.response.defer(ephemeral=True)
     await log_to_database(interaction.user.id, "/profile")
-    guild = interaction.guild
-    # # Check if the user is a member of the guild
-    # member = guild.get_member(interaction.user.id)
-    # # Log the interaction
-    # print(interaction.user.id)
-    # await log_to_database(interaction.user.id, "profile")
     profile_exist = Profile_Exist(str(interaction.user.id))
-
     await profile_exist.initialize()
-
     if profile_exist.no_user:
         await interaction.followup.send("Looks like you haven't created a profile with us! Please click the link below to create your profile.\nhttps://app.sidekick.fans/profile", ephemeral=True)
     else:
         await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
-
-    # await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
-    # if member:
-    #     # print("HE IS A MEMBER")
-    #     view = ProfileView()
-    #     await interaction.response.send_message("Welcome onboard!\nClick on go to profile to set up or edit your profile", view=view, ephemeral=True)
-    #     return
-    # else:
-    #     await interaction.response.defer(ephemeral=True)
-    #     # Generate an invite link if the user is not in the guildawait profile_exist.initialize()
-    #     try:
-    #         # Create an invite that expires in 24 hours with a maximum of 10 uses
-    #         invite = await guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
-    #         await interaction.response.send_message(f"You must join our main guild to access your profile. Please join using this invite: {invite.url}", ephemeral=True)
-    #     except Exception as e:
-    #         await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
-    #         print(e)
 
 
 async def list_all_users_with_online_status(guild):
     if guild is None:
         return []
     all_member_ids = [member.id for member in guild.members]
-    # online_member_ids = [member.id for member in guild.members if str(member.status) == 'online']
     return all_member_ids
+
 
 @bot.tree.command(name="go", description="Use this command and start looking for playmates!")
 @app_commands.choices(choices=[app_commands.Choice(name="All players", value="ALL"),
