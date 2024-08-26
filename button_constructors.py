@@ -38,7 +38,7 @@ class AcceptView(discord.ui.View):
             #     self.task_id
             # )
 
-            serviceId = self.profile_data["serviceId"]
+            serviceId = self.profile_data['service_id']
             discordServerId = interaction.guild.id
             payment_link = f"https://app.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
 
@@ -71,8 +71,8 @@ class ButtonAcceptView(discord.ui.View):
 
     async def button_callback(self, interaction: discord.Interaction):
         kicker_data = self.profile_data
-        kicker_data["task_desc"] = TASK_DESCRIPTIONS[self.task_id]
-        # print("KICKER TASK DESK:", kicker_data["task_desc"])
+        kicker_data['task_desc'] = TASK_DESCRIPTIONS[self.task_id]
+        # print("KICKER TASK DESK:", kicker_data['task_desc'])
         user = await bot.fetch_user(self.user_id)
         button = AcceptView(self.user_id, self.task_id)
         embed = create_profile_embed(kicker_data)

@@ -1,4 +1,4 @@
-import asyncio
+from typing import List
 
 import asyncpg
 from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
@@ -23,6 +23,7 @@ class Services_Database:
     PASSWORD = PASSWORD_PSQL
     DATABASE = DATABASE_PSQL
     CHUNK_SIZE = 10  # Number of rows to fetch at a time
+    BASE_QUERY = "SELECT * FROM discord_services WHERE profile_score >= 100"
 
     def __init__(self, app_choice="ALL", user_name=None):
         self.current_offset = 0
@@ -63,16 +64,23 @@ class Services_Database:
             # Fetch remaining services if user-specific services are less than CHUNK_SIZE
             remaining_chunk_size = self.CHUNK_SIZE - len(self.current_chunk)
             if remaining_chunk_size > 0:
+                default_query = self.BASE_QUERY
+                query_args: List = []
                 if self.app_choice == "ALL":
-                    query_all = "SELECT * FROM discord_services WHERE profile_username != $1 LIMIT $2 OFFSET $3;"
-                    remaining_chunk = await conn.fetch(query_all, self.user_name, remaining_chunk_size, self.current_offset)
+                    if self.user_name:
+                        default_query += " AND profile_username != $1 LIMIT $2 OFFSET $3;"
+                        query_args = [self.user_name, remaining_chunk_size, self.current_offset]
+                    else:
+                        default_query += " LIMIT $1 OFFSET $2;"
+                        query_args = [remaining_chunk_size, self.current_offset]
                 else:
-                    query_specific = """
-                    SELECT * FROM discord_services
-                    WHERE service_type_id = $1 AND profile_username != $2
-                    LIMIT $3 OFFSET $4;
-                    """
-                    remaining_chunk = await conn.fetch(query_specific, APP_CHOICES[self.app_choice], self.user_name, remaining_chunk_size, self.current_offset)
+                    if self.user_name:
+                        default_query += " AND service_type_id = $1 AND profile_username != $2 LIMIT $3 OFFSET $4;"
+                        query_args = [APP_CHOICES[self.app_choice], self.user_name, remaining_chunk_size, self.current_offset]
+                    else:
+                        default_query += " AND service_type_id = $1 LIMIT $2 OFFSET $3;"
+                        query_args = [APP_CHOICES[self.app_choice], remaining_chunk_size, self.current_offset]
+                remaining_chunk = await conn.fetch(default_query, *query_args)
                 self.current_chunk.extend(remaining_chunk)
 
         self.current_offset += self.CHUNK_SIZE
@@ -86,8 +94,15 @@ class Services_Database:
         result = self.current_chunk.pop(0)
         return result
 
-    async def get_services_by_discord_id(self, discord_id):
+    async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
-            query = "SELECT * FROM discord_services WHERE discord_id = $1;"
-            services = await conn.fetch(query, discord_id)
+            query = "SELECT * FROM discord_services WHERE discordId = $1;"
+            services = await conn.fetch(query, discordId)
         return services
+    
+    async def get_all_active_tags(self):
+        default_query = \
+            self.BASE_QUERY.replace("*", "service_type_name") + " GROUP BY service_type_name"
+        async with self.get_connection() as conn:
+            tags = await conn.fetch(default_query)
+        return [tag["service_type_name"] for tag in tags]

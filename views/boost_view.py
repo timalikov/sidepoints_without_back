@@ -61,7 +61,7 @@ class BoostView(View):
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
 
-        user_id = self.user_data["discord_id"]
+        user_id = self.user_data['discord_id']
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
 
         if thread_id:
