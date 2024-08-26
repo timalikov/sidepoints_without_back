@@ -12,6 +12,7 @@ from bot_instance import get_bot
 from getServices import DiscordServiceFetcher
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
+from views.share_view import ShareView
 
 bot = get_bot()
 load_dotenv()
@@ -31,13 +32,13 @@ class Profile_Exist(View):
         self.list_services = []
         self.index = 0
         self.profile_embed = None
-        # self.affiliate_channel_ids = []  
+        self.affiliate_channel_ids = []  
 
     async def initialize(self):
         self.list_services = await self.service_db.get_services_by_discord_id(self.discord_id)
         if self.list_services:
             self.profile_embed = create_profile_embed_2(self.list_services[self.index])
-            # self.affiliate_channel_ids = await self.service_db.get_channel_ids()
+            self.affiliate_channel_ids = await self.service_db.get_channel_ids()
         else:
             self.no_user = True
 
@@ -67,31 +68,31 @@ class Profile_Exist(View):
         await interaction.response.defer(ephemeral=True)
 
         user_id = self.list_services[self.index]["discord_id"]
-
         username = self.list_services[self.index]["profile_username"]
         service_description = self.list_services[self.index]["service_description"]
         category = self.list_services[self.index]["service_type_name"]
         price = self.list_services[self.index]["service_price"]
         service_image = self.list_services[self.index].get("service_image", None)  
-        serviceId = self.list_services[self.index]["service_id"]
-        discordServerId = interaction.guild.id
-        payment_link = f"https://app.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
-
-        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
+        service_id = self.list_services[self.index]["service_id"]
+        discord_server_id = interaction.guild.id
+        
+        channel_ids = self.affiliate_channel_ids
 
         embed = discord.Embed(
             title=f"Username: {username}",
-            description=f"**Description:** {service_description}\n**Category:** {category}\n**Price:** ${price}\n**Payment Link:** {payment_link}"
+            description=f"**Description:** {service_description}\n**Category:** {category}\n**Price:** ${price}"
         )
         if service_image:
             embed.set_image(url=service_image) 
 
-        channel_ids = ['1267779156502904924']
-        for channel_id in channel_ids:
+        share_view = ShareView(user_id=user_id, service_id=service_id, discord_server_id=discord_server_id)
+
+        for record in channel_ids:
+            channel_id = record["channel_id"]
             channel = await bot.fetch_channel(channel_id)
             if channel:
                 try:
-                    await channel.send(embed=embed)
+                    await channel.send(embed=embed, view=share_view)
                 except Exception as e:
                     print(f"Failed to send message to channel {channel_id}: {e}")
 

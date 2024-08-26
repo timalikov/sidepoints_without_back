@@ -94,6 +94,6 @@ class Services_Database:
     
     async def get_channel_ids(self):
         async with self.get_connection() as conn:
-            query = "SELECT discord_id FROM discord_servers;"
+            query = "SELECT channel_id FROM discord_server_channels;"
             records = await conn.fetch(query)
         return records
