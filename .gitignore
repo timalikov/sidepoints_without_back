@@ -1,1 +1,8 @@
 /.idea/
+.env
+__pycache__/
+sessionmanager-bundle/
+db-port-forward-prod.sh
+.gitignore
+
+

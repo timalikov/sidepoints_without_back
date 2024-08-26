@@ -100,6 +100,13 @@ class Services_Database:
             services = await conn.fetch(query, discordId)
         return services
     
+
+    async def get_channel_ids(self):
+        async with self.get_connection() as conn:
+            query = "SELECT channel_id FROM discord_server_channels;"
+            records = await conn.fetch(query)
+        return records
+
     async def get_all_active_tags(self):
         default_query = \
             self.BASE_QUERY.replace("*", "service_type_name") + " GROUP BY service_type_name"
