@@ -44,7 +44,7 @@ class ForumUserPostDatabase:
                 result = await cursor.fetchone()
         pool.close()
         await pool.wait_closed()
-        return result['thread_id'] if result else None
+        return result["thread_id"] if result else None
 
     @staticmethod
     async def delete_all_rows():
