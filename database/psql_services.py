@@ -80,6 +80,7 @@ class Services_Database:
                     else:
                         default_query += " AND service_type_id = $1 LIMIT $2 OFFSET $3;"
                         query_args = [APP_CHOICES[self.app_choice], remaining_chunk_size, self.current_offset]
+                default_query = default_query.replace("LIMIT", "ORDER BY profile_score DESC LIMIT")
                 remaining_chunk = await conn.fetch(default_query, *query_args)
                 self.current_chunk.extend(remaining_chunk)
 
@@ -96,7 +97,7 @@ class Services_Database:
 
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
-            query = "SELECT * FROM discord_services WHERE discordId = $1;"
+            query = "SELECT * FROM discord_services WHERE discord_id = $1;"
             services = await conn.fetch(query, discordId)
         return services
     

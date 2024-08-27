@@ -90,7 +90,7 @@ class SQLChallengeDatabase:
 
     @staticmethod
     async def get_leaderboard(period):
-        if period not in ['week", "month']:
+        if period not in ['week', 'month']:
             raise ValueError("Period must be either 'week' or 'month'.")
 
         # Calculate the start date based on the given period

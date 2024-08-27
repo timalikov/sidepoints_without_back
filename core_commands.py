@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Callable
 import discord
 from discord import app_commands
 import discord.ext
@@ -32,9 +32,16 @@ async def list_online_users(guild):
     online_member_ids = [member.id for member in online_members]
     return online_member_ids
 
+
+def is_owner(interaction: discord.Interaction) -> bool:
+    return interaction.guild is not None and interaction.guild.owner_id == interaction.user.id
+
+
 @bot.tree.command(name="forum", description="Just test command!")
-@discord.ext.commands.has_permissions(administrator=True)
 async def forum_command(interaction: discord.Interaction):
+    if not is_owner(interaction):
+        await interaction.response.send_message('Oops, you do not have right to use this command!')
+        return
     await interaction.response.defer(ephemeral=True)
     guild: discord.guild.Guild = interaction.guild
     forum_channels = guild.channels
@@ -43,7 +50,11 @@ async def forum_command(interaction: discord.Interaction):
         if channel.name == FORUM_NAME and isinstance(channel, discord.channel.ForumChannel):
             forum_channel = channel
     if not forum_channel:
-        forum_channel = await create_base_forum(guild)
+        try:
+            forum_channel = await create_base_forum(guild)
+        except discord.DiscordException:
+            await interaction.response.send_message(content="Discord channel is not community!", ephemeral=True)
+            return
     services_db = Services_Database()
     for _ in range(100):
         profile_data = await services_db.get_next_service()
@@ -62,7 +73,8 @@ async def forum_command(interaction: discord.Interaction):
                 )
         temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
         await temp_post.post_user_profile()
-        await interaction.followup.send(content="Posts created!", ephemeral=True)
+    await interaction.followup.send(content="Posts created!", ephemeral=True)
+
 
 @bot.tree.command(name="profile", description="Use this command if you wish to be part of the Sidekick Playmates network.")
 async def profile(interaction: discord.Interaction):

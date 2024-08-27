@@ -55,7 +55,7 @@ class PlayView(View):
             return
 
         await log_to_database(interaction.user.id, "play_user")
-        serviceId = self.service["serviceId"]
+        serviceId = self.service['service_id']
         discordServerId = interaction.guild.id
         payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
         await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
@@ -72,7 +72,7 @@ class PlayView(View):
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
 
-        user_id = self.service["discordId"]
+        user_id = self.service['discord_id']
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
 
         if thread_id:
@@ -93,7 +93,7 @@ class PlayView(View):
     async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "chat_user")
-        user_id = self.service["discordId"]
+        user_id = self.service['discord_id']
         member = interaction.guild.get_member(int(user_id))
         if member:
             # username = member.name
