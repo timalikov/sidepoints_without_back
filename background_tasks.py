@@ -13,6 +13,8 @@ from sql_forum_server import ForumsOfServerDatabase
 from sql_profile import Profile_Database
 from sql_forum_posted import ForumUserPostDatabase  # Import the ForumUserPostDatabase class
 from database.psql_services import Services_Database
+from serializers.profile_serializer import serialize_profile_data
+
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
@@ -175,6 +177,8 @@ class UserProfileView(discord.ui.View):
         self.add_item(button)  # Add the button to the view
         self.add_item(ShareButton(self.user_id))
         self.add_item(ChatButton(self.user_id))
+
+        self.profile_data = serialize_profile_data(profile_data)
 
     async def button_callback(self, interaction: discord.Interaction):
 
