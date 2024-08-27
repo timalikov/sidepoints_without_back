@@ -2,6 +2,7 @@ import discord
 from discord.ui import View
 from config import MAIN_GUILD_ID  
 from bot_instance import get_bot  
+import os
 
 bot = get_bot()
 

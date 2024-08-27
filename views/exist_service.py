@@ -3,7 +3,6 @@ import discord
 from sql_forum_posted import ForumUserPostDatabase
 # from sql_profile import Profile_Database
 from discord.ui import View
-# from datetime import datetime
 from config import APP_CHOICES, HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed_2
@@ -13,6 +12,7 @@ from getServices import DiscordServiceFetcher
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
 from views.share_view import ShareView
+from datetime import datetime, timedelta
 
 bot = get_bot()
 load_dotenv()
@@ -33,6 +33,7 @@ class Profile_Exist(View):
         self.index = 0
         self.profile_embed = None
         self.affiliate_channel_ids = []  
+        self.cooldowns = {}
 
     async def initialize(self):
         self.list_services = await self.service_db.get_services_by_discordId(self.discord_id)
@@ -65,6 +66,23 @@ class Profile_Exist(View):
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
+        user_id = interaction.user.id
+        now = datetime.utcnow()
+
+        if user_id in self.cooldowns:
+            last_shared_time = self.cooldowns[user_id]
+            cooldown_time = timedelta(hours=6)  
+            if now < last_shared_time + cooldown_time:
+                remaining_time = last_shared_time + cooldown_time - now
+                minutes, seconds = divmod(remaining_time.seconds, 60)
+                await interaction.response.send_message(
+                    f"Please wait {minutes} minutes and {seconds} seconds before sharing again",
+                    ephemeral=True
+                )
+                return
+
+        self.cooldowns[user_id] = now
+
         await interaction.response.defer(ephemeral=True)
 
         user_id = self.list_services[self.index]["discord_id"]
@@ -106,5 +124,5 @@ class Profile_Exist(View):
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "create_service")
-        payment_link = "{os.getenv('WEB_APP_URL')}/services/create"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/services/create"
         await interaction.followup.send(f"To create a new service go to the link below: {payment_link}", ephemeral=True)
