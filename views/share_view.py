@@ -16,7 +16,7 @@ class ShareView(View):
     async def go(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         
-        payment_link = f"https://app.sidekick.fans/payment/{self.service_id}?discordServerId={self.discord_server_id}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={self.discord_server_id}"
         
         is_member = await self.is_member_of_main_guild(interaction.user.id)
         if not is_member:

@@ -57,7 +57,7 @@ class PlayView(View):
         await log_to_database(interaction.user.id, "play_user")
         serviceId = self.service["serviceId"]
         discordServerId = interaction.guild.id
-        payment_link = f"https://app.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
         await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
