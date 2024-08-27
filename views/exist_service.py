@@ -35,7 +35,7 @@ class Profile_Exist(View):
         self.affiliate_channel_ids = []  
 
     async def initialize(self):
-        self.list_services = await self.service_db.get_services_by_discord_id(self.discord_id)
+        self.list_services = await self.service_db.get_services_by_discordId(self.discord_id)
         if self.list_services:
             self.profile_embed = create_profile_embed_2(self.list_services[self.index])
             self.affiliate_channel_ids = await self.service_db.get_channel_ids()
@@ -48,7 +48,7 @@ class Profile_Exist(View):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "edit_service")
 
-        payment_link = f"https://app.sidekick.fans/services/{self.list_services[self.index]['service_id']}/edit"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit"
         await interaction.followup.send(f"To edit your service go to the link below: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
@@ -106,5 +106,5 @@ class Profile_Exist(View):
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "create_service")
-        payment_link = "https://app.sidekick.fans/services/create"
+        payment_link = "{os.getenv('WEB_APP_URL')}/services/create"
         await interaction.followup.send(f"To create a new service go to the link below: {payment_link}", ephemeral=True)

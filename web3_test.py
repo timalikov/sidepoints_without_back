@@ -97,7 +97,7 @@ def receive_messages():
 
 def send_message_to_endpoint(message_body, port_id):
     # url = f"http://localhost:{port_id}/create_private_channel"
-    url = f"https://app.sidekick.fans/discord_api/create_private_channel"
+    url = f"{os.getenv('WEB_APP_URL')}/discord_api/create_private_channel"
     try:
         response = requests.post(url, json=message_body)
         if response.status_code == 200:

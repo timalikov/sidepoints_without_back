@@ -40,7 +40,7 @@ class AcceptView(discord.ui.View):
 
             serviceId = self.profile_data['service_id']
             discordServerId = interaction.guild.id
-            payment_link = f"https://app.sidekick.fans/payment/{serviceId}?discordServerId={discordServerId}"
+            payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
 
             # Check if initial response is done, then follow up
             try:
