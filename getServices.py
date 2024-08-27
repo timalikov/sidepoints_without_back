@@ -1,5 +1,9 @@
 import requests
 import config
+
+from serializers.profile_serializer import serialize_profile_data
+
+
 class DiscordServiceFetcher:
     def __init__(self, serviceTypeId="ALL"):
         self.serviceTypeId = serviceTypeId
@@ -25,20 +29,21 @@ class DiscordServiceFetcher:
             self.total_elements = data['page']['totalElements']
             self.page_size = data['page']['size']
             self.page_number = data['page']['number']
-            self.discordId = [service['discord_id'] for service in data['_embedded']['discordServices']]
+            self.discordId = [service['discordId'] for service in data['_embedded']['discordServices']]
+            serialized_services = [serialize_profile_data(service) for service in data['_embedded']['discordServices']]
             self.services = [
                 {
                     "index": index,
-                    "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
-                    "discordId": service['discord_id'],
-                    "profileUsername": service['profile_username'],
-                    "serviceTitle": service['service_title'],
-                    "serviceDescription": service['service_description'],
-                    "servicePrice": service['service_price'],
-                    "serviceImage": service['service_image'],
-                    "serviceTypeId": service['service_type_id'],
-                    "serviceId": service['service_id']
-                } for index, service in enumerate(data['_embedded']['discordServices'])
+                    "profile_id": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
+                    "discord_id": service['discord_id'],
+                    "profile_username": service['profile_username'],
+                    "service_title": service['service_title'],
+                    "service_description": service['service_description'],
+                    "service_price": service['service_price'],
+                    "service_image": service['service_image'],
+                    "service_type_id": service['service_type_id'],
+                    "service_id": service['service_id']
+                } for index, service in enumerate(serialized_services)
             ]
         else:
             response.raise_for_status()
@@ -51,7 +56,7 @@ class DiscordServiceFetcher:
             "totalElements": self.total_elements,
             "size": self.page_size,
             "page": self.page_number,
-            "discordId": self.discordId
+            "discord_id": self.discordId
         }
 
     def get_next(self):
@@ -71,42 +76,23 @@ class DiscordServiceFetcher:
                     return False
                 return self.get_next()
 
-    # def find(self, profileUsername):
-    #     url_to_send = f"{self.base_url}/search/profileNameStartsWith?profileUsername={profileUsername}"
-    #     response = requests.get(url_to_send)
-    #     if response.status_code == 200:
-    #         data = response.json()
-    #         if '_embedded' in data and 'discordServices' in data['_embedded']:
-    #             service = data['_embedded']['discordServices'][0]
-    #             return {
-    #                 "profileUsername": service['profile_username'],
-    #                 "service_title": service['service_title'],
-    #                 "serviceDescription": service['service_description'],
-    #                 "servicePrice": service['service_price'],
-    #                 "serviceImage": service['service_image']
-    #             }
-    #         else:
-    #             return None
-    #     else:
-    #         response.raise_for_status()
-
     def find(self, profileUsername):
         url_to_send = f"{self.base_url}/search/profileNameStartsWith?profileUsername={profileUsername}"
         response = requests.get(url_to_send)
         if response.status_code == 200:
             data = response.json()
             if '_embedded' in data and 'discordServices' in data['_embedded'] and data['_embedded']['discordServices']:
-                service = data['_embedded']['discordServices'][0]
+                service = serialize_profile_data(data['_embedded']['discordServices'][0])
                 return {
-                    "discordId": service['discord_id'],
-                    "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
-                    "profileUsername": service['profile_username'],
-                    "serviceTitle": service['service_title'],
-                    "serviceDescription": service['service_description'],
-                    "servicePrice": service['service_price'],
-                    "serviceImage": service['service_image'],
-                    "serviceTypeId": service['service_type_id'],
-                    "serviceId": service['service_id']
+                    "discord_id": service['discord_id'],
+                    "profile_id": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
+                    "profile_username": service['profile_username'],
+                    "service_title": service['service_title'],
+                    "service_description": service['service_description'],
+                    "service_price": service['service_price'],
+                    "service_image": service['service_image'],
+                    "service_type_id": service['service_type_id'],
+                    "service_id": service['service_id']
                 }
             else:
                 return False
@@ -119,17 +105,17 @@ class DiscordServiceFetcher:
         if response.status_code == 200:
             data = response.json()
             if '_embedded' in data and 'discordServices' in data['_embedded'] and data['_embedded']['discordServices']:
-                service = data['_embedded']['discordServices'][0]
+                service = serialize_profile_data(data['_embedded']['discordServices'][0])
                 return {
-                    "discordId": service['discord_id'],
-                    "profileId": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
-                    "profileUsername": service['profile_username'],
-                    "serviceTitle": service['service_title'],
-                    "serviceDescription": service['service_description'],
-                    "servicePrice": service['service_price'],
-                    "serviceImage": service['service_image'],
-                    "serviceTypeId": service['service_type_id'],
-                    "serviceId": service['service_id']
+                    "discord_id": service['discord_id'],
+                    "profile_id": "1446359f-dd6c-4c7f-9a46-1813736ebffd",
+                    "profile_username": service['profile_username'],
+                    "service_title": service['service_title'],
+                    "service_description": service['service_description'],
+                    "service_price": service['service_price'],
+                    "service_image": service['service_image'],
+                    "service_type_id": service['service_type_id'],
+                    "service_id": service['service_id']
                 }
             else:
                 return False

@@ -20,27 +20,6 @@ async def get_guild_invite_link(guild_id):
         return invite
     return None
 
-# async def send_push_notifications(order_id):
-#     order_data = await Order_Database.get_order_data(order_id)
-#     task_id = order_data.get("task_id")
-#     # all_user_ids = await Profile_Database.get_user_ids_by_task_id(task_id)
-#     userData = DiscordServiceFetcher(serviceTypeId=task_id)
-#     userData.fetch_services()
-#
-#     # Get the pushed user IDs for the given order_id
-#     pushed_user_ids = await Order_Database.get_pushed_user_ids(order_id)
-#
-#     tasks = []
-#
-#     for _ in range(20):
-#         time.sleep(1)
-#         current_user = userData.get_next()
-#         if current_user:  # Check if get_next() returns a valid user
-#             discord_id = current_user["discordId"]
-#             await process_user_push(order_id, discord_id, current_user)
-#             # tasks.append(process_user_push(order_id, discord_id, current_user))
-#
-#     # await asyncio.gather(*tasks)
 
 async def send_push_notifications(order_id):
     order_data = await Order_Database.get_order_data(order_id)

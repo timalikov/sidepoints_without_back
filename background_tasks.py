@@ -1,3 +1,4 @@
+import os
 import asyncio
 import csv
 from datetime import datetime, timezone, timedelta
@@ -169,7 +170,7 @@ async def delete_old_channels():
 class UserProfileView(discord.ui.View):
     def __init__(self, user_data):
         super().__init__(timeout=None)
-        self.profile_data = user_data
+        self.profile_data = serialize_profile_data(user_data)
         self.user_id = user_data['discord_id']
         self.task_id = user_data['service_type_id']
         button = discord.ui.Button(label="Go", style=discord.ButtonStyle.primary, custom_id=f"go_{self.user_id}")
@@ -178,7 +179,6 @@ class UserProfileView(discord.ui.View):
         self.add_item(ShareButton(self.user_id))
         self.add_item(ChatButton(self.user_id))
 
-        self.profile_data = serialize_profile_data(profile_data)
 
     async def button_callback(self, interaction: discord.Interaction):
 
@@ -222,11 +222,11 @@ async def delete_all_threads_and_clear_csv():
 class Post_FORUM:
     def __init__(self, bot, profile_data, forum_channel, thread=False):
         self.bot = bot
-        self.forum_channel = forum_channel
-        self.forum_id = forum_channel.id
-        self.guild_id = str(forum_channel.guild.id)
-        self.profile_data = profile_data
-        self.thread = thread
+        self.forum_channel: discord.ForumChannel = forum_channel
+        self.forum_id: int = forum_channel.id
+        self.guild_id: int = str(forum_channel.guild.id)
+        self.profile_data: dict = serialize_profile_data(profile_data)
+        self.thread: discord.Thread = thread
 
     async def post_user_profile(self):
         category = self.profile_data['service_title']
@@ -245,9 +245,15 @@ class Post_FORUM:
 
         tag_name = self.profile_data["service_type_name"]
         tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
+        if not tag:
+            tag = discord.ForumTag(name=tag_name)
+            new_tags = list(self.forum_channel.available_tags)
+            new_tags.append(tag)
+            self.forum_channel.edit(available_tags=new_tags)
 
         if self.thread:
             first_message = await self.thread.fetch_message(self.thread.id)
+            await self.thread.add_tags(tag)
             await first_message.edit(embed=embed, view=view)
         else:
             thread_result = await self.forum_channel.create_thread(

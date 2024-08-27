@@ -1,8 +1,11 @@
+import os
 from datetime import datetime
 from bot_instance import get_bot
 # from sql_profile import Profile_Database
 from message_constructors import create_profile_embed
 import discord
+
+from serializers.profile_serializer import serialize_profile_data
 from sql_forum_posted import ForumUserPostDatabase
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
 bot = get_bot()
@@ -11,7 +14,7 @@ bot = get_bot()
 class AcceptView(discord.ui.View):
     def __init__(self, user_id, task_id, profile_data):
         super().__init__(timeout=None)
-        self.profile_data = profile_data
+        self.profile_data = serialize_profile_data(profile_data)
         self.user_id = user_id
         self.task_id = task_id
         button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.primary, custom_id=f"go_{user_id}")
@@ -22,22 +25,6 @@ class AcceptView(discord.ui.View):
         # Fetch profile data for the user_id
         profile_data = self.profile_data
         if profile_data:
-            # user_id1 = interaction.user.id
-            # user_id2 = profile_data['user_id']
-            # price = profile_data['price']
-            # wallet = profile_data.get("wallet", "not provided")  # Ensure wallet is fetched or default
-
-            # # Create a challenge in the database
-            # challenge_id = await SQLChallengeDatabase.create_challenge(
-            #     user_id1,
-            #     user_id2,
-            #     datetime.now().strftime("%d-%m-%Y"),
-            #     price,
-            #     wallet,
-            #     MAIN_GUILD_ID,
-            #     self.task_id
-            # )
-
             serviceId = self.profile_data['service_id']
             discordServerId = interaction.guild.id
             payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
@@ -61,7 +48,7 @@ class AcceptView(discord.ui.View):
 class ButtonAcceptView(discord.ui.View):
     def __init__(self, user_id, task_id, order_id, profile_data):
         super().__init__(timeout=None)
-        self.profile_data = profile_data
+        self.profile_data = serialize_profile_data(profile_data)
         self.user_id = int(user_id)  # Store user_id to use in the callback
         self.task_id = task_id
         self.order_id = order_id
