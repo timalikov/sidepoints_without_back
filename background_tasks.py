@@ -1,9 +1,10 @@
+from typing import Union
+
 import os
 import asyncio
 import csv
 from datetime import datetime, timezone, timedelta
 import discord
-from discord import ForumTag
 from discord.ui import View
 from bot_instance import get_bot
 from discord.ext import tasks
@@ -19,10 +20,12 @@ from serializers.profile_serializer import serialize_profile_data
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
+
 class DoneButton(View):
     def __init__(self):
         # Setting timeout=None to make the button non-expirable
         super().__init__(timeout=None)
+
     @discord.ui.button(label="Done", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         # Fetch the role from the guild using the provided role ID
@@ -226,12 +229,10 @@ class Post_FORUM:
         self.forum_id: int = forum_channel.id
         self.guild_id: int = str(forum_channel.guild.id)
         self.profile_data: dict = serialize_profile_data(profile_data)
-        self.thread: discord.Thread = thread
+        self.thread: Union[discord.Thread, bool] = thread
 
     async def post_user_profile(self):
-        category = self.profile_data['service_title']
-        serviceTypeId = self.profile_data['service_type_id']
-        task_id = APP_CHOICES.get(serviceTypeId, "Coaching")
+        tag_name = self.profile_data["service_type_name"]
 
         embed = discord.Embed(
             title=self.profile_data['profile_username'],
@@ -240,20 +241,17 @@ class Post_FORUM:
 
         embed.set_image(url=self.profile_data['service_image'])
         embed.add_field(name="Price", value=f"${self.profile_data['service_price']}/hour", inline=True)
-        embed.add_field(name="Category", value=self.profile_data.get('service_title', f'{category}'), inline=True)
+        embed.add_field(name="Category", value=tag_name, inline=True)
         view = UserProfileView(self.profile_data)
 
-        tag_name = self.profile_data["service_type_name"]
         tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
         if not tag:
-            tag = discord.ForumTag(name=tag_name)
             new_tags = list(self.forum_channel.available_tags)
-            new_tags.append(tag)
+            new_tags.append(discord.ForumTag(name=tag_name))
             self.forum_channel.edit(available_tags=new_tags)
 
         if self.thread:
             first_message = await self.thread.fetch_message(self.thread.id)
-            await self.thread.add_tags(tag)
             await first_message.edit(embed=embed, view=view)
         else:
             thread_result = await self.forum_channel.create_thread(
@@ -267,8 +265,12 @@ class Post_FORUM:
                 allowed_mentions=discord.AllowedMentions.none()
             )
             thread_id = thread_result.thread.id
-            await ForumUserPostDatabase.add_forum_post(self.forum_id, thread_id, self.profile_data['discord_id'],
-                                                       self.guild_id)
+            await ForumUserPostDatabase.add_forum_post(
+                self.forum_id,
+                thread_id,
+                self.profile_data['discord_id'],
+                self.guild_id
+            )
             await asyncio.sleep(4)
             return True
 

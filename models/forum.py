@@ -1,3 +1,5 @@
+from typing import List
+
 import discord
 from discord import ForumTag
 
@@ -22,12 +24,29 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
     services_db = Services_Database()
     values_list = await services_db.get_all_active_tags()
     available_tags = [ForumTag(name=tag) for tag in values_list]
+    permissions = discord.PermissionOverwrite(
+        read_messages=False,
+        create_public_threads=False,
+        create_private_threads=False,
+        kick_members=False,
+        ban_members=False,
+        manage_channels=False,
+        manage_threads=False
+    )
     new_forum_channel = await guild.create_forum(
         name=FORUM_NAME,
         topic="SideKickers Cards",
         category=category,
         available_tags=available_tags,
-        overwrites={guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+        overwrites={guild.default_role: permissions},
+        default_layout=discord.ForumLayoutType.gallery_view
     )
     await ForumsOfServerDatabase.add_forum(str(guild.id), str(new_forum_channel.id))
     return new_forum_channel
+
+
+async def find_thread_in_forum_by_ids(
+    forum: discord.ForumChannel,
+    thread_ids: List[int]
+) -> List[discord.Thread]:
+    return [forum.get_thread(thread_id) for thread_id in thread_ids]

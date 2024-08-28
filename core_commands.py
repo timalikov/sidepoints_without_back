@@ -1,4 +1,4 @@
-from typing import Union, Callable
+from typing import Union, List
 import discord
 from discord import app_commands
 import discord.ext
@@ -60,17 +60,19 @@ async def forum_command(interaction: discord.Interaction):
         profile_data = await services_db.get_next_service()
         if not profile_data:
             break
-        existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(
-            user_id=profile_data['discord_id'], server_id=str(guild.id)
+        existing_thread_ids = await ForumUserPostDatabase.get_thread_id_by_user_and_forum_multi(
+            user_id=profile_data['discord_id'], forum_id=forum_channel.id
         )
         thread: Union[bool, discord.Thread] = False
-        if existing_thread_id:
-            try:
-                thread = await guild.fetch_channel(int(existing_thread_id))
-            except discord.errors.DiscordException:
-                await ForumUserPostDatabase.delete_row_by_server_and_user(
-                    user_id=profile_data['discord_id'], server_id=str(guild.id)
-                )
+        if existing_thread_ids:
+            for existing_thread_id in existing_thread_ids:
+                try:
+                    thread = await guild.fetch_channel(int(existing_thread_id))
+                except discord.errors.DiscordException:
+                    continue
+                if [profile_data["service_type_name"]] == [i.name for i in thread.applied_tags]:
+                    break
+                thread = False
         temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
         await temp_post.post_user_profile()
     await interaction.followup.send(content="Posts created!", ephemeral=True)

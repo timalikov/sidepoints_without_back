@@ -4,6 +4,8 @@ import asyncpg
 from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
 from contextlib import asynccontextmanager
 
+from serializers.profile_serializer import serialize_profile_data
+
 
 APP_CHOICES = {
     "ALL": None,
@@ -80,7 +82,7 @@ class Services_Database:
                     else:
                         default_query += " AND service_type_id = $1 LIMIT $2 OFFSET $3;"
                         query_args = [APP_CHOICES[self.app_choice], remaining_chunk_size, self.current_offset]
-                default_query = default_query.replace("LIMIT", "ORDER BY profile_score DESC LIMIT")
+                default_query = default_query.replace("LIMIT", "ORDER BY profile_score LIMIT")
                 remaining_chunk = await conn.fetch(default_query, *query_args)
                 self.current_chunk.extend(remaining_chunk)
 
@@ -93,7 +95,7 @@ class Services_Database:
             if not chunk:
                 return []
         result = self.current_chunk.pop(0)
-        return result
+        return serialize_profile_data(result)
 
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
