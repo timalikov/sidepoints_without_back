@@ -11,6 +11,7 @@ from sql_profile import log_to_database
 from sql_forum_posted import ForumUserPostDatabase 
 from database.psql_services import Services_Database
 from models.forum import create_base_forum
+import os
 
 #post_weekly_leaderboard
 
@@ -83,7 +84,7 @@ async def profile(interaction: discord.Interaction):
     profile_exist = Profile_Exist(str(interaction.user.id))
     await profile_exist.initialize()
     if profile_exist.no_user:
-        await interaction.followup.send("Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{os.getenv('WEB_APP_URL')}/profile", ephemeral=True)
+        await interaction.followup.send(f"Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{os.getenv('WEB_APP_URL')}/profile", ephemeral=True)
     else:
         await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
 
@@ -193,7 +194,7 @@ async def wallet(interaction: discord.Interaction):
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
 async def points(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/tasks")
-    await interaction.response.send_message("For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks", ephemeral=True)
+    await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks", ephemeral=True)
 
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")

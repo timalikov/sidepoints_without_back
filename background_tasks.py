@@ -15,6 +15,8 @@ from sql_profile import Profile_Database
 from sql_forum_posted import ForumUserPostDatabase  # Import the ForumUserPostDatabase class
 from database.psql_services import Services_Database
 from serializers.profile_serializer import serialize_profile_data
+from kickers_list import kickers
+from managers_list import managers
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -67,6 +69,10 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         challenger: discord.PermissionOverwrite(read_messages=True),
         challenged: discord.PermissionOverwrite(read_messages=True)
     }
+    if challenged.id in kickers:
+        for manager in managers:
+            overwrites[manager] = discord.PermissionOverwrite(read_messages=True)
+
     channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
     invite = await channel.create_invite(max_age=86400)
@@ -83,15 +89,34 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     user_message = (f"Your session {challenger.name} with {kickerUsername} is ready!" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
                     f"Join the private channel between you and the kicker: {invite.url}")
+    
+    other_kickers_message = (f"{challenger.name} has purchased {serviceName} session with {kickerUsername}! " +
+                    f"Join the private channel between {kickerUsername} and the user: {invite.url} to complete the session.")
+    
+    message_after_2_min = ("Hey there! It seems like you haven't joined the private channel yet. 2 mins")
+
+    message_after_5_min = ("Hey there! It seems like you haven't joined the private channel yet.  5 mins")
+
     try:
-        # print("Kicker_message:", kicker_message)
-        # print("User_message:", user_message)
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
-        # print(f"Private arena text channel created: {channel.mention}. Invites sent.")
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
+
+    if challenged.id in kickers:
+        try: 
+            for kicker in kickers:
+                await kicker.send(other_kickers_message)
+                await asyncio.sleep(120)
+                await kicker.send(message_after_2_min)
+                await asyncio.sleep(180)
+                await kicker.send(message_after_5_min)
+        except discord.HTTPException:
+            print("Failed to send invite links to other kickers.")
+
+
+        
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:

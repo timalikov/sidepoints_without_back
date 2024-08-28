@@ -24,7 +24,6 @@ class ShareCommandView(discord.ui.View):
             return await self.send_cooldown_message(interaction, user_id, now)
         
         self.cooldowns[user_id] = now
-        await interaction.response.defer(ephemeral=True)
 
         username = self.list_services[self.index]["profile_username"]
         service_description = self.list_services[self.index]["service_description"]
@@ -65,13 +64,14 @@ class ShareCommandView(discord.ui.View):
     async def send_cooldown_message(self, interaction, user_id, now):
         last_shared_time = self.cooldowns[user_id]
         remaining_time = last_shared_time + timedelta(hours=6) - now
-        hours, remainder = divmod(int(remaining_time.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60) 
+        hours, minutes = divmod(int(remaining_time.seconds), 3600)
+        minutes, seconds = divmod(minutes, 60)
         
-        await interaction.response.send_message(
-            f"Please wait {hours} hours {minutes} minutes and {seconds} seconds before sharing again.",
-            ephemeral=True
-        )
+        message = f"Please wait {hours} hours {minutes} minutes {seconds} seconds before sharing again."
+        if interaction.response.is_done():
+            await interaction.followup.send(message, ephemeral=True)
+        else:
+            await interaction.response.send_message(message, ephemeral=True)
     
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="share_go_button")
     async def go(self, interaction: discord.Interaction, button: discord.ui.Button):

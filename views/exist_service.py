@@ -61,6 +61,7 @@ class Profile_Exist(View):
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
         share_command_view = ShareCommandView(bot, self.list_services, self.index, self.affiliate_channel_ids)
         await share_command_view.share(interaction)
 
