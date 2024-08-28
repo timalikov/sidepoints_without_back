@@ -1,7 +1,5 @@
 import discord
-# from sql_challenge import SQLChallengeDatabase  # Adjusted import to use SQLChallengeDatabase
 from sql_forum_posted import ForumUserPostDatabase
-# from sql_profile import Profile_Database
 from discord.ui import View
 from config import APP_CHOICES, HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL
 from dotenv import load_dotenv
@@ -11,8 +9,9 @@ from bot_instance import get_bot
 from getServices import DiscordServiceFetcher
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
-from views.share_view import ShareView
+# from views.share_view import ProfileShareView
 from datetime import datetime, timedelta
+from views.share_command_view import ShareCommandView
 
 bot = get_bot()
 load_dotenv()
@@ -66,59 +65,9 @@ class Profile_Exist(View):
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
-        user_id = interaction.user.id
-        now = datetime.utcnow()
+        share_command_view = ShareCommandView(bot, self.list_services, self.index, self.affiliate_channel_ids)
+        await share_command_view.share(interaction)
 
-        if user_id in self.cooldowns:
-            last_shared_time = self.cooldowns[user_id]
-            cooldown_time = timedelta(hours=6)  
-            if now < last_shared_time + cooldown_time:
-                remaining_time = last_shared_time + cooldown_time - now
-                minutes, seconds = divmod(remaining_time.seconds, 60)
-                await interaction.response.send_message(
-                    f"Please wait {minutes} minutes and {seconds} seconds before sharing again",
-                    ephemeral=True
-                )
-                return
-
-        self.cooldowns[user_id] = now
-
-        await interaction.response.defer(ephemeral=True)
-
-        user_id = self.list_services[self.index]["discord_id"]
-        username = self.list_services[self.index]["profile_username"]
-        service_description = self.list_services[self.index]["service_description"]
-        category = self.list_services[self.index]["service_type_name"]
-        price = self.list_services[self.index]["service_price"]
-        service_image = self.list_services[self.index].get("service_image", None)  
-        service_id = self.list_services[self.index]["service_id"]
-        discord_server_id = interaction.guild.id
-        
-        channel_ids = self.affiliate_channel_ids
-
-        embed = discord.Embed(
-            title=f"Username: {username}",
-            description=f"**Description:** {service_description}\n**Category:** {category}\n**Price:** ${price}"
-        )
-        if service_image:
-            embed.set_image(url=service_image) 
-
-        share_view = ShareView(user_id=user_id, service_id=service_id, discord_server_id=discord_server_id)
-
-        for record in channel_ids:
-            channel_id = record["channel_id"]
-            channel = await bot.fetch_channel(channel_id)
-            if channel:
-                try:
-                    await channel.send(embed=embed, view=share_view)
-                except Exception as e:
-                    print(f"Failed to send message to channel {channel_id}: {e}")
-
-        message = "Message has been shared across all affiliate channels."
-        if interaction.response.is_done():
-            await interaction.followup.send(message, ephemeral=True)
-        else:
-            await interaction.response.send_message(message, ephemeral=True)
 
     @discord.ui.button(label="Create a new service", style=discord.ButtonStyle.secondary, custom_id="create_service")
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
