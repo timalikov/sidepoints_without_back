@@ -46,7 +46,7 @@ class DoneButton(View):
         else:
             await interaction.response.send_message("Role not found.", ephemeral=True)
 
-async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername, base_category_name = "Sidekick Chatrooms"):
+async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
 
     services_db = Services_Database()
@@ -92,18 +92,14 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
                        f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
     
-    kicker_message = (f"Hey @{kickerUsername}! Your session has started. Please check this private channel: {invite.url}.")
+    kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
 
-    manager_message = (f"Hey! Session between kicker: @{kickerUsername} and {challenger.name} has started. Please check this private channel: {invite.url}.")
+    manager_message = (f"Hey! Session between kicker: @{kicker_username} and {challenger.name} has started. Please check this private channel: {invite.url}.")
 
-    user_message = (f"Your session {challenger.name} with @{kickerUsername} is ready!" +
+    user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
                     f"Join the private channel between you and the kicker: {invite.url}")
     
-    message_after_2_min = (f"Hey @{kickerUsername}! It's been 2 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
-
-    message_after_5_min = (f"Hey @{kickerUsername}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
-
     manager_members = []
 
     for manager_id in managers:
@@ -122,9 +118,8 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-    send_message_after_2_min.start(manager_members, challenged, message_after_2_min)
-    send_message_after_5_min.start(manager_members, challenged, message_after_5_min)
-  
+    send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
+    send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
@@ -141,8 +136,9 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     return True, channel
 
 @tasks.loop(count=1)
-async def send_message_after_2_min(managers, challenged, message_after_2_min):
+async def send_message_after_2_min(managers, challenged, kicker_username, invite_url):
     await asyncio.sleep(120)
+    message_after_2_min = (f"Hey @{kicker_username}! It's been 2 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
     try:
         await challenged.send(message_after_2_min)
         for manager in managers:
@@ -151,8 +147,9 @@ async def send_message_after_2_min(managers, challenged, message_after_2_min):
         print(f"Failed to send message to {manager.name}: {e}")
 
 @tasks.loop(minutes=5)
-async def send_message_after_5_min(managers, challenged, message_after_5_min):
+async def send_message_after_5_min(managers, challenged, kicker_username, invite_url):
     await asyncio.sleep(300)
+    message_after_5_min = (f"Hey @{kicker_username}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
     try:
         await challenged.send(message_after_5_min)
         for manager in managers:
