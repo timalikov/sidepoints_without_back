@@ -50,8 +50,8 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     guild = bot.get_guild(guild_id)
 
     services_db = Services_Database()
-    kickers = services_db.get_kickers()
-    managers = services_db.get_managers()
+    kickers = await services_db.get_kickers()
+    managers = await services_db.get_managers()
 
     category = None
     index = 1
