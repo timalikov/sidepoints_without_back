@@ -8,6 +8,7 @@ from bot_instance import get_bot
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
 from views.share_command_view import ShareCommandView
+from background_tasks import create_private_discord_channel
 
 bot = get_bot()
 load_dotenv()

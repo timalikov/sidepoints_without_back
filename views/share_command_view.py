@@ -38,8 +38,11 @@ class ShareCommandView(discord.ui.View):
         if service_image:
             embed.set_image(url=service_image) 
 
-        for record in self.affiliate_channel_ids:
-            channel_id = record["channel_id"]
+        channel_ids = ['1276403616961400916']
+        # for record in self.affiliate_channel_ids:
+        for record in channel_ids:
+            # channel_id = record["channel_id"]
+            channel_id = record
             channel = await self.bot.fetch_channel(channel_id)
             if channel:
                 try:
