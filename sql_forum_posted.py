@@ -45,6 +45,18 @@ class ForumUserPostDatabase:
         pool.close()
         await pool.wait_closed()
         return result["thread_id"] if result else None
+    
+    @staticmethod
+    async def get_thread_id_by_user_and_forum_multi(user_id, forum_id):
+        pool = await ForumUserPostDatabase.get_pool()
+        async with pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cursor:
+                query = "SELECT thread_id FROM forum_user_post WHERE user_id = %s AND forum_id = %s;"
+                await cursor.execute(query, (user_id, forum_id))
+                result = await cursor.fetchall()
+        pool.close()
+        await pool.wait_closed()
+        return [column["thread_id"] if column else None for column in result]
 
     @staticmethod
     async def delete_all_rows():
