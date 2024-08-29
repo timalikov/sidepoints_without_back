@@ -45,12 +45,20 @@ class DoneButton(View):
         else:
             await interaction.response.send_message("Role not found.", ephemeral=True)
 
-async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername, base_category_name = "Sidekick Chatrooms"):
+async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
 
     services_db = Services_Database()
     kickers = await services_db.get_kickers()
     managers = await services_db.get_managers()
+
+    kicker_members = []
+    for kicker_id in kickers:
+        kicker = guild.get_member(kicker_id)
+        if kicker:
+            kicker_members.append(kicker)
+        else:
+            print(f"Kicker with ID {kicker_id} not found in the guild.")
 
     category = None
     index = 1
@@ -69,13 +77,9 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         challenged: discord.PermissionOverwrite(read_messages=True)
     }
 
-    kicker_members = []
-    for kicker_id in kickers:
-        kicker = guild.get_member(kicker_id)
-        if kicker:
-            kicker_members.append(kicker)
-        else:
-            print(f"Kicker with ID {kicker_id} not found in the guild.")
+    if challenged in kicker_members:
+        for kicker in kicker_members:
+            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
 
     channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
@@ -87,40 +91,34 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
                        f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
     
-    kicker_message = (f"Hey @{kickerUsername}! Your session has started. Please check this private channel: {invite.url}.")
+    kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
 
-    manager_message = (f"Hey! Session between kicker: @{kickerUsername} and {challenger.name} has started. Please check this private channel: {invite.url}.")
+    manager_message = (f"Hey! Session between kicker: @{kicker_username} and {challenger.name} has started. Please check this private channel: {invite.url}.")
 
-    user_message = (f"Your session {challenger.name} with @{kickerUsername} is ready!" +
+    user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
                     f"Join the private channel between you and the kicker: {invite.url}")
     
-    message_after_2_min = (f"Hey @{kickerUsername}! It's been 2 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
+    manager_members = []
 
-    message_after_5_min = (f"Hey @{kickerUsername}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
-
+    for manager_id in managers:
+        manager = await bot.fetch_user(manager_id)
+        if manager:
+            manager_members.append(manager)
+        else:
+            print(f"Manager with ID {manager_id} not found in the guild.")
+    
     try:
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
+        for manager in manager_members:
+            await manager.send(manager_message)
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-    if challenged in kicker_members:
-        for kicker in kicker_members:
-            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
-
-        tasks = []
-        for manager_id in managers:
-            manager = await bot.fetch_user(manager_id)
-            if manager:
-                task = asyncio.create_task(
-                    send_messages_to_manager(manager, manager_message, message_after_2_min, message_after_5_min)
-                )
-                tasks.append(task)
-            else:
-                print(f"Manager with ID {manager_id} not found.")
-        await asyncio.gather(*tasks)        
+    send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
+    send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
@@ -136,21 +134,29 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         await channel.send(embed=embed, view=view)
     return True, channel
 
+@tasks.loop(count=1)
+async def send_message_after_2_min(managers, challenged, kicker_username, invite_url):
+    await asyncio.sleep(120)
+    message_after_2_min = (f"Hey @{kicker_username}! It's been 2 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
 
-async def send_messages_to_manager(manager, manager_message, message_after_2_min, message_after_5_min):
     try:
-        await manager.send(manager_message)
-        print(f"Message sent to {manager.name}")
-
-        await asyncio.sleep(120)  
-        await manager.send(message_after_2_min)
-
-        await asyncio.sleep(180) 
-        await manager.send(message_after_5_min)
+        await challenged.send(message_after_2_min)
+        for manager in managers:
+            await manager.send(message_after_2_min)
     except discord.HTTPException as e:
         print(f"Failed to send message to {manager.name}: {e}")
 
-        
+@tasks.loop(minutes=5)
+async def send_message_after_5_min(managers, challenged, kicker_username, invite_url):
+    await asyncio.sleep(300)
+    message_after_5_min = (f"Hey @{kicker_username}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
+    try:
+        await challenged.send(message_after_5_min)
+        for manager in managers:
+            await manager.send(message_after_5_min)
+    except discord.HTTPException as e:
+        print(f"Failed to send message to {manager.name}: {e}")
+
 async def send_challenge_invites(challenger, challenged, invite_url):
     await challenger.send(f"Your session is ready! Join the private channel: {invite_url}")
     if challenged.id != challenger.id:
