@@ -53,6 +53,14 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     kickers = await services_db.get_kickers()
     managers = await services_db.get_managers()
 
+    kicker_members = []
+    for kicker_id in kickers:
+        kicker = guild.get_member(kicker_id)
+        if kicker:
+            kicker_members.append(kicker)
+        else:
+            print(f"Kicker with ID {kicker_id} not found in the guild.")
+
     category = None
     index = 1
     while not category:
@@ -69,6 +77,10 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         challenger: discord.PermissionOverwrite(read_messages=True),
         challenged: discord.PermissionOverwrite(read_messages=True)
     }
+
+    if challenged in kicker_members:
+        for kicker in kicker_members:
+            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
 
     channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
@@ -92,16 +104,8 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     message_after_5_min = (f"Hey @{kickerUsername}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
 
-    kicker_members = []
     manager_members = []
 
-    for kicker_id in kickers:
-        kicker = guild.get_member(kicker_id)
-        if kicker:
-            kicker_members.append(kicker)
-        else:
-            print(f"Kicker with ID {kicker_id} not found in the guild.")
-    
     for manager_id in managers:
         manager = await bot.fetch_user(manager_id)
         if manager:
@@ -109,10 +113,6 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         else:
             print(f"Manager with ID {manager_id} not found in the guild.")
     
-    if challenged in kicker_members:
-        for kicker in kicker_members:
-            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
-
     try:
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
@@ -140,35 +140,25 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         await channel.send(embed=embed, view=view)
     return True, channel
 
-first_message_2_min = True
-@tasks.loop(minutes=2)
+@tasks.loop(count=1)
 async def send_message_after_2_min(managers, challenged, message_after_2_min):
-    global first_message_2_min
-    if not first_message_2_min:
-        try:
-            await challenged.send(message_after_2_min)
-            for manager in managers:
-                await manager.send(message_after_2_min)
-            send_message_after_2_min.stop()
-        except discord.HTTPException as e:
-            print(f"Failed to send message to {manager.name}: {e}")
-    else:
-        first_message_2_min = False
+    await asyncio.sleep(120)
+    try:
+        await challenged.send(message_after_2_min)
+        for manager in managers:
+            await manager.send(message_after_2_min)
+    except discord.HTTPException as e:
+        print(f"Failed to send message to {manager.name}: {e}")
 
-first_message_5_min = True
 @tasks.loop(minutes=5)
 async def send_message_after_5_min(managers, challenged, message_after_5_min):
-    global first_message_5_min
-    if not first_message_5_min:
-        try:
-            await challenged.send(message_after_5_min)
-            for manager in managers:
-                await manager.send(message_after_5_min)
-            send_message_after_5_min.stop()
-        except discord.HTTPException as e:
-            print(f"Failed to send message to {manager.name}: {e}")
-    else:
-        first_message_5_min = False
+    await asyncio.sleep(300)
+    try:
+        await challenged.send(message_after_5_min)
+        for manager in managers:
+            await manager.send(message_after_5_min)
+    except discord.HTTPException as e:
+        print(f"Failed to send message to {manager.name}: {e}")
     
 async def send_challenge_invites(challenger, challenged, invite_url):
     await challenger.send(f"Your session is ready! Join the private channel: {invite_url}")
