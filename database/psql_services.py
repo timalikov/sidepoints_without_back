@@ -1,9 +1,12 @@
-from typing import List
+from typing import List, Union
 
 import asyncpg
+import discord
 from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
 from contextlib import asynccontextmanager
 
+from models.thread_forum import find_thread_in_forum
+from models.post_forum import Post_FORUM
 from serializers.profile_serializer import serialize_profile_data
 
 
@@ -96,6 +99,24 @@ class Services_Database:
                 return []
         result = self.current_chunk.pop(0)
         return serialize_profile_data(result)
+    
+    async def start_posting(
+        self,
+        forum_channel: discord.ForumChannel,
+        guild: discord.Guild,
+        bot
+    ) -> None:
+        for _ in range(100):
+            profile_data = await self.get_next_service()
+            if not profile_data:
+                break
+            thread: Union[bool, discord.Thread] = await find_thread_in_forum(
+                guild=guild, forum=forum_channel, profile_data=profile_data
+            )
+            if thread and thread.archived:
+                await thread.edit(archived=False)
+            temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
+            await temp_post.post_user_profile()
 
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Optional
 
 import discord
 from discord import ForumTag
@@ -7,6 +7,14 @@ from sql_forum_server import ForumsOfServerDatabase
 from database.psql_services import Services_Database
 from config import FORUM_NAME
 
+
+async def find_forum(guild: discord.Guild) -> Optional[discord.ForumChannel]:
+    forum_channels = guild.channels
+    forum_channel: discord.channel.ForumChannel = None
+    for channel in forum_channels:
+        if channel.name == FORUM_NAME and isinstance(channel, discord.channel.ForumChannel):
+            forum_channel = channel
+    return forum_channel
 
 async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
     base_category_name = "SIDEKICK BOT"
@@ -87,8 +95,8 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
     return new_forum_channel
 
 
-async def find_thread_in_forum_by_ids(
-    forum: discord.ForumChannel,
-    thread_ids: List[int]
-) -> List[discord.Thread]:
-    return [forum.get_thread(thread_id) for thread_id in thread_ids]
+async def get_or_create_forum(guild: discord.Guild) -> discord.ForumChannel:
+    forum_channel: discord.channel.ForumChannel = await find_forum(guild)
+    if not forum_channel:
+        forum_channel = await create_base_forum(guild)
+    return forum_channel
