@@ -46,10 +46,13 @@ class DoneButton(View):
         else:
             await interaction.response.send_message("Role not found.", ephemeral=True)
 
-# Example function to create a private channel
 async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
-    # Find the first available category that is not full
+
+    services_db = Services_Database()
+    kickers = services_db.get_kickers()
+    managers = services_db.get_managers()
+
     category = None
     index = 1
     while not category:
@@ -61,12 +64,20 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         elif not category:
             category = await guild.create_category(category_name)
 
-    # Create the private channel under the specified category
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
         challenger: discord.PermissionOverwrite(read_messages=True),
         challenged: discord.PermissionOverwrite(read_messages=True)
     }
+
+    kicker_members = []
+    for kicker_id in kickers:
+        kicker = guild.get_member(kicker_id)
+        if kicker:
+            kicker_members.append(kicker)
+        else:
+            print(f"Kicker with ID {kicker_id} not found in the guild.")
+
     channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
     invite = await channel.create_invite(max_age=86400)
@@ -76,22 +87,41 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
                        # f"The game is scheduled for {game_date}.\n" +
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
                        f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
-    kicker_message = (f"Hey {kickerUsername}, {challenger.name} has purchased {serviceName} session with you! " +
-                      f"In case your user is inactive in the private channel, you can reach out to the kicker via discord username @{challenger.name}.\n" +
-                      f"Join the private channel between you and the user: {invite.url} to complete the session.")
+    
+    kicker_message = (f"Hey @{kickerUsername}! Your session has started. Please check this private channel: {invite.url}.")
 
-    user_message = (f"Your session {challenger.name} with {kickerUsername} is ready!" +
+    manager_message = (f"Hey! Session between kicker: @{kickerUsername} and {challenger.name} has started. Please check this private channel: {invite.url}.")
+
+    user_message = (f"Your session {challenger.name} with @{kickerUsername} is ready!" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
                     f"Join the private channel between you and the kicker: {invite.url}")
+    
+    message_after_2_min = (f"Hey @{kickerUsername}! It's been 2 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
+
+    message_after_5_min = (f"Hey @{kickerUsername}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite.url}.")
+
     try:
-        # print("Kicker_message:", kicker_message)
-        # print("User_message:", user_message)
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
-        # print(f"Private arena text channel created: {channel.mention}. Invites sent.")
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
+
+    if challenged in kicker_members:
+        for kicker in kicker_members:
+            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
+
+        tasks = []
+        for manager_id in managers:
+            manager = await bot.fetch_user(manager_id)
+            if manager:
+                task = asyncio.create_task(
+                    send_messages_to_manager(manager, manager_message, message_after_2_min, message_after_5_min)
+                )
+                tasks.append(task)
+            else:
+                print(f"Manager with ID {manager_id} not found.")
+        await asyncio.gather(*tasks)        
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
@@ -106,6 +136,19 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         view = DoneButton()
         await channel.send(embed=embed, view=view)
     return True, channel
+
+async def send_messages_to_manager(manager, manager_message, message_after_2_min, message_after_5_min):
+    try:
+        await manager.send(manager_message)
+        print(f"Message sent to {manager.name}")
+
+        await asyncio.sleep(120)  
+        await manager.send(message_after_2_min)
+
+        await asyncio.sleep(180) 
+        await manager.send(message_after_5_min)
+    except discord.HTTPException as e:
+        print(f"Failed to send message to {manager.name}: {e}")
 
 async def send_challenge_invites(challenger, challenged, invite_url):
     await challenger.send(f"Your session is ready! Join the private channel: {invite_url}")

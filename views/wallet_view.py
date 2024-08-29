@@ -32,7 +32,7 @@ class Wallet_exist(View):
     async def top_up_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "top_up_button")
-        await interaction.followup.send("Press the link to get access to the top up: {os.getenv('WEB_APP_URL')}/topup", ephemeral=True)
+        await interaction.followup.send(f"Press the link to get access to the top up: {os.getenv('WEB_APP_URL')}/topup", ephemeral=True)
 
     @discord.ui.button(label="Balance", style=discord.ButtonStyle.secondary, custom_id="balance_button")
     async def balance_button(self, interaction: discord.Interaction, button: discord.ui.Button):

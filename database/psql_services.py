@@ -3,6 +3,7 @@ from typing import List
 import asyncpg
 from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
 from contextlib import asynccontextmanager
+from database.core_kicker_list import kickers, managers
 
 
 APP_CHOICES = {
@@ -114,3 +115,9 @@ class Services_Database:
         async with self.get_connection() as conn:
             tags = await conn.fetch(default_query)
         return [tag["service_type_name"] for tag in tags]
+    
+    async def get_kickers(self):
+        return kickers
+    
+    async def get_managers(self):
+        return managers
