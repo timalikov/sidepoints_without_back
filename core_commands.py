@@ -1,21 +1,19 @@
-from typing import Union, Callable
+from typing import Union
 import discord
 from discord import app_commands
 import discord.ext
 import discord.ext.commands
 from play_view import PlayView
 from bot_instance import get_bot
-from background_tasks import delete_old_channels, post_user_profiles, Post_FORUM
+from background_tasks import delete_old_channels, post_user_profiles
 from sql_subscriber import Subscribers_Database
 from sql_profile import log_to_database
-from sql_forum_posted import ForumUserPostDatabase 
 from database.psql_services import Services_Database
-from models.forum import create_base_forum
+
+from models.forum import get_or_create_forum
 import os
 
-#post_weekly_leaderboard
 
-#delete_all_threads_and_clear_csv
 from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, FORUM_NAME
 from sql_order import Order_Database
 from views.boost_view import BoostView
@@ -45,35 +43,13 @@ async def forum_command(interaction: discord.Interaction):
         return
     await interaction.response.defer(ephemeral=True)
     guild: discord.guild.Guild = interaction.guild
-    forum_channels = guild.channels
-    forum_channel: discord.channel.ForumChannel = None
-    for channel in forum_channels:
-        if channel.name == FORUM_NAME and isinstance(channel, discord.channel.ForumChannel):
-            forum_channel = channel
-    if not forum_channel:
-        try:
-            forum_channel = await create_base_forum(guild)
-        except discord.DiscordException:
-            await interaction.response.send_message(content="Discord channel is not community!", ephemeral=True)
-            return
+    try:
+        forum_channel: discord.channel.ForumChannel = await get_or_create_forum(guild)
+    except discord.DiscordException:
+        await interaction.response.send_message(content="Discord channel is not community!", ephemeral=True)
+        return
     services_db = Services_Database()
-    for _ in range(100):
-        profile_data = await services_db.get_next_service()
-        if not profile_data:
-            break
-        existing_thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(
-            user_id=profile_data['discord_id'], server_id=str(guild.id)
-        )
-        thread: Union[bool, discord.Thread] = False
-        if existing_thread_id:
-            try:
-                thread = await guild.fetch_channel(int(existing_thread_id))
-            except discord.errors.DiscordException:
-                await ForumUserPostDatabase.delete_row_by_server_and_user(
-                    user_id=profile_data['discord_id'], server_id=str(guild.id)
-                )
-        temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
-        await temp_post.post_user_profile()
+    await services_db.start_posting(forum_channel, guild, bot)
     await interaction.followup.send(content="Posts created!", ephemeral=True)
 
 
