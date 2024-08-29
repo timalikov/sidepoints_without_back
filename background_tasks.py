@@ -51,7 +51,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     services_db = Services_Database()
     kickers = await services_db.get_kickers()
-    managers = awaitservices_db.get_managers()
+    managers = await services_db.get_managers()
 
     category = None
     index = 1
@@ -121,7 +121,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
                 tasks.append(task)
             else:
                 print(f"Manager with ID {manager_id} not found.")
-        await asyncio.gather(*tasks)        
+  
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
