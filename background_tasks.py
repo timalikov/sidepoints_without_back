@@ -117,8 +117,9 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-    send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
-    send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
+    if challenged in kicker_members:
+        send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
+        send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
