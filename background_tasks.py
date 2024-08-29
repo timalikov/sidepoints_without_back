@@ -147,7 +147,7 @@ async def send_message_after_2_min(managers, challenged, kicker_username, invite
     except discord.HTTPException as e:
         print(f"Failed to send message to {manager.name}: {e}")
 
-@tasks.loop(minutes=5)
+@tasks.loop(count=1)
 async def send_message_after_5_min(managers, challenged, kicker_username, invite_url):
     await asyncio.sleep(300)
     message_after_5_min = (f"Hey @{kicker_username}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
