@@ -9,7 +9,10 @@ from background_tasks import delete_old_channels, post_user_profiles
 from sql_subscriber import Subscribers_Database
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
+
 from models.forum import get_or_create_forum
+import os
+
 
 from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, FORUM_NAME
 from sql_order import Order_Database
@@ -57,7 +60,7 @@ async def profile(interaction: discord.Interaction):
     profile_exist = Profile_Exist(str(interaction.user.id))
     await profile_exist.initialize()
     if profile_exist.no_user:
-        await interaction.followup.send("Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{os.getenv('WEB_APP_URL')}/profile", ephemeral=True)
+        await interaction.followup.send(f"Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{os.getenv('WEB_APP_URL')}/profile", ephemeral=True)
     else:
         await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
 
@@ -167,7 +170,7 @@ async def wallet(interaction: discord.Interaction):
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
 async def points(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/tasks")
-    await interaction.response.send_message("For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks", ephemeral=True)
+    await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks", ephemeral=True)
 
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
