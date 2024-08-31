@@ -35,13 +35,20 @@ async def send_scheduled_messages(channel):
         try:
             if use_fact:
                 message = await choose_random_fact()
-            await channel.send(message, view=StopButton(stop_all_messages))
+                message = f"__Fun fact:__ \n{message}"
+            await channel.send(message)
         except discord.HTTPException as e:
             print(f"Failed to send message to channel {channel}: {e}")
 
+@tasks.loop(count=1)
+async def send_stop_button(channel):
+    await asyncio.sleep(11)
+    await channel.send("**If the kicker has already joined the channel, please click on the \"Stop\" button to stop receiving notifications**", view=StopButton(stop_all_messages))
+
 async def start_all_messages(channel):
     send_scheduled_messages.start(channel)
+    send_stop_button.start(channel)
 
 async def stop_all_messages():
-    send_scheduled_messages.stop()
+    send_scheduled_messages.cancel()
     return True

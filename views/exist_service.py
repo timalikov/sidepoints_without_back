@@ -43,22 +43,10 @@ class Profile_Exist(View):
     @discord.ui.button(label="Edit", style=discord.ButtonStyle.success, custom_id="edit_service")
     async def edit_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await log_to_database(interaction.user.id, "edit_service")
 
-        guild_id = main_guild_id
-        guild = bot.get_guild(guild_id)
-        channel_name = f"private-channel-{self.list_services[self.index]['profile_username']}"
-        challenger = guild.get_member(836655813048402011)
-        challenged = guild.get_member(1278392054983954433)
-        serviceName = self.list_services[self.index]["service_description"]
-        kickerUsername = self.list_services[self.index]['profile_username']
-        success, channel = await create_private_discord_channel(bot, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername)
-        if not success:
-                return False, "Failed to create a new private channel"
-        
-        # await log_to_database(interaction.user.id, "edit_service")
-
-        # payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit"
-        # await interaction.followup.send(f"To edit your service go to the link below: {payment_link}", ephemeral=True)
+        payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit"
+        await interaction.followup.send(f"To edit your service go to the link below: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):

@@ -98,7 +98,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     await channel.send(f"Welcome to the Sidekick Private Session Room!\n" +
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
-                       f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel!" +
+                       f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel!\n" +
                        f"Your Kicker's username is @{kicker_username}" )
     
     await start_all_messages(channel)
