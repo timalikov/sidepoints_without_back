@@ -10,6 +10,7 @@ from database.core_kicker_list import kickers, managers
 from models.thread_forum import find_thread_in_forum
 from models.post_forum import Post_FORUM
 from serializers.profile_serializer import serialize_profile_data
+from database.fact_list import facts
 
 
 APP_CHOICES = {
@@ -146,3 +147,6 @@ class Services_Database:
     
     async def get_managers(self):
         return managers
+
+    async def get_facts(self):
+        return facts

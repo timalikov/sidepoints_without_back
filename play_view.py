@@ -96,8 +96,7 @@ class PlayView(View):
         user_id = self.service['discord_id']
         member = interaction.guild.get_member(int(user_id))
         if member:
-            # username = member.name
-            chat_link = f"Trial chat with the Kicker: <@!{int(user_id)}>.\n Click below to connect with user https://discord.com/users/{user_id}"
+            chat_link = f"Trial chat with the Kicker: <@!{int(user_id)}>"
             if interaction.response.is_done():
                 await interaction.followup.send(f"{chat_link}", ephemeral=True)
             else:
