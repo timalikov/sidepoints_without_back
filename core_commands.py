@@ -35,6 +35,10 @@ def is_owner(interaction: discord.Interaction) -> bool:
     return interaction.guild is not None and interaction.guild.owner_id == interaction.user.id
 
 
+def is_admin(interaction: discord.Interaction) -> bool:
+    return interaction.user.guild_permissions.administrator
+
+
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
@@ -44,7 +48,7 @@ async def forum_command(interaction: discord.Interaction):
     except discord.DiscordException:
         await interaction.response.send_message(content="Discord channel is not community!", ephemeral=True)
         return
-    if not is_owner(interaction):
+    if not is_admin(interaction):
         await interaction.followup.send(content='Oops, you do not have right to use this command!', ephemeral=True)
         return
     services_db = Services_Database()
