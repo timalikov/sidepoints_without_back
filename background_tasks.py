@@ -133,8 +133,17 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         print("Failed to send invite links to one or more participants.")
 
     if challenged in kicker_members:
-        send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
-        send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
+            if send_message_after_2_min.is_running():
+                print("Task 2 minutes send message is already running, stopping it first.")
+                send_message_after_2_min.cancel()
+                await asyncio.sleep(0.1) 
+            if send_message_after_5_min.is_running():
+                print("Task 5 minutes send message is already running, stopping it first.")
+                send_message_after_5_min.cancel()
+                await asyncio.sleep(0.1)
+                
+            send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
+            send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:

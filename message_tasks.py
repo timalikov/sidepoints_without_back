@@ -43,12 +43,41 @@ async def send_scheduled_messages(channel):
 @tasks.loop(count=1)
 async def send_stop_button(channel):
     await asyncio.sleep(11)
-    await channel.send("**If the kicker has already joined the channel, please click on the \"Stop\" button to stop receiving notifications**", view=StopButton(stop_all_messages))
+    stop_button_view = StopButton(lambda: stop_all_messages(channel))
+    await channel.send("**If the kicker has already joined the channel, please click on the \"Stop\" button to stop receiving notifications**", view=stop_button_view)
+
+active_tasks = {}
+
+async def handle_task(task, channel, action='start', task_name=None):
+    task_key = f"{task_name}_{channel.name}"
+
+    if active_tasks.get(task_key) and action == 'start':
+        print(f"Task {task_name} is already running. Ignoring duplicate start.")
+        return
+    
+    if task.is_running():
+        print(f"Task {task_name} is already running. Stopping the task.")
+        task.cancel()
+        await asyncio.sleep(0.1)
+    
+    if action == 'start' and channel:
+        print(f"Starting task {task_name}.")
+        task.start(channel)
+        active_tasks[task_key] = task
+        print(f"Task {task_name} started successfully.")
+    elif action == 'stop':
+        active_tasks.pop(task_key, None)
+        print(f"Task {task_name} stopped successfully.")
+
 
 async def start_all_messages(channel):
-    send_scheduled_messages.start(channel)
-    send_stop_button.start(channel)
+    await handle_task(send_scheduled_messages, channel, action='start', task_name='send_scheduled_messages')
+    await handle_task(send_stop_button, channel, action='start', task_name='send_stop_button')
 
-async def stop_all_messages():
-    send_scheduled_messages.cancel()
-    return True
+stop_lock = asyncio.Lock()
+
+async def stop_all_messages(channel):
+    async with stop_lock:
+        await handle_task(send_scheduled_messages, channel, action='stop', task_name='send_scheduled_messages')
+        await handle_task(send_stop_button, channel, action='stop', task_name='send_stop_button')
+        return True

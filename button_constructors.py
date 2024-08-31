@@ -136,7 +136,6 @@ class StopButton(discord.ui.View):
 
     @discord.ui.button(label='Stop', style=discord.ButtonStyle.danger)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        print('button callback used')
         if await self.stop_callback():
             message = "Stopped all notifications"
             if interaction.response.is_done():
