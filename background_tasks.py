@@ -9,6 +9,7 @@ from discord.ui import View
 from bot_instance import get_bot
 from discord.ext import tasks
 from config import MAIN_GUILD_ID
+from message_tasks import start_all_messages
 from models.forum import get_or_create_forum
 from sql_profile import Profile_Database
 from database.psql_services import Services_Database
@@ -95,11 +96,12 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     invite = await channel.create_invite(max_age=86400)
 
-    await channel.send(f"Welcome to the Side Quest Private Session Room!\n" +
-                       # f"Your payment of ${challenge['price']} has been processed, and you can now arrange the perfect time for a game!\n" +
-                       # f"The game is scheduled for {game_date}.\n" +
+    await channel.send(f"Welcome to the Sidekick Private Session Room!\n" +
                        "We hope you enjoy the games and the time spent together ❤️.\n" +
-                       f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel! Enjoy!")
+                       f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel!" +
+                       f"Your Kicker's username is @{kicker_username}" )
+    
+    await start_all_messages(channel)
     
     kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
 
@@ -107,7 +109,8 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
-                    f"Join the private channel between you and the kicker: {invite.url}")
+                    f"Join the private channel between you and the kicker: {invite.url}\n" +
+                    "**Important: If you did not receive a session, please create a ticket to report this case and get refunded <#1233350206280437760>**")
     
     manager_members = []
 
@@ -122,8 +125,10 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
-        for manager in manager_members:
-            await manager.send(manager_message)
+        
+        if challenged in kicker_members:
+            for manager in manager_members:
+                await manager.send(manager_message)
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 

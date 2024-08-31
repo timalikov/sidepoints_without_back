@@ -1,0 +1,22 @@
+facts = [
+    "🎮 Co-op Games Boost Teamwork: Playing co-op games can actually improve your teamwork skills in real life! 🤝",
+    "🕹️ Mario & Luigi Bros: The famous Mario and Luigi are actually brothers in the gaming world! 👬",
+    "🎲 Board Games Turned Digital: Many popular video games started as board games! Think D&D and Warhammer. 🎲➡️🎮",
+    "👾 Old School Arcade Love: The term \"arcade\" comes from the 1970s when gaming was a new and exciting trend. 🎟️",
+    "🏆 Speedrunning Heroes: Some gamers complete games in record times just to see how fast they can go! ⏱️",
+    "💻 Modding Magic: Gamers create mods (modifications) to enhance or change games, adding new experiences. 🔧",
+    "🎉 Gamer Gatherings: Gaming conventions like PAX and E3 are huge events where gamers and creators unite! 🌟",
+    "🎵 Game Soundtracks: Many game soundtracks are composed by talented musicians and are loved by fans worldwide! 🎶",
+    "🧩 Puzzle Mastery: Some gamers excel at solving intricate puzzles, making them real-life problem-solvers! 🧠",
+    "👑 Esports Champs: Professional gaming has turned into a big deal with esports tournaments and big prize money! 💰",
+    "🎮 Cross-Platform Fun: Some games let players on different platforms (like Xbox and PlayStation) play together! 🕹️",
+    "🐱 In-Game Pets: Virtual pets in games can provide companionship and even become quite the little sidekicks! 🐶",
+    "🚀 Space Exploration: Games like No Man's Sky let players explore vast, procedurally-generated universes. 🌌",
+    "🏰 Fantasy Worlds: Many games create rich, fantasy worlds with detailed lore and history! 🏰",
+    "🤖 AI Companions: Some games feature advanced AI that can adapt to your play style for a more challenging experience! 🤖",
+    "🎯 Achievements & Trophies: Gamers love collecting achievements and trophies to show off their skills! 🏅",
+    "🕵️‍♂️ Secret Easter Eggs: Games often hide secret messages or features for players to discover! 🥚",
+    "📚 Gaming Lore: Many games have deep stories and lore that can rival the complexity of novels! 📖",
+    "🎨 Creative Mods: Gamers use mods to customize and personalize their gameplay experiences, from new characters to unique maps! 🎨",
+    "🤝 Global Community: Gamers from all over the world can connect and form friendships through online gaming! 🌍"
+]

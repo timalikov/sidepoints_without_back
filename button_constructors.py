@@ -101,8 +101,7 @@ class ChatButton(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         member = interaction.guild.get_member(int(self.user_id))
         if member:
-            username = member.name
-            chat_link = f"Trial chat with the Kicker: <@!{self.user_id}>.\n\n Also, click below to connect with user https://discord.com/users/{self.user_id}"
+            chat_link = f"Trial chat with the Kicker: <@!{self.user_id}>"
         else:
             chat_link = f"Click below to connect with user https://discord.com/users/{self.user_id}"
 
@@ -128,3 +127,22 @@ class GoButton(discord.ui.Button):
                 await interaction.response.send_message(f"{payment_link}", ephemeral=False)
         except discord.errors.NotFound:
             print("Failed to send follow-up message. Interaction webhook not found.")
+
+
+class StopButton(discord.ui.View):
+    def __init__(self, stop_callback):
+        super().__init__(timeout=None)
+        self.stop_callback = stop_callback
+
+    @discord.ui.button(label='Stop', style=discord.ButtonStyle.danger)
+    async def stop(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if await self.stop_callback():
+            message = "Stopped all scheduled messages"
+            if interaction.response.is_done():
+                await interaction.followup.send(f"{message}", ephemeral=False)
+            else:
+                await interaction.response.send_message(f"{message}", ephemeral=False)
+        else:
+            print("Failed to stop all scheduled messages")
+
+    
