@@ -19,6 +19,7 @@ class UserProfileView(discord.ui.View):
         self.add_item(ChatButton(self.user_id))
 
     async def button_callback(self, interaction: discord.Interaction):
+        print("ENTER")
         serviceId = self.profile_data['service_id']
         discordServerId = interaction.guild.id
         payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"

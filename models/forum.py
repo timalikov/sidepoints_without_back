@@ -17,7 +17,7 @@ async def find_forum(guild: discord.Guild) -> Optional[discord.ForumChannel]:
     return forum_channel
 
 async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
-    base_category_name = "SIDEKICK'S DC BOT"
+    base_category_name = "Sidekick: Match to Play"
     category = None
     index = 1
     while not category:
