@@ -4,7 +4,7 @@ load_dotenv()
 MAIN_GUILD_ID = int(os.getenv('MAIN_GUILD_ID'))
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 FORUM_ID = int(os.getenv('FORUM_ID'))
-FORUM_NAME = "sidekick-forum"
+FORUM_NAME = "sidekick-cards"
 PORT_ID = int(os.getenv('PORT_ID'))
 LEADER_BOT_CHANNEL = int(os.getenv('LEADER_BOT_CHANNEL'))
 # FORUM_ID_LIST = [1248303158313222255, 1240260161491439637, 1242449492280737843]

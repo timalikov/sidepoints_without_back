@@ -13,8 +13,7 @@ from database.psql_services import Services_Database
 from models.forum import get_or_create_forum
 import os
 
-
-from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, FORUM_NAME
+from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN
 from sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
@@ -36,11 +35,8 @@ def is_owner(interaction: discord.Interaction) -> bool:
     return interaction.guild is not None and interaction.guild.owner_id == interaction.user.id
 
 
-@bot.tree.command(name="forum", description="Just test command!")
+@bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
-    if not is_owner(interaction):
-        await interaction.response.send_message('Oops, you do not have right to use this command!')
-        return
     await interaction.response.defer(ephemeral=True)
     guild: discord.guild.Guild = interaction.guild
     try:
@@ -48,6 +44,8 @@ async def forum_command(interaction: discord.Interaction):
     except discord.DiscordException:
         await interaction.response.send_message(content="Discord channel is not community!", ephemeral=True)
         return
+    if not is_owner(interaction):
+        await interaction.followup.send(content='Oops, you do not have right to use this command!', ephemeral=True)
     services_db = Services_Database()
     await services_db.start_posting(forum_channel, guild, bot)
     await interaction.followup.send(content="Posts created!", ephemeral=True)

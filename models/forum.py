@@ -17,7 +17,7 @@ async def find_forum(guild: discord.Guild) -> Optional[discord.ForumChannel]:
     return forum_channel
 
 async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
-    base_category_name = "SIDEKICK BOT"
+    base_category_name = "SIDEKICK'S DC BOT"
     category = None
     index = 1
     while not category:
@@ -40,7 +40,7 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
         manage_channels=False,
         manage_guild=False,
         add_reactions=False,
-        view_audit_log=False,
+        view_audit_log=True,
         priority_speaker=False,
         stream=False,
         read_messages=True,
@@ -50,7 +50,7 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
         manage_messages=False,
         embed_links=False,
         attach_files=False,
-        read_message_history=False,
+        read_message_history=True,
         mention_everyone=False,
         view_guild_insights=False,
         connect=False,

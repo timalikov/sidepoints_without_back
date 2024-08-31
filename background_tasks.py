@@ -45,6 +45,16 @@ class DoneButton(View):
         else:
             await interaction.response.send_message("Role not found.", ephemeral=True)
 
+
+async def send_discord_notification(*, user_id: int, message: str) -> None:
+    try:
+        user: discord.User = await bot.fetch_user(user_id)
+    except discord.DiscordException:
+        return False
+    await user.send(message)
+    return True
+
+
 async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
 
@@ -242,6 +252,7 @@ async def delete_all_threads_and_clear_csv():
 
 @tasks.loop(hours=24)
 async def post_user_profiles():
+    await asyncio.sleep(360)
     print("START LOOP POST")
     bot = get_bot()  # Assuming you have a function to get your bot instance
     services_db = Services_Database()

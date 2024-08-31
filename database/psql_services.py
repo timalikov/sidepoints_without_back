@@ -1,5 +1,6 @@
 from typing import List, Union
 
+import asyncio
 import asyncpg
 import discord
 from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
@@ -118,6 +119,7 @@ class Services_Database:
                 await thread.edit(archived=False)
             temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
             await temp_post.post_user_profile()
+            await asyncio.sleep(4)
 
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
