@@ -135,13 +135,13 @@ class StopButton(discord.ui.View):
         self.stop_callback = stop_callback
 
     @discord.ui.button(label='Stop', style=discord.ButtonStyle.danger)
-    async def stop(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         if await self.stop_callback():
             message = "Stopped all scheduled messages"
             if interaction.response.is_done():
-                await interaction.followup.send(f"{message}", ephemeral=False)
+                await interaction.followup.send(message, ephemeral=False)
             else:
-                await interaction.response.send_message(f"{message}", ephemeral=False)
+                await interaction.response.send_message(message, ephemeral=False)
         else:
             print("Failed to stop all scheduled messages")
 
