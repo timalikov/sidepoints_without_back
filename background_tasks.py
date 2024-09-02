@@ -46,12 +46,12 @@ class DoneButton(View):
             await interaction.response.send_message("Role not found.", ephemeral=True)
 
 
-async def send_discord_notification(*, user_id: int, message: str) -> None:
+async def send_discord_notification(*, user_id: int, message: str) -> int:
     try:
-        user: discord.User = await bot.fetch_user(user_id)
-    except discord.DiscordException:
+        user: discord.User = await bot.fetch_user(int(user_id))
+    except (ValueError, discord.NotFound):
         return False
-    await user.send(message)
+    _: discord.Message = await user.send(message)
     return True
 
 

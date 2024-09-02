@@ -4,7 +4,7 @@ import datetime
 import io
 from flask import Flask, request, jsonify, Response
 import config
-from background_tasks import join_or_create_private_discord_channel, create_private_discord_channel
+from background_tasks import send_discord_notification, create_private_discord_channel
 from sql_challenge import SQLChallengeDatabase
 from bot_instance import get_bot
 
@@ -23,22 +23,20 @@ async def server_user_counts():
         }
     return jsonify(user_counts), 200
 
-# @app.route('/discord_api/server_user_counts', methods=['GET'])
-# async def server_user_counts():
-#     user_counts = {}
-#     total_member_count = 0
-#     for guild in bot.guilds:
-#         total_member_count += guild.member_count
-#         # user_counts[guild.id] = {
-#         #     "guild_name": guild.name,
-#         #     "member_count": guild.member_count
-#         # }
-#
-#     user_counts['1208438041174343690'] = {
-#         "guild_name": "Sidekick [Beta]",
-#         "member_count": total_member_count
-#     }
-#     return jsonify(user_counts), 200
+
+@app.route("/discord_api/notification", methods=['POST'])
+async def send_notification():
+    data = request.json
+    try:
+        user_id: int = data["kickerDiscordId"]
+        message: str = data["message"]
+    except KeyError as e:
+        return jsonify({"message": f"Missing key: {e}"}), 400
+    future = asyncio.run_coroutine_threadsafe(send_discord_notification(user_id=user_id, message=message), bot.loop)
+    is_user_found = future.result()
+    if not is_user_found:
+        return jsonify({"message": "User not found"}), 404
+    return jsonify({"message": "Notification sended"}), 200
 
 
 @app.route('/discord_api/health_check', methods=['GET'])
@@ -55,32 +53,14 @@ async def handle_create_private_channel():
     serviceName = data.get("serviceName")
     kickerUsername = data.get("kickerUsername")
     if channelName:
-        # guild = bot.get_guild(main_guild_id)
-
-        # Use the bot to create a private channel asynchronously
         channel_name = f"private-channel-{channelName}"
-        # challenge = await SQLChallengeDatabase.get_challenge(challenge_id)
-        # guild_id = int(challenge["server_id"])
-        # if challenge["price"] < 1:
-        #     return jsonify({"error": "Less that one 1 dollar."}), 400
-        # guild = bot.get_guild(guild_id)
-        # await SQLChallengeDatabase.update_channel_created(challenge_id)
-        # second_id = int(challenge['user_id2'])
-
         guild_id = main_guild_id
-        # print(main_guild_id)
         guild = bot.get_guild(guild_id)
         challenger = guild.get_member(int(customerId))
         challenged = guild.get_member(int(kickerId))
 
         if not all([challenger, challenged]):
             return jsonify({"error": "One or more users could not be found in this guild."}), 400
-        # Since this is an async function, we run it in the event loop of the bot
-
-        # if challenge['task_id'] == 101:
-        #     future = asyncio.run_coroutine_threadsafe(join_or_create_private_discord_channel(bot, guild_id, challenge, challenger, challenged), bot.loop)
-        # else:
-        #     future = asyncio.run_coroutine_threadsafe(create_private_discord_channel(bot, guild_id, challenge, channel_name, challenger, challenged), bot.loop)
         future = asyncio.run_coroutine_threadsafe(create_private_discord_channel(bot, guild_id, channel_name, challenger, challenged, serviceName, kickerUsername), bot.loop)
         success, response = future.result()  # This blocks until the coroutine completes
 
