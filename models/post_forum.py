@@ -1,3 +1,4 @@
+from typing import Union
 import os
 import discord
 
@@ -49,17 +50,21 @@ class Post_FORUM:
         self.thread: Union[discord.Thread, bool] = thread
 
     async def post_user_profile(self):
-        tag_name = self.profile_data["service_type_name"]
+        tag_name: str = self.profile_data["service_type_name"]
+        username: str = self.profile_data['profile_username']
+        service_id: str = self.profile_data['service_id']
+        invite_link: str = f"https://app.sidekick.fans/payment/{service_id}?discordServerId={self.guild_id}"
+        link_message = f"To initiate a session with {username}, please click on the link: {invite_link}"
 
         embed = discord.Embed(
-            title=self.profile_data['profile_username'],
+            title=username,
             description=f"Discord username: <@{int(self.profile_data['discord_id'])}>\n\n {self.profile_data['service_description']}"
         )
 
         embed.set_image(url=self.profile_data['service_image'])
         embed.add_field(name="Price", value=f"${self.profile_data['service_price']}/hour", inline=True)
         embed.add_field(name="Category", value=tag_name, inline=True)
-        view = UserProfileView(self.profile_data)
+        embed.add_field(name="Link", value=link_message, inline=False)
 
         tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)
         if not tag:
@@ -69,13 +74,12 @@ class Post_FORUM:
 
         if self.thread:
             first_message = await self.thread.fetch_message(self.thread.id)
-            await first_message.edit(embed=embed, view=view)
+            await first_message.edit(embed=embed)
         else:
             thread_result = await self.forum_channel.create_thread(
-                name=f"Profile: <@{self.profile_data['profile_username']}>",
+                name=f"Profile: <@{username}>",
                 content="Click 'Go' to interact with this profile!",
                 embed=embed,
-                view=view,
                 reason="Automated individual profile showcase",
                 applied_tags=[tag] if tag else [],
                 auto_archive_duration=60,
