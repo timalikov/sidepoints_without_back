@@ -128,6 +128,22 @@ class Services_Database:
             services = await conn.fetch(query, discordId)
         return services
     
+    async def get_services_by_username(self, username):
+        async with self.get_connection() as conn:
+            if self.app_choice == "ALL":
+                query = "SELECT * FROM discord_services WHERE profile_username ILIKE $1 LIMIT 1;"
+                query_args = [username]
+            else:
+                query = "SELECT * FROM discord_services WHERE profile_username ILIKE $1 AND service_type_id = $2 LIMIT 1;"
+                query_args = [username, APP_CHOICES[self.app_choice]]
+            services = await conn.fetch(query, *query_args)
+        return services.pop(0) if services else None
+
+    async def get_service_type_name(self, service_type_id):
+        async with self.get_connection() as conn:
+            query = "SELECT name FROM discord_service_types WHERE id = $1;"
+            service_type = await conn.fetchval(query, service_type_id)
+        return service_type if service_type else "Unknown"
 
     async def get_channel_ids(self):
         async with self.get_connection() as conn:

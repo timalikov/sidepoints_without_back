@@ -1,16 +1,13 @@
 import discord
-# from sql_challenge import SQLChallengeDatabase  # Adjusted import to use SQLChallengeDatabase
 from sql_forum_posted import ForumUserPostDatabase
-# from sql_profile import Profile_Database
 from discord.ui import View
-# from datetime import datetime
 from config import MAIN_GUILD_ID, FORUM_ID, APP_CHOICES, LEADER_BOT_CHANNEL, CATEGORY_TO_TAG, FORUM_ID_LIST, LEADER_BOT_CHANNEL_LIST
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed
 import os
 from bot_instance import get_bot
-from getServices import DiscordServiceFetcher
 from sql_profile import log_to_database
+from database.psql_services import Services_Database
 
 bot = get_bot()
 load_dotenv()
@@ -21,23 +18,26 @@ app_choices = APP_CHOICES
 
 
 class PlayView(View):
-    def __init__(self, user_choice="ALL", username=None):
-        super().__init__(timeout=None)
-        self.userData = DiscordServiceFetcher(user_choice)
-        self.no_user = False
-        if username is not None:
-            self.service = self.userData.find(username)
-            if self.service != False:
-                self.user_discord_id = self.service.get("")
-                self.profile_embed = create_profile_embed(self.service)
-            else:
-                self.no_user = True
+
+    @classmethod
+    async def create(cls, user_choice="ALL", username=None):
+        services_db = Services_Database(app_choice=user_choice)
+        if username:
+            service = await services_db.get_services_by_username(username)
         else:
-            self.service = self.userData.get_next()
-            if  self.service != False:
-                self.profile_embed = create_profile_embed(self.service)
-            else:
-                self.no_user = True
+            service = await services_db.get_next_service()
+
+        return cls(service, services_db)
+    
+    def __init__(self, service: dict = None, services_db: Services_Database = None):
+        super().__init__(timeout=None)
+        self.service = service
+        self.services_db = services_db
+        self.no_user = False
+        if self.service:
+            self.profile_embed = create_profile_embed(service)
+        else:
+            self.no_user = True
 
     async def is_member_of_main_guild(self, user_id):
         main_guild = bot.get_guild(main_guild_id)
@@ -64,7 +64,9 @@ class PlayView(View):
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         log_to_database(interaction.user.id, "next_user")
-        self.service = self.userData.get_next()
+        self.service = await self.services_db.get_next_service()
+        if self.service:
+            self.service["service_type_name"] = await self.services_db.get_service_type_name(self.service["service_type_id"])
         self.profile_embed = create_profile_embed(self.service)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
 
