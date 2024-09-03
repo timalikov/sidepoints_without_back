@@ -86,7 +86,7 @@ async def list_all_users_with_online_status(guild):
                                ])
 async def play(interaction: discord.Interaction, choices: app_commands.Choice[str]):
     await interaction.response.defer(ephemeral=True)
-    view = PlayView(user_choice=choices.value)
+    view = await PlayView.create(user_choice=choices.value)
     await log_to_database(interaction.user.id, "/go")
 
     if view.no_user:
@@ -99,7 +99,7 @@ async def play(interaction: discord.Interaction, choices: app_commands.Choice[st
 @app_commands.describe(username="The username to find.")
 async def find(interaction: discord.Interaction, username: str):
     await interaction.response.defer(ephemeral=True)
-    view = PlayView(user_choice="ALL", username=username)
+    view = await PlayView.create(user_choice="ALL", username=username)
     await log_to_database(interaction.user.id, "/find")
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
