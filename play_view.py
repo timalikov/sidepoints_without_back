@@ -27,6 +27,9 @@ class PlayView(View):
         else:
             service = await services_db.get_next_service()
 
+        if service:
+            service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
+
         return cls(service, services_db)
     
     def __init__(self, service: dict = None, services_db: Services_Database = None):
@@ -66,7 +69,7 @@ class PlayView(View):
         log_to_database(interaction.user.id, "next_user")
         self.service = await self.services_db.get_next_service()
         if self.service:
-            self.service["service_type_name"] = await self.services_db.get_service_type_name(self.service["service_type_id"])
+            self.service["service_category_name"] = await self.services_db.get_service_category_name(self.service["service_type_id"])
         self.profile_embed = create_profile_embed(self.service)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
 

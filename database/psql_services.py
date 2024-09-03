@@ -84,10 +84,10 @@ class Services_Database:
                 else:
                     if self.user_name:
                         default_query += " AND service_type_id = $1 AND profile_username != $2 LIMIT $3 OFFSET $4;"
-                        query_args = [APP_CHOICES[self.app_choice], self.user_name, remaining_chunk_size, self.current_offset]
+                        query_args = [self.app_choice, self.user_name, remaining_chunk_size, self.current_offset]
                     else:
                         default_query += " AND service_type_id = $1 LIMIT $2 OFFSET $3;"
-                        query_args = [APP_CHOICES[self.app_choice], remaining_chunk_size, self.current_offset]
+                        query_args = [self.app_choice, remaining_chunk_size, self.current_offset]
                 default_query = default_query.replace("LIMIT", "ORDER BY profile_score LIMIT")
                 remaining_chunk = await conn.fetch(default_query, *query_args)
                 self.current_chunk.extend(remaining_chunk)
@@ -137,9 +137,11 @@ class Services_Database:
                 query = "SELECT * FROM discord_services WHERE profile_username ILIKE $1 AND service_type_id = $2 LIMIT 1;"
                 query_args = [username, APP_CHOICES[self.app_choice]]
             services = await conn.fetch(query, *query_args)
-        return services.pop(0) if services else None
+        
+        result = services.pop() 
+        return serialize_profile_data(result)
 
-    async def get_service_type_name(self, service_type_id):
+    async def get_service_category_name(self, service_type_id):
         async with self.get_connection() as conn:
             query = "SELECT name FROM discord_service_types WHERE id = $1;"
             service_type = await conn.fetchval(query, service_type_id)
