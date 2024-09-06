@@ -2,7 +2,7 @@ import discord
 import asyncio
 
 from bot_instance import get_bot
-from config import MAIN_GUILD_ID
+from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID
 from message_tasks import start_all_messages
 from database.psql_services import Services_Database
 from background_tasks import (
@@ -81,6 +81,13 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
             manager_members.append(manager)
         else:
             print(f"Manager with ID {manager_id} not found in the guild.")
+    
+    for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:
+        customer_support = bot.get_user(customer_support_id)
+        try:
+            await customer_support.send(manager_message)
+        except discord.HTTPException:
+            print(f"Failed to send message to customer support with ID {customer_support_id}")
     
     try:
         await challenger.send(user_message)
