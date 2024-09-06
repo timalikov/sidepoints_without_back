@@ -68,34 +68,22 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     manager_message = (f"Hey! Session between kicker: @{kicker_username} and {challenger.name} has started. Please check this private channel: {invite.url}.")
 
-    user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!" +
+    user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!\n" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
                     f"Join the private channel between you and the kicker: {invite.url}\n" +
                     "**Important: If you did not receive a session, please create a ticket to report this case and get refded <#1233350206280437760>**")
     
     manager_members = []
 
-    for manager_id in managers:
-        manager = await bot.fetch_user(manager_id)
-        if manager:
-            manager_members.append(manager)
-        else:
-            print(f"Manager with ID {manager_id} not found in the guild.")
-    
-    for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:
-        customer_support = bot.get_user(customer_support_id)
-        try:
-            await customer_support.send(manager_message)
-        except discord.HTTPException:
-            print(f"Failed to send message to customer support with ID {customer_support_id}")
-    
     try:
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
         
         if challenged in kicker_members:
-            for manager in manager_members:
+            for manager_id in managers:
+                manager = await bot.fetch_user(manager_id)
+                manager_members.append(manager)
                 await manager.send(manager_message)
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
@@ -112,6 +100,15 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
             
         send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
         send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
+    
+    for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:
+        try:
+            customer_support = await bot.fetch_user(customer_support_id)  # Fetch the user from the API
+            await customer_support.send(manager_message)
+        except discord.HTTPException:
+            print(f"Failed to send message to customer support with ID {customer_support_id}")
+        except AttributeError:
+            print(f"Failed to find user with ID {customer_support_id}")
 
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
