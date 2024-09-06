@@ -169,6 +169,3 @@ class Services_Database:
 
     async def get_facts(self):
         return facts
-    
-    async def get_customer_support_team(self):
-        return customer_support_team
