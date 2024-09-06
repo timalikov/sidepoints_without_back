@@ -100,3 +100,11 @@ async def get_or_create_forum(guild: discord.Guild) -> discord.ForumChannel:
     if not forum_channel:
         forum_channel = await create_base_forum(guild)
     return forum_channel
+
+
+async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
+    forum_channel: discord.channel.ForumChannel = await find_forum(guild)
+    if forum_channel:
+        await forum_channel.delete()
+    forum_channel = await create_base_forum(guild)
+    return forum_channel

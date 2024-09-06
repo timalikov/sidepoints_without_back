@@ -4,9 +4,15 @@ import datetime
 import io
 from flask import Flask, request, jsonify, Response
 import config
-from background_tasks import send_discord_notification, create_private_discord_channel
+from services.messages.base import (
+    send_confirm_order_message,
+    send_discord_notification,
+)
+from models.private_channel import create_private_discord_channel
 from sql_challenge import SQLChallengeDatabase
 from bot_instance import get_bot
+
+import discord
 
 main_guild_id = config.MAIN_GUILD_ID
 bot = get_bot()
@@ -42,6 +48,40 @@ async def send_notification():
 @app.route('/discord_api/health_check', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy"}), 200
+
+
+@app.route('/discord_ap/order/confirm', methods=['POST'])
+async def handle_confirm_order():
+    data: dict = request.json
+    channelName: str = data.get('channelName')
+    customerId: str = data.get("customerId")
+    serviceName = data.get("serviceName")
+    kickerId: str = data.get("kickerId")
+    kickerUsername: str = data.get("kickerUsername")
+    if channelName:
+        channel_name = f"private-channel-{channelName}"
+        challenger: discord.User = bot.get_user(int(customerId))
+        challenged: discord.User = bot.get_user(int(kickerId))
+        if not all([challenger, challenged]):
+            return jsonify({"error": "One or more users could not be found in this guild."}), 400
+        future = asyncio.run_coroutine_threadsafe(
+            send_confirm_order_message(
+                channel_name=channel_name,
+                customer=challenger,
+                kicker=challenged,
+                kicker_username=kickerUsername,
+                service_name=serviceName
+            ),
+            bot.loop
+        )
+        success, response = future.result()  # This blocks until the coroutine completes
+
+        if success:
+            return jsonify({"message": "Private channel created", "channel_id": response.id}), 200
+        else:
+            return jsonify({"error": response.id}), 400
+    else:
+        return jsonify({"error": "Challenge ID not provided"}), 400
 
 
 @app.route('/discord_api/create_private_channel', methods=['POST'])

@@ -1,163 +1,17 @@
-from typing import Union
-
-import os
 import asyncio
 import csv
 from datetime import datetime, timezone, timedelta
 import discord
-from discord.ui import View
 from bot_instance import get_bot
 from discord.ext import tasks
 from config import MAIN_GUILD_ID
-from message_tasks import start_all_messages
-from models.forum import get_or_create_forum
+from models.forum import get_and_recreate_forum
 from sql_profile import Profile_Database
 from database.psql_services import Services_Database
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
-
-class DoneButton(View):
-    def __init__(self):
-        # Setting timeout=None to make the button non-expirable
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="Done", style=discord.ButtonStyle.green)
-    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Fetch the role from the guild using the provided role ID
-        role_ids = [1235556503596040224, 1242457735988252692]  # Role ID to be assigned
-        # role = interaction.guild.get_role(role_id)
-
-        # Fetch the first valid role from the guild using the provided role IDs
-        role = None
-        for role_id in role_ids:
-            role = interaction.guild.get_role(role_id)
-            if role:
-                break
-
-        if role:
-            # Add the role to the user who clicked the button
-            try:
-                await interaction.user.add_roles(role)
-                await interaction.response.send_message("Good job! You've been given a special role.", ephemeral=True)
-            except discord.HTTPException as e:
-                await interaction.response.send_message(f"Failed to assign role: {str(e)}", ephemeral=True)
-        else:
-            await interaction.response.send_message("Role not found.", ephemeral=True)
-
-
-async def send_discord_notification(*, user_id: int, message: str) -> int:
-    try:
-        user: discord.User = await bot.fetch_user(int(user_id))
-    except (ValueError, discord.NotFound):
-        return False
-    _: discord.Message = await user.send(message)
-    return True
-
-
-async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, base_category_name = "Sidekick Chatrooms"):
-    guild = bot.get_guild(guild_id)
-
-    services_db = Services_Database()
-    kickers = await services_db.get_kickers()
-    managers = await services_db.get_managers()
-
-    kicker_members = []
-    for kicker_id in kickers:
-        kicker = guild.get_member(kicker_id)
-        if kicker:
-            kicker_members.append(kicker)
-        else:
-            print(f"Kicker with ID {kicker_id} not found in the guild.")
-
-    category = None
-    index = 1
-    while not category:
-        category_name = f"{base_category_name}{index}"
-        category = discord.utils.get(guild.categories, name=category_name)
-        if category and len(category.channels) >= 50:
-            category = None
-            index += 1
-        elif not category:
-            category = await guild.create_category(category_name)
-
-    overwrites = {
-        guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        challenger: discord.PermissionOverwrite(read_messages=True),
-        challenged: discord.PermissionOverwrite(read_messages=True)
-    }
-
-    if challenged in kicker_members:
-        for kicker in kicker_members:
-            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
-
-    channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
-
-    invite = await channel.create_invite(max_age=86400)
-
-    await channel.send(f"Welcome to the Sidekick Private Session Room!\n" +
-                       "We hope you enjoy the games and the time spent together ❤️.\n" +
-                       f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel!\n" +
-                       f"Your Kicker's username is @{kicker_username}" )
-    
-    await start_all_messages(channel)
-    
-    kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
-
-    manager_message = (f"Hey! Session between kicker: @{kicker_username} and {challenger.name} has started. Please check this private channel: {invite.url}.")
-
-    user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!" +
-                    f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
-                    f"Join the private channel between you and the kicker: {invite.url}\n" +
-                    "**Important: If you did not receive a session, please create a ticket to report this case and get refunded <#1233350206280437760>**")
-    
-    manager_members = []
-
-    for manager_id in managers:
-        manager = await bot.fetch_user(manager_id)
-        if manager:
-            manager_members.append(manager)
-        else:
-            print(f"Manager with ID {manager_id} not found in the guild.")
-    
-    try:
-        await challenger.send(user_message)
-        if challenged.id != 1208433940050874429:
-            await challenged.send(kicker_message)
-        
-        if challenged in kicker_members:
-            for manager in manager_members:
-                await manager.send(manager_message)
-    except discord.HTTPException:
-        print("Failed to send invite links to one or more participants.")
-
-    if challenged in kicker_members:
-            if send_message_after_2_min.is_running():
-                print("Task 2 minutes send message is already running, stopping it first.")
-                send_message_after_2_min.cancel()
-                await asyncio.sleep(0.1) 
-            if send_message_after_5_min.is_running():
-                print("Task 5 minutes send message is already running, stopping it first.")
-                send_message_after_5_min.cancel()
-                await asyncio.sleep(0.1)
-                
-            send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
-            send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
-
-    # Special handling for the specific user ID
-    if challenged.id == 1208433940050874429:
-        # Creating the embed
-        embed = discord.Embed(title="👋 Hi there! Welcome to the Web3 Mastery Tutorial!", description="I'm CZ, here to guide you through your first steps into an exciting world🌐✨", color=discord.Color.blue())
-        embed.add_field(name="Congratulations on successfully placing your order 🎉", value="You've just unlocked the title of \"Web3 Master,\" but the journey doesn't stop here.", inline=False)
-        embed.add_field(name="Learn and Earn", value="Go through the info we’ve shared here carefully and hit the 'I’ve learnt all the acknowledgments above' button to claim your campaign POINTS.", inline=False)
-        embed.add_field(name="Refund Alert", value="Remember, the $4 you spent will be refunded back to your account at the end of the campaign. Keep an eye on your balance!", inline=False)
-        embed.add_field(name="More Points, More Power", value="Place more orders and boost your POINTs tally significantly.", inline=False)
-        embed.add_field(name="Exploring Sidekick: All You Need to Know!", value="[Watch Here](https://youtu.be/h9fzscEdC1Y)", inline=False)
-        embed.set_footer(text="Let's make your crypto journey rewarding 🚀")
-        view = DoneButton()
-        await channel.send(embed=embed, view=view)
-    return True, channel
 
 @tasks.loop(count=1)
 async def send_message_after_2_min(managers, challenged, kicker_username, invite_url):
@@ -272,9 +126,12 @@ async def post_user_profiles():
     services_db = Services_Database()
     for guild in bot.guilds:
         try:
-            forum_channel: discord.channel.ForumChannel = await get_or_create_forum(guild)
+            forum_channel: discord.channel.ForumChannel = await get_and_recreate_forum(guild)
         except discord.DiscordException:
             return
+        forum_channel.overwrites[guild.default_role].read_messages = False
         await services_db.start_posting(
             forum_channel=forum_channel, guild=guild, bot=bot
         )
+        forum_channel.overwrites[guild.default_role].read_messages = True
+
