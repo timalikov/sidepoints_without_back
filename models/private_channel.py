@@ -83,7 +83,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
             print(f"Manager with ID {manager_id} not found in the guild.")
     
     for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:
-        customer_support = await bot.get_user(customer_support_id)
+        customer_support = bot.get_user(customer_support_id)
         try:
             await customer_support.send(manager_message)
         except discord.HTTPException:
