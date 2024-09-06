@@ -1,6 +1,6 @@
 import discord
 from discord.ui import View
-from config import APP_CHOICES, HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL
+from config import APP_CHOICES
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed_2
 import os
@@ -8,7 +8,6 @@ from bot_instance import get_bot
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
 from views.share_command_view import ShareCommandView
-from background_tasks import create_private_discord_channel
 
 bot = get_bot()
 load_dotenv()
