@@ -11,7 +11,6 @@ from models.thread_forum import find_thread_in_forum
 from models.post_forum import Post_FORUM
 from serializers.profile_serializer import serialize_profile_data
 from database.fact_list import facts
-from database.customer_support_team_list import customer_support_team
 
 
 APP_CHOICES = {
