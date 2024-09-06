@@ -138,8 +138,8 @@ class Services_Database:
                 query_args = [username, APP_CHOICES[self.app_choice]]
             services = await conn.fetch(query, *query_args)
         
-        result = services.pop() 
-        return serialize_profile_data(result)
+        result = serialize_profile_data(services.pop()) if services else None
+        return result
 
     async def get_service_category_name(self, service_type_id):
         async with self.get_connection() as conn:
