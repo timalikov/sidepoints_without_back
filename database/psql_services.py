@@ -11,6 +11,7 @@ from models.thread_forum import find_thread_in_forum
 from models.post_forum import Post_FORUM
 from serializers.profile_serializer import serialize_profile_data
 from database.fact_list import facts
+from database.customer_support_team_list import customer_support_team
 
 
 APP_CHOICES = {
@@ -168,3 +169,6 @@ class Services_Database:
 
     async def get_facts(self):
         return facts
+    
+    async def get_customer_support_team(self):
+        return customer_support_team

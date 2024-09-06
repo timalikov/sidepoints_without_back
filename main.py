@@ -2,7 +2,7 @@ import threading
 from multiprocessing import Process
 from core_commands import run as run_bot
 from web.flask_app import create_app
-import web3_test
+# import web3_test
 import push_order
 from flask_cors import CORS
 from config import PORT_ID

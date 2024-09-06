@@ -21,6 +21,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     services_db = Services_Database()
     kickers = await services_db.get_kickers()
     managers = await services_db.get_managers()
+    customer_support_team = await services_db.get_customer_support_team()
 
     kicker_members = []
     for kicker_id in kickers:
@@ -74,6 +75,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
                     "**Important: If you did not receive a session, please create a ticket to report this case and get refded <#1233350206280437760>**")
     
     manager_members = []
+    customer_support_members = []
 
     for manager_id in managers:
         manager = await bot.fetch_user(manager_id)
@@ -82,10 +84,24 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         else:
             print(f"Manager with ID {manager_id} not found in the guild.")
     
+    for customer_support_id in customer_support_team:
+        customer_support = await bot.fetch_user(customer_support_id)
+        if customer_support:
+            customer_support_members.append(customer_support)
+        else:
+            print(f"Customer support with ID {customer_support_id} not found in the guild.")
+    
     try:
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
+        
+        for cutomer_support_member in customer_support_members:
+            try:
+                await cutomer_support_member.send(manager_message)
+                print("notified customer support")
+            except discord.HTTPException as e:
+                print(f"Failed to send message to {cutomer_support_member.name}: {e}")
         
         if challenged in kicker_members:
             for manager in manager_members:
