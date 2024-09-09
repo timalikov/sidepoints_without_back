@@ -8,7 +8,7 @@ from config import MAIN_GUILD_ID
 from models.forum import get_and_recreate_forum
 from sql_profile import Profile_Database
 from database.psql_services import Services_Database
-from views.session_start_check import SessionStartCheckView
+from views.session_check import SessionCheckView
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -28,7 +28,31 @@ async def session_start_check(
         )       
     )
 
-    view = SessionStartCheckView(
+    view = SessionCheckView(
+        customer=customer,
+        kicker=kicker
+    )
+    await customer.send(
+        view=view,
+        embed=message_embed
+    )
+
+@tasks.loop(count=1)
+async def session_delivery_check(
+    *,
+    customer: discord.User,
+    kicker: discord.User,
+):
+    await asyncio.sleep(3600)
+    message_embed = discord.Embed(
+        colour=discord.Colour.dark_blue(),
+        title=f"Hey @{customer.name}",
+        description=(
+            f"Has your session with kicker @{kicker.name} finished?"
+        )       
+    )
+
+    view = SessionCheckView(
         customer=customer,
         kicker=kicker
     )

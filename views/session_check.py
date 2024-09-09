@@ -7,12 +7,13 @@ from services.messages.interaction import send_interaction_message
 
 bot = get_bot()
 
-class SessionStartCheckView(discord.ui.View):
+class SessionCheckView(discord.ui.View):
     def __init__(
         self, 
         *, 
         customer: discord.User,
         kicker: discord.User,
+        
     ) -> None:
         super().__init__(timeout=None)
         self.customer = customer
@@ -112,7 +113,7 @@ class RefundReplaceView(discord.ui.View):
             message=f"Okay your payment will be refunded soon."
         )
         try:
-            await self.kicker.send(f"User {self.customer.name} refunded the payment!")
+            await self.kicker.send(f"User <@{self.customer.id}> refunded the payment!")
         except discord.HTTPException:
             print(f"Failed to send message to kicker {self.kicker.id}")
 
