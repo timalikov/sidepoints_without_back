@@ -42,7 +42,7 @@ class Receiver:
     def receive_messages(self, queue: str):
         messages_list = []
         try:
-            response = client.receive_message(
+            response = self.client.receive_message(
                 QueueUrl=queue,
                 MaxNumberOfMessages=10,
                 WaitTimeSeconds=10
@@ -52,7 +52,7 @@ class Receiver:
                 for message in response['Messages']:
                     body = json.loads(message['Body'])
                     messages_list.append(body)
-                    client.delete_message(
+                    self.client.delete_message(
                         QueueUrl=queue,
                         ReceiptHandle=message['ReceiptHandle']
                     )
