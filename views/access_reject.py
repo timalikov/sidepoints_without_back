@@ -1,5 +1,5 @@
 from typing import Callable, Any
-from background_tasks import session_start_check
+from background_tasks import session_delivery_check, session_start_check
 import discord
 
 import config
@@ -69,6 +69,7 @@ class AccessRejectView(discord.ui.View):
         )
         await send_interaction_message(interaction=interaction, message="Enjoy!")
         await session_start_check.start(customer=self.customer, kicker=self.kicker)
+        await session_delivery_check.start(customer=self.customer, kicker=self.kicker)
 
     @discord.ui.button(
         label="Reject",
