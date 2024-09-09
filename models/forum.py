@@ -8,13 +8,18 @@ from database.psql_services import Services_Database
 from config import FORUM_NAME
 
 
-async def find_forum(guild: discord.Guild) -> Optional[discord.ForumChannel]:
+async def find_forum(guild: discord.Guild, forum_name: str) -> Optional[discord.ForumChannel]:
     forum_channels = guild.channels
     forum_channel: discord.channel.ForumChannel = None
     for channel in forum_channels:
-        if channel.name == FORUM_NAME and isinstance(channel, discord.channel.ForumChannel):
+        if channel.name == forum_name and isinstance(channel, discord.channel.ForumChannel):
             forum_channel = channel
     return forum_channel
+
+
+async def find_sidekick_forum(guild: discord.Guild) -> Optional[discord.ForumChannel]:
+    return await find_forum(guild=guild, forum_name=FORUM_NAME)
+
 
 async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
     base_category_name = "Sidekick: Match to Play"
@@ -96,14 +101,14 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
 
 
 async def get_or_create_forum(guild: discord.Guild) -> discord.ForumChannel:
-    forum_channel: discord.channel.ForumChannel = await find_forum(guild)
+    forum_channel: discord.channel.ForumChannel = await find_sidekick_forum(guild)
     if not forum_channel:
         forum_channel = await create_base_forum(guild)
     return forum_channel
 
 
 async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
-    forum_channel: discord.channel.ForumChannel = await find_forum(guild)
+    forum_channel: discord.channel.ForumChannel = await find_sidekick_forum(guild)
     if forum_channel:
         await forum_channel.delete()
     forum_channel = await create_base_forum(guild)

@@ -7,6 +7,7 @@ import config
 from services.messages.base import (
     send_confirm_order_message,
     send_discord_notification,
+    send_boost_message,
 )
 from models.private_channel import create_private_discord_channel
 from sql_challenge import SQLChallengeDatabase
@@ -45,6 +46,30 @@ async def send_notification():
     return jsonify({"message": "Notification sended"}), 200
 
 
+@app.route("/discord_api/reaction_test", methods=['POST'])
+def reaction_test():
+    ...
+
+
+@app.route('/discord_api/boost', methods=['POST'])
+async def boost_compleate():
+    data: dict = request.json
+    image_url = data.get("imageUrl")
+    if not image_url:
+        return jsonify({"error": "Missing field: image_url."}), 400
+    future = asyncio.run_coroutine_threadsafe(
+        send_boost_message(
+            image_url=image_url
+        ),
+        bot.loop
+    )
+    success, errors = future.result()
+    if success:
+        return jsonify({"message": "Send boost notification"}), 200
+    else:
+        return jsonify({"error": errors}), 400
+
+    
 @app.route('/discord_api/health_check', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy"}), 200
