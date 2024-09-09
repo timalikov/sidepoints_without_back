@@ -52,3 +52,5 @@ USER_PSQL = os.getenv('USER_AWS_PSQL').strip()
 PASSWORD_PSQL = os.getenv('PASSWORD_PSQL').strip()
 DATABASE_PSQL = os.getenv('DATABASE_PSQL').strip()
 PORT_PSQL = os.getenv('PORT_PSQL').strip()
+
+BOOST_CHANNEL_ID = 1208438041991970868
