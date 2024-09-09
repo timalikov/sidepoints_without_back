@@ -6,7 +6,6 @@ import discord.ext.commands
 from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles
-from services.messages.base import send_confirm_order_message, send_boost_message
 from sql_subscriber import Subscribers_Database
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
@@ -38,18 +37,6 @@ def is_owner(interaction: discord.Interaction) -> bool:
 
 def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
-
-
-@bot.tree.command(name="sss", description="TEST")
-async def test_sss(interaction: discord.Interaction):
-    # me: discord.User = bot.get_user(243040580186144769)
-    # await send_confirm_order_message(
-    #     channel_name="AAA",
-    #     customer=me,
-    #     kicker=me,
-    #     kicker_username="Billi Jin"
-    # )
-    await send_boost_message(image_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXJA32WU4rBpx7maglqeEtt3ot1tPIRWptxA&s")
 
 
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
@@ -89,9 +76,9 @@ async def list_all_users_with_online_status(guild):
 
 
 @bot.tree.command(name="go", description="Use this command and start looking for playmates!")
-async def play(interaction: discord.Interaction, choices: app_commands.Choice[str]):
+async def play(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
-    view = await PlayView.create(user_choice=choices.value)
+    view = await PlayView.create(user_choice="ALL")
     await log_to_database(interaction.user.id, "/go")
 
     if view.no_user:

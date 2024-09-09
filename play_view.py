@@ -66,7 +66,7 @@ class PlayView(View):
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        log_to_database(interaction.user.id, "next_user")
+        await log_to_database(interaction.user.id, "next_user")
         self.service = await self.services_db.get_next_service()
         if self.service:
             self.service["service_category_name"] = await self.services_db.get_service_category_name(self.service["service_type_id"])
