@@ -9,6 +9,7 @@ from background_tasks import (
     send_message_after_2_min,
     send_message_after_5_min,
 )
+from services.messages.customer_support_messenger import send_message_to_customer_support
 from views.done_button import DoneButton
 
 main_guild_id = MAIN_GUILD_ID
@@ -88,6 +89,8 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
+    await send_message_to_customer_support(bot, manager_message)
+
     if challenged in kicker_members:
         if send_message_after_2_min.is_running():
             print("Task 2 minutes send message is already running, stopping it first.")
@@ -98,18 +101,9 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
             send_message_after_5_min.cancel()
             await asyncio.sleep(0.1)
             
-        send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
-        send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
+        await send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
+        await send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
     
-    for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:
-        try:
-            customer_support = await bot.fetch_user(customer_support_id)  # Fetch the user from the API
-            await customer_support.send(manager_message)
-        except discord.HTTPException:
-            print(f"Failed to send message to customer support with ID {customer_support_id}")
-        except AttributeError:
-            print(f"Failed to find user with ID {customer_support_id}")
-
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
         # Creating the embed
