@@ -4,10 +4,32 @@ from bot_instance import get_bot
 from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID
 
 from views.access_reject import AccessRejectView
+from views.check_reaction import CheckReactionView
+from database.psql_services import Services_Database
 from models.enums import StatusCodes
 from models.public_channel import find_channel_by_category_and_name
 
 bot = get_bot()
+
+
+async def send_kickers_reaction_test() -> StatusCodes:
+    service = Services_Database()
+    kickers = await service.get_kickers()
+    for kicker_id in kickers:
+        kicker: discord.User = bot.get_user(kicker_id)
+        btn = CheckReactionView(kicker=kicker)
+        await kicker.send(
+            (
+                f"Hi {kicker.name}, we’re "
+                "doing a quick check to see "
+                "if you're available online. "
+                "Please click the 'Check' button "
+                "below within the next 5 minutes "
+                "to pass the test.!"
+            ),
+            view=btn
+        )
+    return StatusCodes.SUCCESS
 
 
 async def send_boost_message(*, image_url: str) -> StatusCodes:

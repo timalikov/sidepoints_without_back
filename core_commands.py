@@ -6,6 +6,7 @@ import discord.ext.commands
 from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles
+from services.messages.base import send_confirm_order_message
 from sql_subscriber import Subscribers_Database
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
@@ -18,6 +19,7 @@ from sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
+from views.check_reaction import CheckReactionView
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
