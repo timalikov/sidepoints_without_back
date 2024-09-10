@@ -41,31 +41,6 @@ def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
 
 
-@bot.tree.command(name="sss", description="TEST")
-async def test_sss(interaction: discord.Interaction):
-    me: discord.User = bot.get_user(243040580186144769)
-    # await send_confirm_order_message(
-    #     channel_name="AAA",
-    #     customer=me,
-    #     kicker=me,
-    #     kicker_username="Billi Jin"
-    # )
-
-    # btn = CheckReactionView(kicker=me)
-    # embed = discord.Embed(
-    #     title=f"Hi {me.name}",
-    #     description=(
-    #         f"Hi {me.name}, we’re "
-    #         "doing a quick check to see "
-    #         "if you're available online. "
-    #         "Please click the 'Check' button "
-    #         "below within the next 5 minutes "
-    #         "to pass the test.!"
-    #     )
-    # )
-    await me.send(embed=discord.Embed().set_image(url="https://discord-photos.s3.eu-central-1.amazonaws.com/temp24hr/boosts/37f22f5b-b583-4211-8f59-990e2c66383d"))
-
-
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
