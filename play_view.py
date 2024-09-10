@@ -9,7 +9,6 @@ import os
 from bot_instance import get_bot
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
-from views.boost_view import BoostView
 
 bot = get_bot()
 load_dotenv()
