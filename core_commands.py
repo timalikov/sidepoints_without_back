@@ -6,6 +6,7 @@ import discord.ext.commands
 from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles
+from services.messages.base import send_confirm_order_message
 from sql_subscriber import Subscribers_Database
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
@@ -18,6 +19,7 @@ from sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
+from views.check_reaction import CheckReactionView
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -37,6 +39,31 @@ def is_owner(interaction: discord.Interaction) -> bool:
 
 def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
+
+
+@bot.tree.command(name="sss", description="TEST")
+async def test_sss(interaction: discord.Interaction):
+    me: discord.User = bot.get_user(243040580186144769)
+    # await send_confirm_order_message(
+    #     channel_name="AAA",
+    #     customer=me,
+    #     kicker=me,
+    #     kicker_username="Billi Jin"
+    # )
+
+    # btn = CheckReactionView(kicker=me)
+    # embed = discord.Embed(
+    #     title=f"Hi {me.name}",
+    #     description=(
+    #         f"Hi {me.name}, we’re "
+    #         "doing a quick check to see "
+    #         "if you're available online. "
+    #         "Please click the 'Check' button "
+    #         "below within the next 5 minutes "
+    #         "to pass the test.!"
+    #     )
+    # )
+    await me.send(embed=discord.Embed().set_image(url="https://discord-photos.s3.eu-central-1.amazonaws.com/temp24hr/boosts/37f22f5b-b583-4211-8f59-990e2c66383d"))
 
 
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")

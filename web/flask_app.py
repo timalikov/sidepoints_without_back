@@ -8,6 +8,7 @@ from services.messages.base import (
     send_confirm_order_message,
     send_discord_notification,
     send_boost_message,
+    send_kickers_reaction_test
 )
 from models.private_channel import create_private_discord_channel
 from sql_challenge import SQLChallengeDatabase
@@ -48,7 +49,12 @@ async def send_notification():
 
 @app.route("/discord_api/reaction_test", methods=['POST'])
 def reaction_test():
-    ...
+    future = asyncio.run_coroutine_threadsafe(send_kickers_reaction_test(), bot.loop)
+    success = future.result()
+    if success:
+        return jsonify({"message": "ok"}), 200
+    return jsonify({"error": "Just error"}), 400
+    
 
 
 @app.route('/discord_api/boost', methods=['POST'])
