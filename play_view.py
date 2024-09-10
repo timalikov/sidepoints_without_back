@@ -118,7 +118,7 @@ class PlayView(View):
     async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         if self.service:
-            payment_link = f"{os.getenv('WEB_APP_URL')}/support/{self.service['profile_id']}"
+            payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.service['profile_id']}"
             await send_interaction_message(interaction=interaction, message=f"To boost the profile go to the link below: {payment_link}")
         else:
             await send_interaction_message(interaction=interaction, message="No user found to boost.")

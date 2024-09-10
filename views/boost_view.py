@@ -44,7 +44,7 @@ class BoostView(View):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "edit_service")
 
-        payment_link = f"{os.getenv('WEB_APP_URL')}/support/{self.user_data['profile_id']}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.user_data['profile_id']}"
         await interaction.followup.send(f"To boost the profile go to the link below: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
