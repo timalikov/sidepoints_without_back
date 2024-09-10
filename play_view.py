@@ -1,4 +1,5 @@
 import discord
+from services.messages.interaction import send_interaction_message
 from sql_forum_posted import ForumUserPostDatabase
 from discord.ui import View
 from config import MAIN_GUILD_ID, FORUM_ID, APP_CHOICES, LEADER_BOT_CHANNEL, CATEGORY_TO_TAG, FORUM_ID_LIST, LEADER_BOT_CHANNEL_LIST
@@ -8,6 +9,7 @@ import os
 from bot_instance import get_bot
 from sql_profile import log_to_database
 from database.psql_services import Services_Database
+from views.boost_view import BoostView
 
 bot = get_bot()
 load_dotenv()
@@ -112,3 +114,13 @@ class PlayView(View):
                 await interaction.followup.send(f"Chat with the user: {chat_link}", ephemeral=True)
             else:
                 await interaction.followup.send(f"Chat with the user: {chat_link}", ephemeral=True)
+
+    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_user")
+    async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
+        if self.service:
+            payment_link = f"{os.getenv('WEB_APP_URL')}/support/{self.service['profile_id']}"
+            await send_interaction_message(interaction=interaction, message=f"To boost the profile go to the link below: {payment_link}")
+        else:
+            await send_interaction_message(interaction=interaction, message="No user found to boost.")
+            print(f"Boost button clicked, but no service found for user {interaction.user.id}")
