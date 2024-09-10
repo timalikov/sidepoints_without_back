@@ -10,4 +10,4 @@ if __name__ == "__main__":
     bot_thread.start()
     flask_app = create_app()
     CORS(flask_app)  # This will enable CORS for all routes
-    flask_app.run(host='localhost', port=PORT_ID, debug=True)
+    flask_app.run(host='0.0.0.0', port=PORT_ID)
