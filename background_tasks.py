@@ -6,8 +6,8 @@ from bot_instance import get_bot
 from discord.ext import tasks
 from config import MAIN_GUILD_ID
 from models.forum import get_and_recreate_forum
-from sql_profile import Profile_Database
-from database.psql_services import Services_Database
+from database.dto.sql_profile import Profile_Database
+from database.dto.psql_services import Services_Database
 from views.session_check import SessionCheckView
 
 main_guild_id = MAIN_GUILD_ID

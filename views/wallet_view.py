@@ -1,15 +1,15 @@
 import discord
 
-from database.psql_wallets import Wallets_Database
-from sql_forum_posted import ForumUserPostDatabase
+from database.dto.psql_wallets import Wallets_Database
+from database.dto.sql_forum_posted import ForumUserPostDatabase
 from discord.ui import View
 from config import APP_CHOICES
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed_2
 import os
 from bot_instance import get_bot
-from sql_profile import log_to_database
-from database.psql_services import Services_Database
+from database.dto.sql_profile import log_to_database
+from database.dto.psql_services import Services_Database
 from web3_interaction.balance_checker import get_usdt_balance
 
 bot = get_bot()

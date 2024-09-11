@@ -1,14 +1,14 @@
 import discord
 from services.messages.interaction import send_interaction_message
-from sql_forum_posted import ForumUserPostDatabase
+from database.dto.sql_forum_posted import ForumUserPostDatabase
 from discord.ui import View
 from config import MAIN_GUILD_ID, FORUM_ID, APP_CHOICES, LEADER_BOT_CHANNEL, CATEGORY_TO_TAG, FORUM_ID_LIST, LEADER_BOT_CHANNEL_LIST
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed
 import os
 from bot_instance import get_bot
-from sql_profile import log_to_database
-from database.psql_services import Services_Database
+from database.dto.sql_profile import log_to_database
+from database.dto.psql_services import Services_Database
 
 bot = get_bot()
 load_dotenv()

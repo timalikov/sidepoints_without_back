@@ -5,6 +5,7 @@ from config import (
     FIRST_LIMIT_CHECK_MINUTES,
     SECOND_LIMIT_CHECK_MINUTES,
 )
+from database.dto.psql_reaction import ReactionDTO
 
 
 class CheckReactionView(discord.ui.View):
@@ -35,7 +36,12 @@ class CheckReactionView(discord.ui.View):
     ) -> None:
         text_message: str = ""
         if reaction_seconds < FIRST_LIMIT_CHECK_MINUTES * 60:
-            # send_reaction_data(created_at, reaction_seconds, self.kicker.id)
+            reaction_dto = ReactionDTO()
+            await reaction_dto.add_reaction(
+                discord_id=interaction.user.id,
+                seconds=int(reaction_seconds),
+                created_at=self.created_at
+            )
             text_message = (
                 "Great! You've successfully passed "
                 "the availability check. Keep up the "

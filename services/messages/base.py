@@ -5,7 +5,7 @@ from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID
 
 from views.access_reject import AccessRejectView
 from views.check_reaction import CheckReactionView
-from database.psql_services import Services_Database
+from database.dto.psql_services import Services_Database
 from models.enums import StatusCodes
 from models.public_channel import find_channel_by_category_and_name
 

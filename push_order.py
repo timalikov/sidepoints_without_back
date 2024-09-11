@@ -1,11 +1,11 @@
 import asyncio
 import time
 from bot_instance import get_bot
-from sql_profile import Profile_Database
-from sql_order import Order_Database
+from database.dto.sql_profile import Profile_Database
+from database.dto.sql_order import Order_Database
 import random
 from getServices import DiscordServiceFetcher
-from sql_subscriber import Subscribers_Database
+from database.dto.sql_subscriber import Subscribers_Database
 from message_constructors import create_profile_embed
 from button_constructors import AcceptView, ButtonAcceptView
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID

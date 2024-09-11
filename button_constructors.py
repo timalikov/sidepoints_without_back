@@ -1,12 +1,12 @@
 import os
 from datetime import datetime
 from bot_instance import get_bot
-# from sql_profile import Profile_Database
+# from database.dto.sql_profile import Profile_Database
 from message_constructors import create_profile_embed
 import discord
 
 from serializers.profile_serializer import serialize_profile_data
-from sql_forum_posted import ForumUserPostDatabase
+from database.dto.sql_forum_posted import ForumUserPostDatabase
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
 bot = get_bot()
 
