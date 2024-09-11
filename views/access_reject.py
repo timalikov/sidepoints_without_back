@@ -7,6 +7,7 @@ from bot_instance import get_bot
 
 from models.private_channel import create_private_discord_channel
 from services.messages.interaction import send_interaction_message
+import aiohttp
 
 bot = get_bot()
 
@@ -67,9 +68,11 @@ class AccessRejectView(discord.ui.View):
             serviceName=self.service_name,
             kicker_username=self.kicker_username
         )
-        await send_interaction_message(interaction=interaction, message="Enjoy!")
-        await session_start_check.start(customer=self.customer, kicker=self.kicker)
-        await session_delivery_check.start(customer=self.customer, kicker=self.kicker)
+        if is_success:
+            await send_interaction_message(interaction=interaction, message="Enjoy!")
+            await session_start_check.start(customer=self.customer, kicker=self.kicker)
+            await session_delivery_check.start(customer=self.customer, kicker=self.kicker)
+            return True, channel
 
     @discord.ui.button(
         label="Reject",
@@ -82,6 +85,16 @@ class AccessRejectView(discord.ui.View):
         interaction: discord.Interaction,
         button: discord.ui.Button
     ) -> None:
-        await send_interaction_message(interaction=interaction, message="Order is cancel!")
-        await self.customer.send(f"Kicker {self.kicker.name} caneled the order!")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_refund_dev",
+                json={"purchaseId": 1}
+            ) as response:
+                if response.status == 200:
+                    await send_interaction_message(interaction=interaction, message="Order is canceled!")
+                    await self.customer.send(f"Kicker {self.kicker.name} canceled the order!")
+                    self.already_pressed = True
+                else:
+                    print(response.status)
+                    await send_interaction_message(interaction=interaction, message="Failed to cancel the order.")
         self.already_pressed = True

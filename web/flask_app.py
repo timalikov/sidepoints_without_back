@@ -83,8 +83,9 @@ def health_check():
     return jsonify({"status": "healthy"}), 200
 
 
-@app.route('/discord_ap/order/confirm', methods=['POST'])
+@app.route('/discord_api/order/confirm', methods=['POST'])
 async def handle_confirm_order():
+    print("request has come")
     data: dict = request.json
     channelName: str = data.get('channelName')
     customerId: str = data.get("customerId")

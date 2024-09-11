@@ -67,7 +67,8 @@ async def send_confirm_order_message(
     customer: discord.User,
     kicker: discord.User,
     kicker_username: str,
-    service_name: str = ""
+    service_name: str = "",
+    purchase_id: int
 ) -> StatusCodes:
     message_embend = discord.Embed(
         colour=discord.Colour.dark_blue(),
@@ -85,12 +86,18 @@ async def send_confirm_order_message(
         customer=customer,
         kicker_username=kicker_username,
         channel_name=channel_name,
-        service_name=service_name
+        service_name=service_name,
+        purchase_id=purchase_id
     )
-    await kicker.send(
-        view=view,
-        embed=message_embend
-    )
+    try:
+        print("Sending message to kicker")
+        message = await kicker.send(
+            view=view,
+            embed=message_embend
+        )
+        return True, message.channel.id
+    except Exception as e:
+        return False, f"Failed to send message: {str(e)}"
 
 
 async def send_reaction_message() -> StatusCodes:

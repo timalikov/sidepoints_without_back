@@ -1,7 +1,11 @@
 from typing import Any, Callable
+from bot_instance import get_bot
 import discord
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.messages.interaction import send_interaction_message
+import aiohttp
+
+bot = get_bot()
 
 class RefundReplaceView(discord.ui.View):
     def __init__(
@@ -39,14 +43,24 @@ class RefundReplaceView(discord.ui.View):
 
         # Refund logic
 
-        await send_interaction_message(
-            interaction=interaction,
-            message=f"Okay your payment will be refunded soon."
-        )
-        try:
-            await self.kicker.send(f"User <@{self.customer.id}> refunded the payment!")
-        except discord.HTTPException:
-            print(f"Failed to send message to kicker {self.kicker.id}")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_refund_dev",
+                json={"purchaseId": 1}
+            ) as response:
+                if response.status == 200:
+                    await send_interaction_message(
+                        interaction=interaction,
+                        message=f"Okay your payment will be refunded soon."
+                    )
+                    try:
+                        await self.kicker.send(f"User <@{self.customer.id}> refunded the payment!")
+                    except discord.HTTPException:
+                        print(f"Failed to send message to kicker {self.kicker.id}")
+                else:
+                    print(response.status)
+                    await send_interaction_message(interaction=interaction, message="Failed to cancel the order.")
+
 
 
     @discord.ui.button(
