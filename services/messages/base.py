@@ -32,7 +32,7 @@ async def send_kickers_reaction_test() -> StatusCodes:
     return StatusCodes.SUCCESS
 
 
-async def send_boost_message(*, image_url: str) -> StatusCodes:
+async def send_boost_message(*, image_url: str, message: str) -> StatusCodes:
     guild = bot.get_guild(MAIN_GUILD_ID)
     channel = guild.get_channel(BOOST_CHANNEL_ID)
     if not channel:
@@ -44,7 +44,8 @@ async def send_boost_message(*, image_url: str) -> StatusCodes:
         return StatusCodes.BAD, "Channel not found"
     try:
         await channel.send(
-            embed=discord.Embed().set_image(url=image_url)
+            embed=discord.Embed().set_image(url=image_url),
+            content=f"@everyone {message}"
         )
     except discord.DiscordException:
         return StatusCodes.BAD, "Bot do not have right to send message!"
