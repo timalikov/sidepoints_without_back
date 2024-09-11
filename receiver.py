@@ -10,9 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-QUEUE_URL = "https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_bot_deliveries.fifo"
-QUEUE_NOTIFICATION_URL = "https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_bot_new_purchases.fifo"
-QUEUE_BOOST_NOTIFICATION = "https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_bot_boost_messages.fifo"
+TEST = os.getenv('RECEIVER_TEST')
 
 
 class bcolors:
@@ -36,7 +34,8 @@ class Receiver:
             aws_secret_access_key="diSyU0WCuXpBtKlQIP0rgyzOGVU2zI6W5Qvdo27Q",
             region_name='eu-central-1'
         )
-        self.queue_host = "https://sqs.eu-central-1.amazonaws.com/"
+        self.queue_router = "sidekick_dev_bot_" if TEST else "sidekick_bot_"
+        self.queue_host = f"https://sqs.eu-central-1.amazonaws.com/104037811570/{self.queue_router}"
         self.queues = {}
 
     def receive_messages(self, queue: str):
@@ -88,7 +87,7 @@ class Receiver:
             )
             for q, func in self.queues.items()
         ]
-        print("Tasks started!")
+        print(f"{bcolors.OKBLUE}Start recevive:{bcolors.ENDC} {self.queue_host}")
         for task in tasks:
             task.start()
         for task in tasks:
@@ -113,19 +112,19 @@ def send_request(url: str, message_body: dict) -> requests.Response:
     return False
 
 
-@sqs_receiver.receive(queue="104037811570/sidekick_bot_deliveries.fifo")
+@sqs_receiver.receive(queue="deliveries.fifo")
 def send_message_to_endpoint(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/create_private_channel"
     _ = send_request(url, message_body)
 
 
-@sqs_receiver.receive(queue="104037811570/sidekick_bot_new_purchases.fifo")
+@sqs_receiver.receive(queue="new_purchases.fifo")
 def send_notification_to_endpoint(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/notification"
     _ = send_request(url, message_body)
 
 
-@sqs_receiver.receive(queue="104037811570/sidekick_bot_boost_messages.fifo")
+@sqs_receiver.receive(queue="boost_messages.fifo")
 def send_boost_notification(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/boost"
     print(message_body)
