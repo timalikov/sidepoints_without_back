@@ -61,11 +61,13 @@ def reaction_test():
 async def boost_compleate():
     data: dict = request.json
     image_url = data.get("imageUrl")
+    message = data.get("message", "")
     if not image_url:
         return jsonify({"error": "Missing field: image_url."}), 400
     future = asyncio.run_coroutine_threadsafe(
         send_boost_message(
-            image_url=image_url
+            image_url=image_url,
+            message=message
         ),
         bot.loop
     )
