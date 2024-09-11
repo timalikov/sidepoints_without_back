@@ -3,7 +3,7 @@ import os
 import discord
 
 from button_constructors import ShareButton, ChatButton
-from sql_forum_posted import ForumUserPostDatabase
+from database.dto.sql_forum_posted import ForumUserPostDatabase
 from serializers.profile_serializer import serialize_profile_data
 
 

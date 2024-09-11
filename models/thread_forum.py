@@ -2,7 +2,7 @@ from typing import Union
 
 import discord
 
-from sql_forum_posted import ForumUserPostDatabase 
+from database.dto.sql_forum_posted import ForumUserPostDatabase 
 
 
 async def find_thread_in_forum(

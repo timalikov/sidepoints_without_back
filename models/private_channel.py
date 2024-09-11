@@ -4,7 +4,7 @@ import asyncio
 from bot_instance import get_bot
 from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID
 from message_tasks import start_all_messages
-from database.psql_services import Services_Database
+from database.dto.psql_services import Services_Database
 from background_tasks import (
     send_message_after_2_min,
     send_message_after_5_min,

@@ -11,7 +11,7 @@ from services.messages.base import (
     send_kickers_reaction_test
 )
 from models.private_channel import create_private_discord_channel
-from sql_challenge import SQLChallengeDatabase
+from database.dto.sql_challenge import SQLChallengeDatabase
 from bot_instance import get_bot
 
 import discord

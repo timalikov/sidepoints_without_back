@@ -7,15 +7,15 @@ from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles
 from services.messages.base import send_confirm_order_message
-from sql_subscriber import Subscribers_Database
-from sql_profile import log_to_database
-from database.psql_services import Services_Database
+from database.dto.sql_subscriber import Subscribers_Database
+from database.dto.sql_profile import log_to_database
+from database.dto.psql_services import Services_Database
 
 from models.forum import get_or_create_forum
 import os
 
 from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN
-from sql_order import Order_Database
+from database.dto.sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
