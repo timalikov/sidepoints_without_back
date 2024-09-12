@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from message_constructors import create_profile_embed_2
 import os
 from bot_instance import get_bot
-from sql_profile import log_to_database
-from database.psql_services import Services_Database
+from database.dto.sql_profile import log_to_database
+from database.dto.psql_services import Services_Database
 from views.share_command_view import ShareCommandView
 
 bot = get_bot()

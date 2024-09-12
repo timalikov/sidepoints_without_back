@@ -11,6 +11,7 @@ from models.thread_forum import find_thread_in_forum
 from models.post_forum import Post_FORUM
 from serializers.profile_serializer import serialize_profile_data
 from database.fact_list import facts
+from database.dto.base import BasePsqlDTO
 
 
 APP_CHOICES = {
@@ -24,12 +25,7 @@ APP_CHOICES = {
     "Virtual Date": "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"
 }
 
-class Services_Database:
-    HOST = HOST_PSQL
-    PORT = PORT_PSQL
-    USER = USER_PSQL
-    PASSWORD = PASSWORD_PSQL
-    DATABASE = DATABASE_PSQL
+class Services_Database(BasePsqlDTO):
     CHUNK_SIZE = 10  # Number of rows to fetch at a time
     BASE_QUERY = "SELECT * FROM discord_services WHERE profile_score >= 100"
 
@@ -38,24 +34,6 @@ class Services_Database:
         self.current_chunk = []
         self.app_choice = app_choice
         self.user_name = user_name
-
-    async def get_pool(self):
-        return await asyncpg.create_pool(
-            host=self.HOST,
-            port=self.PORT,
-            user=self.USER,
-            password=self.PASSWORD,
-            database=self.DATABASE,
-            min_size=1,
-            max_size=20
-        )
-
-    @asynccontextmanager
-    async def get_connection(self):
-        pool = await self.get_pool()
-        async with pool.acquire() as conn:
-            yield conn
-        await pool.close()
 
     async def fetch_chunk(self):
         async with self.get_connection() as conn:

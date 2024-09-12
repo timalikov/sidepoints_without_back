@@ -1,6 +1,5 @@
 from typing import Any, Callable
 from bot_instance import get_bot
-from database.psql_services import Services_Database
 import discord
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.messages.interaction import send_interaction_message
@@ -34,7 +33,7 @@ class RefundReplaceView(discord.ui.View):
         self.stop_task = stop_task if stop_task is not None else lambda: None
         self.already_pressed = False
         self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
-        self.services_db = Services_Database()
+        # self.services_db = Services_Database()
         # self.service = self.services_db.get_services_by_username(kicker.name)
 
         self.timeout_refund_handler = TimeoutRefundHandler(
@@ -93,10 +92,10 @@ class RefundReplaceView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
 
         await self.refund_handler.process_refund(
-            interaction=interaction,
+            interaction=None,
             success_message="Your funds will be refunded to your wallet soon! Until then, you can search for a new kicker.",
             kicker_message=f"User <@{self.customer.id}> refunded the payment!",
-            customer_message=None,
+            customer_message=f"Your funds will be refunded to your wallet soon! Until then, you can search for a new kicker.",
             channel=self.channel
         )
 

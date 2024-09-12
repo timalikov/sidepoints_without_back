@@ -4,7 +4,7 @@ from button_constructors import StopButton
 from config import MESSAGES
 import discord
 from discord.ext import tasks
-from database.psql_services import Services_Database
+from database.dto.psql_services import Services_Database
 
 
 async def choose_random_fact():

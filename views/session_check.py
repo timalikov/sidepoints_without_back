@@ -32,7 +32,7 @@ class SessionCheckView(discord.ui.View):
         self.sqs_client = SQSClient()
 
         self.timeout_refund_handler = TimeoutRefundHandler(
-            timeout_seconds= self.timeout, # 60 * self.timeout,
+            timeout_seconds= 60 * self.timeout,
             on_timeout_callback=self.session_successful  
         )
         
@@ -108,7 +108,7 @@ class SessionCheckView(discord.ui.View):
             kicker=self.kicker,
             purchase_id=self.purchase_id,
             sqs_client=self.sqs_client,
-            channel=self.channel,
+            # channel=self.channel,
             invite_url=self.invite_url
         )
         embed_message = discord.Embed(

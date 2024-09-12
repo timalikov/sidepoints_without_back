@@ -3,8 +3,8 @@ from typing import Optional
 import discord
 from discord import ForumTag
 
-from sql_forum_server import ForumsOfServerDatabase
-from database.psql_services import Services_Database
+from database.dto.sql_forum_server import ForumsOfServerDatabase
+from database.dto.psql_services import Services_Database
 from config import FORUM_NAME
 
 

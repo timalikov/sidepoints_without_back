@@ -6,7 +6,7 @@ import discord
 import config
 from bot_instance import get_bot
 
-from models.private_channel import create_private_discord_channel
+from models.private_channel import create_channel_for_replace, create_private_discord_channel
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
 from services.refund_replace_message_manager import RefundReplaceManager
@@ -46,7 +46,7 @@ class AccessRejectView(discord.ui.View):
         self.refund_manager = RefundReplaceManager(kicker=kicker, refund_handler=self.refund_handler)
 
         self.timeout_refund_handler = TimeoutRefundHandler(
-            timeout_seconds=10,
+            timeout_seconds=60,
             on_timeout_callback=self.auto_reject  
         )
 
@@ -141,12 +141,20 @@ class AccessRejectView(discord.ui.View):
                 "You have rejected the session. The session is no longer valid."
             )
         )
+        
+        channel_url = await create_channel_for_replace(
+            bot_instance=bot,
+            guild_id=config.MAIN_GUILD_ID,
+            customer=self.customer
+        )
+
         view = RefundReplaceView(
             customer=self.customer,
             kicker=self.kicker,
             purchase_id=self.purchase_id,
             sqs_client=self.sqs_client,
             timeout=5,
+            invite_url=channel_url
         )
         embed_message = discord.Embed(
             title=f"Sorry, the kicker {self.kicker.name} has not accepted the session.",

@@ -1,7 +1,7 @@
 import discord
-# from sql_challenge import SQLChallengeDatabase  # Adjusted import to use SQLChallengeDatabase
-from sql_forum_posted import ForumUserPostDatabase
-# from sql_profile import Profile_Database
+# from database.dto.sql_challenge import SQLChallengeDatabase  # Adjusted import to use SQLChallengeDatabase
+from database.dto.sql_forum_posted import ForumUserPostDatabase
+# from database.dto.sql_profile import Profile_Database
 from discord.ui import View
 # from datetime import datetime
 from config import APP_CHOICES, HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL
@@ -10,8 +10,8 @@ from message_constructors import create_profile_embed_2
 import os
 from bot_instance import get_bot
 from getServices import DiscordServiceFetcher
-from sql_profile import log_to_database
-from database.psql_services import Services_Database
+from database.dto.sql_profile import log_to_database
+from database.dto.psql_services import Services_Database
 
 bot = get_bot()
 load_dotenv()

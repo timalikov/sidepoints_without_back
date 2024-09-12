@@ -7,7 +7,7 @@ from services.messages.customer_support_messenger import send_message_to_custome
 from services.sqs_client import SQSClient
 from views.access_reject import AccessRejectView
 from views.check_reaction import CheckReactionView
-from database.psql_services import Services_Database
+from database.dto.psql_services import Services_Database
 from models.enums import StatusCodes
 from models.public_channel import find_channel_by_category_and_name
 

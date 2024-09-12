@@ -8,9 +8,9 @@ from discord.ext import tasks
 from config import MAIN_GUILD_ID
 from models.forum import get_and_recreate_forum
 from services.sqs_client import SQSClient
-from sql_profile import Profile_Database
-from database.psql_services import Services_Database
 from views.refund_replace import RefundReplaceView
+from database.dto.sql_profile import Profile_Database
+from database.dto.psql_services import Services_Database
 from views.session_check import SessionCheckView
 
 main_guild_id = MAIN_GUILD_ID
@@ -55,7 +55,7 @@ async def session_delivery_check(
     invite_url: str
 ):
     print("session_delivery_check starting to send message")
-    await asyncio.sleep(10)#60 * 60)
+    await asyncio.sleep(60)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=f"Hey @{customer.name}",
@@ -70,7 +70,7 @@ async def session_delivery_check(
         purchase_id=purchase_id,
         channel=channel,
         invite_url=invite_url,
-        timeout=20
+        timeout=60
     )
     await customer.send(
         view=view,

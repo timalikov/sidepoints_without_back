@@ -22,14 +22,17 @@ class RefundReplaceManager:
             for item in self.previous_view.children:
                 if isinstance(item, discord.ui.Button):
                     item.disabled = True
-            await self.previous_message.edit(view=self.previous_view)
+            try:
+                await self.previous_message.edit(view=self.previous_view)
+            except Exception as e:
+                print(f"Failed to edit previous message: {e}")
 
         view = RefundReplaceView(
             customer=customer,
             kicker=kicker,
             purchase_id=purchase_id,
             sqs_client=SQSClient(),
-            stop_task=self._handle_user_interaction 
+            stop_task=self.stop_event.set 
         )
 
         embed = discord.Embed(
@@ -41,11 +44,7 @@ class RefundReplaceManager:
         self.previous_message = await customer.send(embed=embed, view=view) 
         self.previous_view = view
 
-    async def _handle_user_interaction(self):
-        self.user_interacted = True
-        self.stop_event.set()
-
-    @tasks.loop(seconds=20, count=5) 
+    @tasks.loop(seconds=60, count=5) 
     async def periodic_refund_replace(self, customer: discord.User, kicker: discord.User, purchase_id: int):
         if self.stop_event.is_set():  
             print("periodic_refund_replace task stopped.")
