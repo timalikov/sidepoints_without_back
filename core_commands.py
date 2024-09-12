@@ -182,16 +182,6 @@ async def boost(interaction: discord.Interaction, username: str):
     else:
         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
 
-@bot.tree.command(name="sss", description="TEST")
-async def test_sss(interaction: discord.Interaction):
-    me: discord.User = bot.get_user(836655813048402011)
-    await send_confirm_order_message(
-        channel_name="AAA",
-        customer=me,
-        kicker=me,
-        kicker_username="Billi Jin",
-        purchase_id=1
-    )
 
 @bot.event
 async def on_ready():

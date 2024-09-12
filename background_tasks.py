@@ -22,8 +22,7 @@ async def session_start_check(
     purchase_id: int,
     channel: Any
 ):
-    print("session_start_check starting to send message")
-    await asyncio.sleep(10)
+    await asyncio.sleep(60 * 5)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=f"Hey @{customer.name}",
@@ -52,8 +51,7 @@ async def session_delivery_check(
     purchase_id: int,
     channel: Any
 ):
-    print("session_delivery_check starting to send message")
-    await asyncio.sleep(30)
+    await asyncio.sleep(60 * 50)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=f"Hey @{customer.name}",
