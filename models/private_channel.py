@@ -67,7 +67,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     
     kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
 
-    manager_message = (f"Hey! Session between kicker: @{kicker_username} and {challenger.name} has started. Please check this private channel: {invite.url}.")
+    manager_message = (f"Hey! Session between kicker: <@{kicker.id}> and <@{challenger.id}> has started. Please check this private channel: {invite.url}.")
 
     user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!\n" +
                     f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
