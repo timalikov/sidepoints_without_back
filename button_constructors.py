@@ -146,3 +146,18 @@ class StopButton(discord.ui.View):
             print("Failed to stop all notifications")
 
     
+class InformKickerButton(discord.ui.View):
+    def __init__(self, kicker: discord.User):
+        super().__init__(timeout=None)
+        self.kicker = kicker
+        self.informed = False
+
+    @discord.ui.button(label="Inform Kicker", style=discord.ButtonStyle.primary, custom_id="inform_kicker_button")
+    async def inform_kicker(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not self.informed:
+            button.label = "Kicker Informed"
+            button.style = discord.ButtonStyle.success
+            button.disabled = True
+            self.informed = True
+
+            await interaction.response.edit_message(view=self)

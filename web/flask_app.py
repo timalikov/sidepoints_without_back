@@ -92,6 +92,7 @@ async def handle_confirm_order():
     serviceName = data.get("serviceName")
     kickerId: str = data.get("kickerId")
     kickerUsername: str = data.get("kickerUsername")
+    purchaseId: str = data.get("purchaseId")
     if channelName:
         channel_name = f"private-channel-{channelName}"
         challenger: discord.User = bot.get_user(int(customerId))
@@ -104,16 +105,17 @@ async def handle_confirm_order():
                 customer=challenger,
                 kicker=challenged,
                 kicker_username=kickerUsername,
-                service_name=serviceName
+                service_name=serviceName,
+                purchase_id=purchaseId
             ),
             bot.loop
         )
         success, response = future.result()  # This blocks until the coroutine completes
 
         if success:
-            return jsonify({"message": "Private channel created", "channel_id": response.id}), 200
+            return jsonify({"message": "Private channel created", "channel_id": response}), 200
         else:
-            return jsonify({"error": response.id}), 400
+            return jsonify({"error": response}), 400
     else:
         return jsonify({"error": "Challenge ID not provided"}), 400
 

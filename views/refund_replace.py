@@ -3,7 +3,7 @@ from bot_instance import get_bot
 import discord
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.messages.interaction import send_interaction_message
-import aiohttp
+from services.refund_handler import RefundHandler
 
 bot = get_bot()
 
@@ -12,24 +12,39 @@ class RefundReplaceView(discord.ui.View):
         self,
         *, 
         customer: discord.User,
-        kicker: discord.User
+        kicker: discord.User,
+        purchase_id: int,
+        sqs_client: Any,
+        channel: Any
     ) -> None:
         super().__init__(timeout=None)
         self.customer = customer
         self.kicker = kicker
+        self.purchase_id = purchase_id
+        self.sqs_client = sqs_client
+        self.channel = channel
         self.already_pressed = False
+        self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
 
     def check_already_pressed(func: Callable) -> Callable:
         async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
             if not self.already_pressed:
                 result: Any = await func(self, interaction, *args, **kwargs)
+
                 self.already_pressed = True
+                for item in self.children:
+                    if isinstance(item, discord.ui.Button):
+                        item.disabled = True
+                
+                await interaction.message.edit(view=self)
+
                 return result
             else:
                 await send_interaction_message(
                     interaction=interaction,
-                    message="Button already pressed"
+                    message="Button has already been pressed."
                 )
+            
         return decorator
 
     @discord.ui.button(
@@ -41,25 +56,13 @@ class RefundReplaceView(discord.ui.View):
     async def refund_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
 
-        # Refund logic
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_refund_dev",
-                json={"purchaseId": 1}
-            ) as response:
-                if response.status == 200:
-                    await send_interaction_message(
-                        interaction=interaction,
-                        message=f"Okay your payment will be refunded soon."
-                    )
-                    try:
-                        await self.kicker.send(f"User <@{self.customer.id}> refunded the payment!")
-                    except discord.HTTPException:
-                        print(f"Failed to send message to kicker {self.kicker.id}")
-                else:
-                    print(response.status)
-                    await send_interaction_message(interaction=interaction, message="Failed to cancel the order.")
+        await self.refund_handler.process_refund(
+            interaction=interaction,
+            success_message="Okay your payment will be refunded soon.",
+            kicker_message=f"User <@{self.customer.id}> refunded the payment!",
+            customer_message=None,
+            channel=self.channel
+        )
 
 
 
@@ -71,6 +74,14 @@ class RefundReplaceView(discord.ui.View):
     @check_already_pressed
     async def replace_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
+
+        await self.refund_handler.process_refund(
+            interaction=interaction,
+            success_message="Okay your payment will be refunded soon.",
+            kicker_message=f"User <@{self.customer.id}> refunded the payment!",
+            customer_message=None,
+            channel=self.channel
+        )
 
         await send_message_to_customer_support(
             bot=bot,

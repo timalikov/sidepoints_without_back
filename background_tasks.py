@@ -1,6 +1,7 @@
 import asyncio
 import csv
 from datetime import datetime, timezone, timedelta
+from typing import Any
 import discord
 from bot_instance import get_bot
 from discord.ext import tasks
@@ -18,8 +19,11 @@ async def session_start_check(
     *,
     customer: discord.User,
     kicker: discord.User,
+    purchase_id: int,
+    channel: Any
 ):
-    await asyncio.sleep(300)
+    print("session_start_check starting to send message")
+    await asyncio.sleep(10)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=f"Hey @{customer.name}",
@@ -30,7 +34,10 @@ async def session_start_check(
 
     view = SessionCheckView(
         customer=customer,
-        kicker=kicker
+        kicker=kicker,
+        purchase_id=purchase_id,
+        channel=channel,
+        session_delivery_check=session_delivery_check
     )
     await customer.send(
         view=view,
@@ -42,19 +49,25 @@ async def session_delivery_check(
     *,
     customer: discord.User,
     kicker: discord.User,
+    purchase_id: int,
+    channel: Any
 ):
-    await asyncio.sleep(3600)
+    print("session_delivery_check starting to send message")
+    await asyncio.sleep(30)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=f"Hey @{customer.name}",
         description=(
-            f"Has your session with kicker @{kicker.name} finished?"
+            f"Has your session with kicker @{kicker.name} delivered?"
         )       
     )
 
     view = SessionCheckView(
         customer=customer,
-        kicker=kicker
+        kicker=kicker,
+        purchase_id=purchase_id,
+        channel=channel,
+        session_delivery_check=None
     )
     await customer.send(
         view=view,
