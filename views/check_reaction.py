@@ -34,20 +34,18 @@ class CheckReactionView(discord.ui.View):
         interaction: discord.Integration,
         reaction_seconds: float
     ) -> None:
+        reaction_time: int = None
         text_message: str = ""
-        if reaction_seconds < FIRST_LIMIT_CHECK_MINUTES * 60:
-            reaction_dto = ReactionDTO()
-            await reaction_dto.add_reaction(
-                discord_id=interaction.user.id,
-                seconds=int(reaction_seconds),
-                created_at=self.created_at
-            )
+        reaction_dto = ReactionDTO()
+        if reaction_seconds < FIRST_LIMIT_CHECK_MINUTES * 1:
+            reaction_time = int(reaction_seconds)
             text_message = (
                 "Great! You've successfully passed "
                 "the availability check. Keep up the "
                 "quick responses!"
             )
-        elif reaction_seconds < SECOND_LIMIT_CHECK_MINUTES * 60:
+        elif reaction_seconds < SECOND_LIMIT_CHECK_MINUTES * 1:
+            reaction_time = int(reaction_seconds)
             text_message = (
                 "Oops! You clicked the button too late. "
                 "Remember, quick response times help "
@@ -60,6 +58,11 @@ class CheckReactionView(discord.ui.View):
                 "sure to be responsive for a better "
                 "service experience"
             )
+        await reaction_dto.add_reaction(
+            discord_id=interaction.user.id,
+            seconds=reaction_time,
+            created_at=self.created_at
+        )
         kwargs = self._get_kwargs_for_send_message(
             text=text_message
         )
