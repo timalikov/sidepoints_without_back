@@ -3,6 +3,7 @@ import discord
 from bot_instance import get_bot
 from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID
 
+from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.sqs_client import SQSClient
 from views.access_reject import AccessRejectView
 from views.check_reaction import CheckReactionView
@@ -71,13 +72,33 @@ async def send_confirm_order_message(
     service_name: str = "",
     purchase_id: int
 ) -> StatusCodes:
+    services_db = Services_Database()
+    service = await services_db.get_services_by_username(kicker_username)
+    if service:
+        service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
+
+    
+    cs_team_message = (
+        "**Session has been purchased**\n"
+        f"User: <@{customer.id}>\n"
+        f"Kicker: <@{kicker.id}>\n"
+        # f"Service: {service["service_category_name"]}\n"
+        # f"Price: {service["service_price"]}\n"
+    )
+    await send_message_to_customer_support(bot, cs_team_message)
+
+    await customer.send(
+        f"Your order has been sent to kicker <@{kicker.id}>.\n"
+        "If there is no response within 1 minute, you will be able to replace the kicker, or refund the money."
+    )
+
     message_embend = discord.Embed(
         colour=discord.Colour.dark_blue(),
-        title=f"Hey @{kicker.name}, @{customer.name} has purchased {service_name} session with you!!",
+        title=f"Your service has been purchased:",
         description=(
-            "Please click on accept, if you want to start a session with the user. "
-            "In case you click on reject or do not respond within 15 minutes, "
-            "the session will be canceled and funds will be refunded to the user."
+            f"Service: {service_name}\n" 
+            # f"Price: {service['service_price']}\n"
+            "Please accept or reject the session"
         )       
     )
     
@@ -92,11 +113,6 @@ async def send_confirm_order_message(
         purchase_id=purchase_id,
         sqs_client=sqs_client
     )
-
-    await customer.send(
-        f"Dear {customer.name}, your purchase request has been sent to the kicker. A private voice room between two of you will be created once he/she accepts the order. \n"
-        "In case the order has been rejected or left with no response for 15 minutes, the funds will be refunded to you."
-        )
 
     try:
         view.message = await kicker.send(

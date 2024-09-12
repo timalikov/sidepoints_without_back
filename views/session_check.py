@@ -1,8 +1,10 @@
+import asyncio
 from typing import Any, Callable
 from bot_instance import get_bot
 import discord
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
+from services.timeout_refund_handler import TimeoutRefundHandler
 from views.refund_replace import RefundReplaceView
 
 bot = get_bot()
@@ -15,7 +17,8 @@ class SessionCheckView(discord.ui.View):
         kicker: discord.User,
         purchase_id: int,    
         channel: Any,
-        session_delivery_check: Callable
+        invite_url: str,
+        timeout: int = 5,
         
     ) -> None:
         super().__init__(timeout=None)
@@ -23,9 +26,17 @@ class SessionCheckView(discord.ui.View):
         self.kicker = kicker
         self.purchase_id = purchase_id
         self.channel = channel
-        self.session_delivery_check = session_delivery_check
+        self.invite_url = invite_url
+        self.timeout = timeout
         self.already_pressed = False
         self.sqs_client = SQSClient()
+
+        self.timeout_refund_handler = TimeoutRefundHandler(
+            timeout_seconds= self.timeout, # 60 * self.timeout,
+            on_timeout_callback=self.session_successful  
+        )
+        
+        asyncio.create_task(self.timeout_refund_handler.start())
 
     def check_already_pressed(func: Callable) -> Callable:
         async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
@@ -47,6 +58,16 @@ class SessionCheckView(discord.ui.View):
                 )
             
         return decorator
+
+    async def session_successful(self) -> None:
+        print("session_successful after 1 hour")
+        for item in self.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
+
+        await self.customer.send(f"Thank you for using Sidekick!\n Hope you enjoyed the session with <@{self.kicker.id}>.")
+        await self.kicker.send("Thank you for your service! The funds will be transferred to your wallet soon!")
+        
         
     @discord.ui.button(
         label="Yes",
@@ -65,11 +86,9 @@ class SessionCheckView(discord.ui.View):
 
         await send_interaction_message(
             interaction=interaction,
-            message="Okay, enjoy your session!"
+            message=f"Thank you for using Sidekick!\n Hope you enjoyed the session with <@{self.kicker.id}>."
         )
-
-        if self.session_delivery_check:
-            await self.session_delivery_check.start(customer=self.customer, kicker=self.kicker, purchase_id=self.purchase_id, channel=self.channel)
+        await self.kicker.send("Thank you for your service! The funds will be transferred to your wallet soon!")
 
     @discord.ui.button(
         label="No",
@@ -81,7 +100,7 @@ class SessionCheckView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         await send_interaction_message(
             interaction=interaction,
-            message="Okay, please select refund or replace kicker."
+            message="We are sorry to hear about that!\n Would you like a refund or customer support team will help you find an online kicker?"
         )
 
         view = RefundReplaceView(
@@ -89,10 +108,13 @@ class SessionCheckView(discord.ui.View):
             kicker=self.kicker,
             purchase_id=self.purchase_id,
             sqs_client=self.sqs_client,
-            channel=self.channel
+            channel=self.channel,
+            invite_url=self.invite_url
         )
         embed_message = discord.Embed(
             colour=discord.Colour.blue(),
             description="Would you like a refund or replace the kicker?"
         )
-        await self.customer.send(content=None, embed=embed_message, view=view)
+
+        await self.kicker.send(f"User <@{self.customer.id}> has stated that the session was not delivered. Your session is no longer valid. Customer Support officer will reach out to you shortly.")
+        await self.customer.send(view=view, embed=embed_message)

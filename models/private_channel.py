@@ -66,15 +66,27 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     )
     
     await start_all_messages(channel)
-    
-    kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
+
+    kicker_message = (
+        "You session has started:\n"
+        f"User: <@{challenger.id}>\n"
+        f"Service: {serviceName}\n"
+        # f"Price: {price}\n"
+        "Reach out to the user as soon as possible:\n"
+        f"Connect via Direct message:<@{challenger.id}>\n"
+        f"Connect via Voice room: {invite.url}"
+    )
 
     manager_message = (f"Hey! Session between kicker: @{kicker_username} and {challenger.name} has started. Please check this private channel: {invite.url}.")
 
-    user_message = (f"Your session @{challenger.name} with @{kicker_username} is ready!\n" +
-                    f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
-                    f"Join the private channel between you and the kicker: {invite.url}\n" +
-                    "**Important: If you did not receive a session, please create a ticket to report this case and get refunded <#1233350206280437760>**")
+    user_message = (
+        "Kicker has accepted your order:\n"
+        f"Kicker: <@{challenged.id}>\n"
+        f"Service: {serviceName}\n"
+        # f"Price: {price}\n"
+        f"Connect via Direct message:<@{challenged.id}>\n"
+        f"Connect via Voice room: {invite.url}"
+    )
     
     manager_members = []
 
@@ -94,7 +106,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     await send_message_to_customer_support(bot, manager_message)
     await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
 
-    await session_start_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
+    await session_delivery_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel, invite_url=invite.url)
 
     if challenged in kicker_members:
         if send_message_after_2_min.is_running():

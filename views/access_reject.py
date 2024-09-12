@@ -1,5 +1,6 @@
 import asyncio
 from typing import Callable, Any
+from background_tasks import send_user_refund_replace
 import discord
 
 import config
@@ -8,7 +9,9 @@ from bot_instance import get_bot
 from models.private_channel import create_private_discord_channel
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
+from services.refund_replace_message_manager import RefundReplaceManager
 from services.timeout_refund_handler import TimeoutRefundHandler
+from views.refund_replace import RefundReplaceView
 
 bot = get_bot()
 
@@ -38,10 +41,12 @@ class AccessRejectView(discord.ui.View):
         self.purchase_id = purchase_id
         self.already_pressed = False
         self.sqs_client = sqs_client
+
         self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
+        self.refund_manager = RefundReplaceManager(kicker=kicker, refund_handler=self.refund_handler)
 
         self.timeout_refund_handler = TimeoutRefundHandler(
-            timeout_seconds=60,
+            timeout_seconds=10,
             on_timeout_callback=self.auto_reject  
         )
 
@@ -71,17 +76,11 @@ class AccessRejectView(discord.ui.View):
         return decorator
 
     async def auto_reject(self):
-        await self.refund_handler.process_refund(
-            interaction=None,
-            success_message="",
-            kicker_message=(
-                f"You haven't accepted/rejected the session within 15 minutes. The session with <@{self.customer.id}> is no longer valid, the funds have been refunded to the user."
-            ),
-            customer_message=(
-                f"The kicker <@{self.kicker.id}> has not responded to the session within 15 minutes. The session is no longer valid and funds will be refunded to your wallet shortly. \n"
-                "Please try again later or select another kicker."
-            )
-        )
+        print("Auto-reject triggered")
+        await self.refund_manager.start_periodic_refund_replace(self.customer, self.kicker, self.purchase_id)
+
+
+
 
     @discord.ui.button(
         label="Accept",
@@ -136,12 +135,27 @@ class AccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer()
-        await self.refund_handler.process_refund(
+        await send_interaction_message(
             interaction=interaction,
-            success_message="The session is canceled",
-            kicker_message=f"You rejected the session with <@{self.customer.id}>.",
-            customer_message=f"Kicker <@{self.kicker.id}> rejected the session."
+            message=(
+                "You have rejected the session. The session is no longer valid."
+            )
         )
+        view = RefundReplaceView(
+            customer=self.customer,
+            kicker=self.kicker,
+            purchase_id=self.purchase_id,
+            sqs_client=self.sqs_client,
+            timeout=5,
+        )
+        embed_message = discord.Embed(
+            title=f"Sorry, the kicker {self.kicker.name} has not accepted the session.",
+            colour=discord.Colour.blue(),
+            description="Would you like a refund or replace the kicker?"
+        )
+        await self.customer.send(content=None, embed=embed_message, view=view)
+
+
 
 
         
