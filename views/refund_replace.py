@@ -3,7 +3,7 @@ from bot_instance import get_bot
 import config
 import discord
 from models.private_channel_for_replace import create_channel_for_replace
-from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_sk
+from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_super_kicker
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
 from services.timeout_refund_handler import TimeoutRefundHandler
@@ -147,13 +147,11 @@ class RefundReplaceView(discord.ui.View):
                 f"Voice room: {invite_url}"
             )
 
-        await send_message_to_customer_support(
+        await send_message_to_super_kicker(
             bot=bot,
             message=message
-            
         )
-
-        await send_message_to_sk(
+        await send_message_to_customer_support(
             bot=bot,
             message=message
         )

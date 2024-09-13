@@ -77,7 +77,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         f"Connect via Voice room: {invite.url}"
     )
 
-    manager_message = (f"Hey! Session between kicker: {challenged.name} and {challenger.name} has started. Please check this private channel: {invite.url}.")
+    manager_message = (f"Hey! Session between kicker: @{challenged.name} and @{challenger.name} has started. Please check this private channel: {invite.url}.")
 
     user_message = (
         "Kicker has accepted your order:\n"

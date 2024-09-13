@@ -25,6 +25,11 @@ async def create_channel_for_replace(bot, guild_id, customer, base_category_name
         cs_member = guild.get_member(cs_id)
         if cs_member:
             overwrites[cs_member] = discord.PermissionOverwrite(read_messages=True)
+    
+    for sk_id in SUPER_KICKER_IDS:
+        sk_member = guild.get_member(sk_id)
+        if sk_member:
+            overwrites[sk_member] = discord.PermissionOverwrite(read_messages=True)
 
     for sk_id in SUPER_KICKER_IDS:
         sk_member = guild.get_member(sk_id)

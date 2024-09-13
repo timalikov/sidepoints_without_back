@@ -15,11 +15,11 @@ async def send_message_to_customer_support(bot: discord.Client, message: str) ->
 
     return
 
-async def send_message_to_sk(*, bot: discord.Client, message: str) -> None:
+async def send_message_to_super_kicker(*, bot: discord.Client, message: str) -> None:
     for sk_id in SUPER_KICKER_IDS:
         try:
-            sk = await bot.fetch_user(sk_id)
-            await sk.send(message)
+            super_kicker = await bot.fetch_user(sk_id)
+            await super_kicker.send(message)
         except discord.HTTPException:
             print(f"Failed to send message to super kicker with ID {sk_id}")
         except AttributeError:
