@@ -20,8 +20,6 @@ from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 
-from services.messages.base import send_kickers_reaction_test
-
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 

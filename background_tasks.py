@@ -17,35 +17,6 @@ main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
 @tasks.loop(count=1)
-async def session_start_check(
-    *,
-    customer: discord.User,
-    kicker: discord.User,
-    purchase_id: int,
-    channel: Any
-):
-    print("session_start_check starting to send message")
-    await asyncio.sleep(300)
-    message_embed = discord.Embed(
-        colour=discord.Colour.dark_blue(),
-        title=f"Hey @{customer.name}",
-        description=(
-            f"Has your session with kicker @{kicker.name} started?"
-        )       
-    )
-
-    view = SessionCheckView(
-        customer=customer,
-        kicker=kicker,
-        purchase_id=purchase_id,
-        channel=channel,
-    )
-    view.message = await customer.send(
-        view=view,
-        embed=message_embed
-    )
-
-@tasks.loop(count=1)
 async def session_delivery_check(
     *,
     customer: discord.User,
@@ -108,7 +79,7 @@ async def send_user_refund_replace(
         channel=channel,
         stop_task=stop_event.set
     )
-    await customer.send(
+    view.message = await customer.send(
         view=view,
         embed=message_embed
     )

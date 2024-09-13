@@ -13,7 +13,7 @@ class SQSClient:
             aws_secret_access_key="diSyU0WCuXpBtKlQIP0rgyzOGVU2zI6W5Qvdo27Q",
             region_name='eu-central-1'
         )
-        self.queue_router = "sidekick_dev_bot_" if TEST else "sidekick_prod_bot_"
+        self.queue_router = "sidekick_dev_refund" if TEST else "sidekick_prod_refund"
         self.queue_host = f"https://sqs.eu-central-1.amazonaws.com/104037811570/{self.queue_router}"
 
     def send_message(self, purchase_id: int) -> bool:

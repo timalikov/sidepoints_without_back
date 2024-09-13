@@ -27,7 +27,6 @@ class SessionCheckView(discord.ui.View):
     async def on_timeout(self):
         if not self.already_pressed:
             await self.session_successful()
-        await self.message.edit(view=None)
 
     def check_already_pressed(func: Callable) -> Callable:
         async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
@@ -39,7 +38,7 @@ class SessionCheckView(discord.ui.View):
                     if isinstance(item, discord.ui.Button):
                         item.disabled = True
                 
-                await interaction.message.edit(view=self)
+                await self.message.edit(view=self)
 
                 return result
             else:
@@ -55,6 +54,7 @@ class SessionCheckView(discord.ui.View):
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
+        await self.message.edit(view=self)
 
         await self.customer.send(f"Thank you for using Sidekick!\n Hope you enjoyed the session with <@{self.kicker.id}>.")
         await self.kicker.send("Thank you for your service! The funds will be transferred to your wallet soon!")
@@ -73,7 +73,7 @@ class SessionCheckView(discord.ui.View):
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
-        await interaction.message.edit(view=self)
+        await self.message.edit(view=self)
 
         await send_interaction_message(
             interaction=interaction,
@@ -106,4 +106,4 @@ class SessionCheckView(discord.ui.View):
         )
 
         await self.kicker.send(f"User <@{self.customer.id}> has stated that the session was not delivered. Your session is no longer valid. Customer Support officer will reach out to you shortly.")
-        await self.customer.send(view=view, embed=embed_message)
+        view.message = await self.customer.send(view=view, embed=embed_message)
