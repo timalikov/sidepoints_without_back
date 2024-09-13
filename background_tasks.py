@@ -67,7 +67,7 @@ async def session_delivery_check(
         customer=customer,
         kicker=kicker,
         purchase_id=purchase_id,
-        channel=channel,
+        channel=channel
     )
     view.message = await customer.send(
         view=view,

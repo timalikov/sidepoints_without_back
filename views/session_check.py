@@ -14,8 +14,7 @@ class SessionCheckView(discord.ui.View):
         customer: discord.User,
         kicker: discord.User,
         purchase_id: int,    
-        channel: Any,
-        
+        channel: Any
     ) -> None:
         super().__init__(timeout=60*60)
         self.customer = customer
@@ -25,7 +24,7 @@ class SessionCheckView(discord.ui.View):
         self.already_pressed = False
         self.sqs_client = SQSClient()
 
-    async def on_timeout(self) -> Coroutine[Any, Any, None]:
+    async def on_timeout(self):
         if not self.already_pressed:
             await self.session_successful()
         await self.message.edit(view=None)
