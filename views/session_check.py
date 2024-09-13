@@ -1,5 +1,4 @@
-import asyncio
-from typing import Any, Callable
+from typing import Any, Callable, Coroutine
 from bot_instance import get_bot
 import discord
 from services.messages.interaction import send_interaction_message
@@ -28,7 +27,7 @@ class SessionCheckView(discord.ui.View):
         self.already_pressed = False
         self.sqs_client = SQSClient()
 
-    async def on_timeout(self) -> asyncio.Coroutine[Any, Any, None]:
+    async def on_timeout(self) -> Coroutine[Any, Any, None]:
         if not self.already_pressed:
             await self.session_successful()
 

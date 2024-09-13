@@ -117,7 +117,7 @@ class OrderAccessRejectView(discord.ui.View):
         return decorator
 
     @discord.ui.button(
-        label="Access",
+        label="Go",
         style=discord.ButtonStyle.green,
         custom_id="access"
     )
