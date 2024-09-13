@@ -96,7 +96,7 @@ async def send_confirm_order_message(
         colour=discord.Colour.dark_blue(),
         title=f"Your service has been purchased:",
         description=(
-            f"Service: {service["service_category_name"] if service else "Not found"}\n" 
+            f"Service: {service['service_category_name'] if service else 'Not found'}\n" 
             # f"Price: {service['service_price']}\n"
             "Please accept or reject the session"
         )       
