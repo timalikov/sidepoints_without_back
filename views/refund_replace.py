@@ -3,7 +3,7 @@ from bot_instance import get_bot
 import config
 import discord
 from models.private_channel_for_replace import create_channel_for_replace
-from services.messages.customer_support_messenger import send_message_to_customer_support
+from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_sk
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
 from services.timeout_refund_handler import TimeoutRefundHandler
@@ -140,15 +140,22 @@ class RefundReplaceView(discord.ui.View):
             interaction=interaction,
             message=f"Join the channel to replace the kicker: {invite_url}"
         )
+        message=(
+                "**Replacement has been purchased**\n"
+                f"User: {self.customer.name}\n"
+                f"Kicker: {self.kicker.name}\n"
+                f"Voice room: {invite_url}"
+            )
 
         await send_message_to_customer_support(
             bot=bot,
-            message=(
-                "**Replacement has been purchased**\n"
-                f"User: <@{self.customer.id}>\n"
-                f"Kicker: <@{self.kicker.id}>\n"
-                f"Voice room: {invite_url}"
-            )
+            message=message
+            
+        )
+
+        await send_message_to_sk(
+            bot=bot,
+            message=message
         )
 
         await self.kicker.send(f"User <@{self.customer.id}> has requested replace you")

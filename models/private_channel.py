@@ -77,7 +77,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         f"Connect via Voice room: {invite.url}"
     )
 
-    manager_message = (f"Hey! Session between kicker: <@{challenged.id}> and <@{challenger.id}> has started. Please check this private channel: {invite.url}.")
+    manager_message = (f"Hey! Session between kicker: {challenged.name} and {challenger.name} has started. Please check this private channel: {invite.url}.")
 
     user_message = (
         "Kicker has accepted your order:\n"
@@ -108,18 +108,18 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
 
     await session_delivery_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
 
-    if challenged in kicker_members:
-        if send_message_after_2_min.is_running():
-            print("Task 2 minutes send message is already running, stopping it first.")
-            send_message_after_2_min.cancel()
-            await asyncio.sleep(0.1) 
-        if send_message_after_5_min.is_running():
-            print("Task 5 minutes send message is already running, stopping it first.")
-            send_message_after_5_min.cancel()
-            await asyncio.sleep(0.1)
+    # if challenged in kicker_members:
+    #     if send_message_after_2_min.is_running():
+    #         print("Task 2 minutes send message is already running, stopping it first.")
+    #         send_message_after_2_min.cancel()
+    #         await asyncio.sleep(0.1) 
+    #     if send_message_after_5_min.is_running():
+    #         print("Task 5 minutes send message is already running, stopping it first.")
+    #         send_message_after_5_min.cancel()
+    #         await asyncio.sleep(0.1)
             
-        await send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
-        await send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
+    #     await send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
+    #     await send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
     
     # Special handling for the specific user ID
     if challenged.id == 1208433940050874429:
