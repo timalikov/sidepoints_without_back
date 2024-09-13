@@ -6,7 +6,6 @@ import discord.ext.commands
 from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles
-from services.messages.base import send_confirm_order_message
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
@@ -19,7 +18,9 @@ from database.dto.sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
-from views.check_reaction import CheckReactionView
+from views.order_view import OrderView
+
+from services.messages.base import send_kickers_reaction_test
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -126,7 +127,17 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(MAIN_GUILD_ID)
-    await interaction.followup.send(f"Your Kickers summon order successfully placed. \nPlease check your DM for Kicker summon responses. Please wait further instructions and join to our server using the link below\n{main_link}", ephemeral=True)
+    channel = bot.get_channel(1277350834732269609)
+    view = OrderView(customer=interaction.user, user_choises=choices.value)
+    view.message = await channel.send(
+        view=view,
+        content=(
+            "@everyone \n"
+            f"New Order Alert: **{choices.name}** [30 minutes]\n"
+            f"You have a new order for a **{choices.name}** in english"
+        )
+    )
+    await interaction.followup.send(f"Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{main_link}", ephemeral=True)
 
 
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")

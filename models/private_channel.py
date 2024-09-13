@@ -5,7 +5,7 @@ from bot_instance import get_bot
 from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID
 from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
-from database.dto.psql_services import Services_Database
+from database.dto.sql_profile import Profile_Database
 from background_tasks import (
     send_message_after_2_min,
     send_message_after_5_min,
@@ -135,3 +135,40 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         await channel.send(embed=embed, view=view)
     return True, channel
 
+
+
+async def send_challenge_invites(challenger, challenged, invite_url):
+    await challenger.send(f"Your session is ready! Join the private channel: {invite_url}")
+    if challenged.id != challenger.id:
+        await challenged.send(f"You've been challenged! Join the private channel: {invite_url}")
+
+
+async def join_or_create_private_discord_channel(bot, guild_id, challenge, challenger, challenged):
+    guild = bot.get_guild(guild_id)
+
+    existing_channel_ids = await Profile_Database.get_channel_id_by_user_id(challenged.id)
+    channel = None
+
+    # Check if any of the fetched channel IDs exist in the guild
+    for channel_id in existing_channel_ids:
+        channel = guild.get_channel(channel_id)
+        if channel:
+            break
+
+    channel_name = f"team-{challenged.display_name}"
+    # If no valid channel is found, create a new one
+    if not channel:
+        success, channel = await create_private_discord_channel(bot, guild_id, challenge, channel_name, challenger, challenged, base_category_name="Sidekick Team Rooms")
+        if not success:
+            return False, "Failed to create a new private channel"
+        await Profile_Database.add_channel_to_user(challenged.id, channel.id)
+
+    await channel.set_permissions(challenger, read_messages=True)
+    await channel.set_permissions(challenged, read_messages=True)
+
+    try:
+        invite = await channel.create_invite(max_age=14400)  # Create a 24-hour invite
+        await send_challenge_invites(challenger, challenged, invite.url)
+        return True, channel
+    except discord.HTTPException:
+        return False, "Failed to send invite links to one or more participants."
