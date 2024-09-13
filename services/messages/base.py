@@ -80,8 +80,8 @@ async def send_confirm_order_message(
     
     cs_team_message = (
         "**Session has been purchased**\n"
-        f"User: <@{customer.id}>\n"
-        f"Kicker: <@{kicker.id}>\n"
+        f"User: {customer.name}\n"
+        f"Kicker: {kicker.name}\n"
         # f"Service: {service["service_category_name"]}\n"
         # f"Price: {service["service_price"]}\n"
     )

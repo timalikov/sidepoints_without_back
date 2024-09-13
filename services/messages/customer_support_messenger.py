@@ -1,7 +1,7 @@
 from datetime import datetime
 from button_constructors import InformKickerButton
 import discord
-from config import CUSTOMER_SUPPORT_TEAM_IDS, TEAM_CHANNEL_ID
+from config import CUSTOMER_SUPPORT_TEAM_IDS, SUPER_KICKER_IDS, TEAM_CHANNEL_ID
 
 async def send_message_to_customer_support(bot: discord.Client, message: str) -> None:
     for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:
@@ -14,6 +14,16 @@ async def send_message_to_customer_support(bot: discord.Client, message: str) ->
             print(f"Failed to find user with ID {customer_support_id}")
 
     return
+
+async def send_message_to_sk(*, bot: discord.Client, message: str) -> None:
+    for sk_id in SUPER_KICKER_IDS:
+        try:
+            sk = await bot.fetch_user(sk_id)
+            await sk.send(message)
+        except discord.HTTPException:
+            print(f"Failed to send message to super kicker with ID {sk_id}")
+        except AttributeError:
+            print(f"Failed to find user with ID {sk_id}")
 
 async def send_message_to_team_channel(*, bot: discord.Client, customer: discord.User, kicker: discord.User, invite_url: str) -> None:
     message = (
