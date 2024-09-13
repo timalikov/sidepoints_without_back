@@ -40,7 +40,7 @@ async def session_start_check(
         purchase_id=purchase_id,
         channel=channel,
     )
-    await customer.send(
+    view.message = await customer.send(
         view=view,
         embed=message_embed
     )
@@ -69,7 +69,7 @@ async def session_delivery_check(
         purchase_id=purchase_id,
         channel=channel,
     )
-    await customer.send(
+    view.message = await customer.send(
         view=view,
         embed=message_embed
     )
