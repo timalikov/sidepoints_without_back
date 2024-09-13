@@ -9,15 +9,16 @@ from database.dto.sql_profile import Profile_Database
 from background_tasks import (
     send_message_after_2_min,
     send_message_after_5_min,
+    session_delivery_check,
 )
-from services.messages.customer_support_messenger import send_message_to_customer_support
+from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_team_channel
 from views.done_button import DoneButton
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
 
-async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, base_category_name = "Sidekick Chatrooms"):
+async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
 
     services_db = Services_Database()
@@ -65,15 +66,27 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     )
     
     await start_all_messages(channel)
-    
-    kicker_message = (f"Hey @{kicker_username}! Your session has started. Please check this private channel: {invite.url}.")
 
-    manager_message = (f"Hey! Session between kicker: <@{kicker.id}> and <@{challenger.id}> has started. Please check this private channel: {invite.url}.")
+    kicker_message = (
+        "**You session has started:**\n"
+        f"User: <@{challenger.id}>\n"
+        f"Service: {serviceName}\n"
+        # f"Price: {price}\n"
+        "Reach out to the user as soon as possible:\n"
+        f"Connect via Direct message:<@{challenger.id}>\n"
+        f"Connect via Voice room: {invite.url}"
+    )
 
-    user_message = (f"Your session {challenger.name} with @{kicker_username} is ready!\n" +
-                    f"In case the kicker is inactive in the private channel, you can reach out to the user via discord username @{challenged.name}.\n"+
-                    f"Join the private channel between you and the kicker: {invite.url}\n" +
-                    "**Important: If you did not receive a session, please create a ticket to report this case and get refded <#1233350206280437760>**")
+    manager_message = (f"Hey! Session between kicker: <@{challenged.id}> and <@{challenger.id}> has started. Please check this private channel: {invite.url}.")
+
+    user_message = (
+        "Kicker has accepted your order:\n"
+        f"Kicker: <@{challenged.id}>\n"
+        f"Service: {serviceName}\n"
+        # f"Price: {price}\n"
+        f"Connect via Direct message:<@{challenged.id}>\n"
+        f"Connect via Voice room: {invite.url}"
+    )
     
     manager_members = []
 
@@ -91,6 +104,9 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         print("Failed to send invite links to one or more participants.")
 
     await send_message_to_customer_support(bot, manager_message)
+    await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
+
+    await session_delivery_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
 
     if challenged in kicker_members:
         if send_message_after_2_min.is_running():
@@ -118,6 +134,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         view = DoneButton()
         await channel.send(embed=embed, view=view)
     return True, channel
+
 
 
 async def send_challenge_invites(challenger, challenged, invite_url):

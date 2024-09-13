@@ -114,7 +114,7 @@ def send_request(url: str, message_body: dict) -> requests.Response:
 
 @sqs_receiver.receive(queue="deliveries.fifo")
 def send_message_to_endpoint(message_body):
-    url = f"{os.getenv('WEB_APP_URL')}/discord_api/create_private_channel"
+    url = f"{os.getenv('WEB_APP_URL_FLASK')}/discord_api/order/confirm"
     _ = send_request(url, message_body)
 
 
@@ -126,7 +126,7 @@ def send_notification_to_endpoint(message_body):
 
 @sqs_receiver.receive(queue="boost_messages.fifo")
 def send_boost_notification(message_body):
-    url = f"{os.getenv('WEB_APP_URL')}/discord_api/boost"
+    url = f"{os.getenv('WEB_APP_URL_FLASK')}/discord_api/boost"
     print(message_body)
     _ = send_request(url, message_body)
 

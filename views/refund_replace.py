@@ -1,31 +1,91 @@
 from typing import Any, Callable
+from bot_instance import get_bot
+import config
 import discord
+from models.private_channel_for_replace import create_channel_for_replace
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.messages.interaction import send_interaction_message
+from services.refund_handler import RefundHandler
+from services.timeout_refund_handler import TimeoutRefundHandler
+
+bot = get_bot()
 
 class RefundReplaceView(discord.ui.View):
     def __init__(
         self,
         *, 
         customer: discord.User,
-        kicker: discord.User
+        kicker: discord.User,
+        purchase_id: int,
+        sqs_client: Any,
+        access_reject_view: Any = None,
+        timeout: int = 60,
+        channel: Any = None,
+        stop_task: Callable = None, 
+
     ) -> None:
         super().__init__(timeout=None)
         self.customer = customer
         self.kicker = kicker
+        self.purchase_id = purchase_id
+        self.sqs_client = sqs_client
+        self.access_reject_view = access_reject_view
+        self.timeout = timeout
+        self.channel = channel
+        self.stop_task = stop_task if stop_task is not None else lambda: None
         self.already_pressed = False
+        self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
+        # self.services_db = Services_Database()
+        # self.service = self.services_db.get_services_by_username(kicker.name)
+
+        self.timeout_refund_handler = TimeoutRefundHandler(
+            timeout_seconds= 60 * self.timeout,
+            on_timeout_callback=self.auto_refund  
+        )
+
+    async def auto_refund(self) -> None:
+        if not self.already_pressed:
+            for item in self.children:
+                if isinstance(item, discord.ui.Button):
+                    item.disabled = True
+            
+            message=f"Sorry, we haven't received your decision in 5 minutes. The funds will be automatically refunded to your wallet."
+            self.customer.send(content=message)
+
+            await self.refund_handler.process_refund(
+                interaction=None,
+                success_message="",
+                kicker_message=f"User <@{self.customer.id}> refunded the payment!",
+                customer_message=None,
+                channel=self.channel
+            )
+
 
     def check_already_pressed(func: Callable) -> Callable:
         async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
             if not self.already_pressed:
                 result: Any = await func(self, interaction, *args, **kwargs)
+                
+                if self.access_reject_view:
+                    await self.access_reject_view.disable_access_reject_buttons()
+                
                 self.already_pressed = True
+                for item in self.children:
+                    if isinstance(item, discord.ui.Button):
+                        item.disabled = True
+                
+                await interaction.message.edit(view=self)
+                
+                if self.stop_task:
+                    self.stop_task()
+
                 return result
             else:
                 await send_interaction_message(
                     interaction=interaction,
-                    message="Button already pressed"
+                    message="Button has already been pressed."
                 )
+            
         return decorator
 
     @discord.ui.button(
@@ -36,17 +96,21 @@ class RefundReplaceView(discord.ui.View):
     @check_already_pressed
     async def refund_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-
-        # Refund logic
+        print("Refund button pressed")
 
         await send_interaction_message(
             interaction=interaction,
-            message=f"Okay your payment will be refunded soon."
+            message="The refund has been requested."
         )
-        try:
-            await self.kicker.send(f"User <@{self.customer.id}> refunded the payment!")
-        except discord.HTTPException:
-            print(f"Failed to send message to kicker {self.kicker.id}")
+
+        await self.refund_handler.process_refund(
+            interaction=None,
+            success_message="Your funds will be refunded to your wallet soon! Until then, you can search for a new kicker.",
+            kicker_message=f"User <@{self.customer.id}> refunded the payment!",
+            customer_message=f"Your funds will be refunded to your wallet soon! Until then, you can search for a new kicker.",
+            channel=self.channel
+        )
+
 
 
     @discord.ui.button(
@@ -58,12 +122,33 @@ class RefundReplaceView(discord.ui.View):
     async def replace_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
 
-        await send_message_to_customer_support(
-            bot=bot,
-            message=f"User <@{self.customer.id}> wants to replace the kicker: <@{self.kicker.id}>"
-        )
-
         await send_interaction_message(
             interaction=interaction,
-            message="Customer support will contact you soon and replace your kicker."
+            message=f"The replacement has been requested. Please wait ..."
         )
+
+        await self.replace_logic(interaction)
+
+    async def replace_logic(self, interaction: discord.Interaction) -> None:
+
+        invite_url = await create_channel_for_replace(
+            bot=bot,
+            guild_id=config.MAIN_GUILD_ID,
+            customer=self.customer
+        )
+        await send_interaction_message(
+            interaction=interaction,
+            message=f"Join the channel to replace the kicker: {invite_url}"
+        )
+
+        await send_message_to_customer_support(
+            bot=bot,
+            message=(
+                "**Replacement has been purchased**\n"
+                f"User: <@{self.customer.id}>\n"
+                f"Kicker: <@{self.kicker.id}>\n"
+                f"Voice room: {invite_url}"
+            )
+        )
+
+        await self.kicker.send(f"User <@{self.customer.id}> has requested replace you")
