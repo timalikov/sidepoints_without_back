@@ -40,7 +40,7 @@ async def session_start_check(
         purchase_id=purchase_id,
         channel=channel,
     )
-    await customer.send(
+    view.message = await customer.send(
         view=view,
         embed=message_embed
     )
@@ -53,7 +53,8 @@ async def session_delivery_check(
     purchase_id: int,
     channel: Any,
 ):
-    await asyncio.sleep(60)
+    ONE_HOUR: int = 3600
+    await asyncio.sleep(ONE_HOUR)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=f"Hey @{customer.name}",
@@ -67,9 +68,8 @@ async def session_delivery_check(
         kicker=kicker,
         purchase_id=purchase_id,
         channel=channel,
-        timeout=1
     )
-    await customer.send(
+    view.message = await customer.send(
         view=view,
         embed=message_embed
     )
