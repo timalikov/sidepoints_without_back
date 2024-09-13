@@ -1,5 +1,9 @@
+import os
 import boto3
 import json
+
+from config import TEST
+
 
 class SQSClient:
     def __init__(self) -> None:
@@ -9,7 +13,8 @@ class SQSClient:
             aws_secret_access_key="diSyU0WCuXpBtKlQIP0rgyzOGVU2zI6W5Qvdo27Q",
             region_name='eu-central-1'
         )
-        self.queue_host = f"https://sqs.eu-central-1.amazonaws.com/104037811570/sidekick_dev_refund"
+        self.queue_router = "sidekick_dev_bot_" if TEST else "sidekick_prod_bot_"
+        self.queue_host = f"https://sqs.eu-central-1.amazonaws.com/104037811570/{self.queue_router}"
 
     def send_message(self, purchase_id: int) -> bool:
         try:
