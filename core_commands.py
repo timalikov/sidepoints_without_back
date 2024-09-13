@@ -13,7 +13,7 @@ from database.dto.psql_services import Services_Database
 from models.forum import get_or_create_forum
 import os
 
-from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN
+from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, ORDER_CHANNEL_ID
 from database.dto.sql_order import Order_Database
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
@@ -127,7 +127,7 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(MAIN_GUILD_ID)
-    channel = bot.get_channel(1277350834732269609)
+    channel = bot.get_channel(ORDER_CHANNEL_ID)
     view = OrderView(customer=interaction.user, user_choises=choices.value)
     view.message = await channel.send(
         view=view,
