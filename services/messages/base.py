@@ -73,7 +73,7 @@ async def send_confirm_order_message(
     purchase_id: int
 ) -> StatusCodes:
     services_db = Services_Database()
-    service = await services_db.get_services_by_username(kicker_username)
+    service = await services_db.get_services_by_username(username=kicker_username)
     if service:
         service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
 
@@ -96,7 +96,7 @@ async def send_confirm_order_message(
         colour=discord.Colour.dark_blue(),
         title=f"Your service has been purchased:",
         description=(
-            f"Service: {service_name}\n" 
+            f"Service: {service["service_category_name"] if service else "Not found"}\n" 
             # f"Price: {service['service_price']}\n"
             "Please accept or reject the session"
         )       

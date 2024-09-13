@@ -1,12 +1,11 @@
 import asyncio
 from typing import Callable, Any
-from background_tasks import send_user_refund_replace
 import discord
 
 import config
 from bot_instance import get_bot
 
-from models.private_channel import create_channel_for_replace, create_private_discord_channel
+from models.private_channel import create_private_discord_channel
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
 from services.refund_replace_message_manager import RefundReplaceManager
@@ -41,9 +40,10 @@ class AccessRejectView(discord.ui.View):
         self.purchase_id = purchase_id
         self.already_pressed = False
         self.sqs_client = sqs_client
+        self.user_interacted = False
 
         self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
-        self.refund_manager = RefundReplaceManager(kicker=kicker, refund_handler=self.refund_handler)
+        self.refund_manager = RefundReplaceManager(kicker=kicker, refund_handler=self.refund_handler, access_reject_view=self)
 
         self.timeout_refund_handler = TimeoutRefundHandler(
             timeout_seconds=60,
@@ -57,14 +57,9 @@ class AccessRejectView(discord.ui.View):
             if not self.already_pressed:
                 result: Any = await func(self, interaction, *args, **kwargs)
 
-                self.already_pressed = True
-                self.timeout_refund_handler.cancel()
+                await self.disable_access_reject_buttons()
+                self.user_interacted = True
 
-                for item in self.children:
-                    if isinstance(item, discord.ui.Button):
-                        item.disabled = True
-                
-                await interaction.message.edit(view=self)
 
                 return result
             else:
@@ -76,11 +71,16 @@ class AccessRejectView(discord.ui.View):
         return decorator
 
     async def auto_reject(self):
-        print("Auto-reject triggered")
-        await self.refund_manager.start_periodic_refund_replace(self.customer, self.kicker, self.purchase_id)
+        if not self.user_interacted:
+            await self.refund_manager.start_periodic_refund_replace(self.customer, self.kicker, self.purchase_id)
 
 
-
+    async def disable_access_reject_buttons(self):
+        self.already_pressed = True
+        for item in self.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
+        await self.message.edit(view=self)
 
     @discord.ui.button(
         label="Accept",
@@ -101,6 +101,7 @@ class AccessRejectView(discord.ui.View):
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
         await self.message.edit(view=self)
+        self.user_interacted = True
 
 
         await send_interaction_message(
@@ -109,6 +110,7 @@ class AccessRejectView(discord.ui.View):
                 f"Thanks for accepting the session with {self.customer.name}!"
             )
         )
+        await self.refund_manager.stop_periodic_refund_replace()
 
         is_success, channel = await create_private_discord_channel(
             bot_instance=bot,
@@ -141,20 +143,15 @@ class AccessRejectView(discord.ui.View):
                 "You have rejected the session. The session is no longer valid."
             )
         )
-        
-        channel_url = await create_channel_for_replace(
-            bot_instance=bot,
-            guild_id=config.MAIN_GUILD_ID,
-            customer=self.customer
-        )
+        await self.refund_manager.stop_periodic_refund_replace()
+        self.user_interacted = True
 
         view = RefundReplaceView(
             customer=self.customer,
             kicker=self.kicker,
             purchase_id=self.purchase_id,
             sqs_client=self.sqs_client,
-            timeout=5,
-            invite_url=channel_url
+            timeout=5
         )
         embed_message = discord.Embed(
             title=f"Sorry, the kicker {self.kicker.name} has not accepted the session.",

@@ -17,7 +17,6 @@ class SessionCheckView(discord.ui.View):
         kicker: discord.User,
         purchase_id: int,    
         channel: Any,
-        invite_url: str,
         timeout: int = 5,
         
     ) -> None:
@@ -26,7 +25,6 @@ class SessionCheckView(discord.ui.View):
         self.kicker = kicker
         self.purchase_id = purchase_id
         self.channel = channel
-        self.invite_url = invite_url
         self.timeout = timeout
         self.already_pressed = False
         self.sqs_client = SQSClient()
@@ -107,9 +105,7 @@ class SessionCheckView(discord.ui.View):
             customer=self.customer,
             kicker=self.kicker,
             purchase_id=self.purchase_id,
-            sqs_client=self.sqs_client,
-            # channel=self.channel,
-            invite_url=self.invite_url
+            sqs_client=self.sqs_client
         )
         embed_message = discord.Embed(
             colour=discord.Colour.blue(),

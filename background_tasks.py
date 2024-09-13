@@ -52,9 +52,7 @@ async def session_delivery_check(
     kicker: discord.User,
     purchase_id: int,
     channel: Any,
-    invite_url: str
 ):
-    print("session_delivery_check starting to send message")
     await asyncio.sleep(60)
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
@@ -69,8 +67,7 @@ async def session_delivery_check(
         kicker=kicker,
         purchase_id=purchase_id,
         channel=channel,
-        invite_url=invite_url,
-        timeout=60
+        timeout=1
     )
     await customer.send(
         view=view,
@@ -109,7 +106,6 @@ async def send_user_refund_replace(
         purchase_id=purchase_id,
         sqs_client=sqs_client,
         channel=channel,
-        invite_url=invite_url,
         stop_task=stop_event.set
     )
     await customer.send(

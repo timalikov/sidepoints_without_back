@@ -126,7 +126,7 @@ def send_notification_to_endpoint(message_body):
 
 @sqs_receiver.receive(queue="boost_messages.fifo")
 def send_boost_notification(message_body):
-    url = f"{os.getenv('WEB_APP_URL')}/discord_api/boost"
+    url = f"{os.getenv('WEB_APP_URL_FLASK')}/discord_api/boost"
     print(message_body)
     _ = send_request(url, message_body)
 

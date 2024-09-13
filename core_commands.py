@@ -195,7 +195,7 @@ async def test_sss(interaction: discord.Interaction):
 
 @bot.tree.command(name="sss2", description="TEST2")
 async def test_sss(interaction: discord.Interaction):
-    me: discord.User = bot.get_user(1278392054983954433)
+    me: discord.User = bot.get_user(836655813048402011)
     await send_confirm_order_message(
         channel_name="AAA",
         customer=me,

@@ -5,11 +5,11 @@ from bot_instance import get_bot
 from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID
 from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
+from database.dto.psql_services import Services_Database
 from background_tasks import (
     send_message_after_2_min,
     send_message_after_5_min,
     session_delivery_check,
-    session_start_check,
 )
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_team_channel
 from views.done_button import DoneButton
@@ -106,9 +106,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     await send_message_to_customer_support(bot, manager_message)
     await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
 
-    replace_channel_url = await create_channel_for_replace(bot_instance, guild_id, challenger)
-
-    await session_delivery_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel, invite_url=replace_channel_url)
+    await session_delivery_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
 
     if challenged in kicker_members:
         if send_message_after_2_min.is_running():
@@ -137,33 +135,3 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         await channel.send(embed=embed, view=view)
     return True, channel
 
-async def create_channel_for_replace(bot_instance, guild_id, customer, base_category_name = "Sidekick Chatrooms"):
-    guild = bot.get_guild(guild_id)
-    channel_name = "Kicker replacement"
-
-
-    category = None
-    index = 1
-    while not category:
-        category_name = f"{base_category_name}{index}"
-        category = discord.utils.get(guild.categories, name=category_name)
-        if category and len(category.channels) >= 50:
-            category = None
-            index += 1
-        elif not category:
-            category = await guild.create_category(category_name)
-
-    overwrites = {
-        guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        customer: discord.PermissionOverwrite(read_messages=True),
-    }
-
-    channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
-
-    invite = await channel.create_invite(max_age=86400)
-
-    await channel.send(
-        f"Welcome to the Sidekick kicker replace room"
-    )
-
-    return invite.url

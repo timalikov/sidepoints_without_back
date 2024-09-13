@@ -103,7 +103,7 @@ class Services_Database(BasePsqlDTO):
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
             query = "SELECT * FROM discord_services WHERE discord_id = $1;"
-            services = await conn.fetch(query, discordId)
+            services = await conn.fetch(query, str(discordId))
         return services
     
     async def get_services_by_username(self, username):
