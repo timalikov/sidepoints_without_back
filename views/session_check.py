@@ -4,7 +4,6 @@ from bot_instance import get_bot
 import discord
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
-from services.timeout_refund_handler import TimeoutRefundHandler
 from views.refund_replace import RefundReplaceView
 
 bot = get_bot()
@@ -20,7 +19,7 @@ class SessionCheckView(discord.ui.View):
         timeout: int = 5,
         
     ) -> None:
-        super().__init__(timeout=None)
+        super().__init__(timeout=60*60)
         self.customer = customer
         self.kicker = kicker
         self.purchase_id = purchase_id
@@ -29,12 +28,9 @@ class SessionCheckView(discord.ui.View):
         self.already_pressed = False
         self.sqs_client = SQSClient()
 
-        self.timeout_refund_handler = TimeoutRefundHandler(
-            timeout_seconds= 60 * self.timeout,
-            on_timeout_callback=self.session_successful  
-        )
-        
-        asyncio.create_task(self.timeout_refund_handler.start())
+    async def on_timeout(self) -> asyncio.Coroutine[Any, Any, None]:
+        if not self.already_pressed:
+            await self.session_successful()
 
     def check_already_pressed(func: Callable) -> Callable:
         async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:

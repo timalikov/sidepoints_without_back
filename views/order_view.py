@@ -23,7 +23,7 @@ class OrderView(discord.ui.View):
     """
 
     def __init__(self, *, customer: discord.User, user_choises: str = "ALL", is_direct_message: bool = False):
-        super().__init__(timeout=10)
+        super().__init__(timeout=15*60)
         self.customer: discord.User = customer
         self.services_db = Services_Database(app_choice=user_choises)
         self.pressed_kickers: List[discord.User] = []
@@ -61,9 +61,11 @@ class OrderView(discord.ui.View):
                 f"New Order Alert: **{choices}** [30 minutes]\n"
                 f"You have a new order for a **{choices}** in english"
             )
+        if self.is_direct_message and not self.is_pressed:
+            await self.customer.send(content="Sorry! No one took your order!")
         await self.message.edit(view=None)
 
-    @discord.ui.button(label="Access", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         kicker = interaction.user
         if kicker in self.pressed_kickers:
