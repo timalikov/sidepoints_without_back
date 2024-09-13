@@ -150,15 +150,14 @@ class AccessRejectView(discord.ui.View):
             customer=self.customer,
             kicker=self.kicker,
             purchase_id=self.purchase_id,
-            sqs_client=self.sqs_client,
-            timeout=5
+            sqs_client=self.sqs_client
         )
         embed_message = discord.Embed(
             title=f"Sorry, the kicker {self.kicker.name} has not accepted the session.",
             colour=discord.Colour.blue(),
             description="Would you like a refund or replace the kicker?"
         )
-        await self.customer.send(content=None, embed=embed_message, view=view)
+        view.message = await self.customer.send(embed=embed_message, view=view)
 
 
 

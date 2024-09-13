@@ -19,38 +19,34 @@ class RefundReplaceView(discord.ui.View):
         purchase_id: int,
         sqs_client: Any,
         access_reject_view: Any = None,
-        timeout: int = 60,
         channel: Any = None,
         stop_task: Callable = None, 
 
     ) -> None:
-        super().__init__(timeout=None)
+        super().__init__(timeout=60 * 5)
         self.customer = customer
         self.kicker = kicker
         self.purchase_id = purchase_id
         self.sqs_client = sqs_client
         self.access_reject_view = access_reject_view
-        self.timeout = timeout
         self.channel = channel
         self.stop_task = stop_task if stop_task is not None else lambda: None
         self.already_pressed = False
         self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
-        # self.services_db = Services_Database()
-        # self.service = self.services_db.get_services_by_username(kicker.name)
-
-        self.timeout_refund_handler = TimeoutRefundHandler(
-            timeout_seconds= 60 * self.timeout,
-            on_timeout_callback=self.auto_refund  
-        )
+    
+    async def on_timeout(self):
+        if not self.already_pressed:
+            await self.auto_refund()
 
     async def auto_refund(self) -> None:
         if not self.already_pressed:
             for item in self.children:
                 if isinstance(item, discord.ui.Button):
                     item.disabled = True
+            await self.message.edit(view=self)
             
             message=f"Sorry, we haven't received your decision in 5 minutes. The funds will be automatically refunded to your wallet."
-            self.customer.send(content=message)
+            await self.customer.send(content=message)
 
             await self.refund_handler.process_refund(
                 interaction=None,
@@ -74,7 +70,7 @@ class RefundReplaceView(discord.ui.View):
                     if isinstance(item, discord.ui.Button):
                         item.disabled = True
                 
-                await interaction.message.edit(view=self)
+                await self.message.edit(view=self)
                 
                 if self.stop_task:
                     self.stop_task()
@@ -96,7 +92,6 @@ class RefundReplaceView(discord.ui.View):
     @check_already_pressed
     async def refund_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-        print("Refund button pressed")
 
         await send_interaction_message(
             interaction=interaction,

@@ -43,13 +43,13 @@ class RefundReplaceManager:
             color=discord.Color.blue()
         )
 
-        self.previous_message = await customer.send(embed=embed, view=view) 
+        view.message = await customer.send(embed=embed, view=view) 
+        self.previous_message = view.message
         self.previous_view = view
 
     @tasks.loop(seconds=60, count=5) 
     async def periodic_refund_replace(self, customer: discord.User, kicker: discord.User, purchase_id: int):
         if self.stop_event.is_set():  
-            print("periodic_refund_replace task stopped.")
             self.user_interacted = True
             self.periodic_refund_replace.cancel() 
             return
