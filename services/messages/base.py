@@ -82,8 +82,8 @@ async def send_confirm_order_message(
         "**Session has been purchased**\n"
         f"User: {customer.name}\n"
         f"Kicker: {kicker.name}\n"
-        # f"Service: {service["service_category_name"]}\n"
-        # f"Price: {service["service_price"]}\n"
+        f"Service: {service["service_category_name"] if service else 'Not found'}\n"
+        f"Price: {service["service_price"] if service else 'Not found'}\n"
     )
     await send_message_to_customer_support(bot, cs_team_message)
 
@@ -97,8 +97,8 @@ async def send_confirm_order_message(
         title=f"Your service has been purchased:",
         description=(
             f"Service: {service['service_category_name'] if service else 'Not found'}\n" 
-            # f"Price: {service['service_price']}\n"
-            "Please accept or reject the session"
+            f"Price: {service['service_price'] if service else 'Not found'}\n"
+            "Please Accept or Reject the session"
         )       
     )
     

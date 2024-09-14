@@ -16,9 +16,7 @@ class RefundReplaceManager:
         self.refund_handler = refund_handler
         self.access_reject_view = access_reject_view
 
-
-
-    async def send_refund_replace(self, customer: discord.User, kicker: discord.User, purchase_id: int):
+    async def send_refund_replace(self, customer: discord.User, kicker: discord.User, purchase_id: int, start_timer: bool):
         if self.previous_message and self.previous_view:
             for item in self.previous_view.children:
                 if isinstance(item, discord.ui.Button):
@@ -28,13 +26,16 @@ class RefundReplaceManager:
             except Exception as e:
                 print(f"Failed to edit previous message: {e}")
 
+        timeout = 60 * 5 if start_timer else None
+
         view = RefundReplaceView(
             customer=customer,
             kicker=kicker,
             purchase_id=purchase_id,
             sqs_client=SQSClient(),
             stop_task=self.stop_event.set,
-            access_reject_view=self.access_reject_view
+            access_reject_view=self.access_reject_view,
+            timeout=timeout
         )
 
         embed = discord.Embed(
@@ -53,27 +54,22 @@ class RefundReplaceManager:
             self.user_interacted = True
             self.periodic_refund_replace.cancel() 
             return
-        await self.send_refund_replace(customer, kicker, purchase_id)
-        await self.kicker.send(f"User <@{customer.id}> is waiting for your response.\n Please Accept or Reject the session")
+        
+        if self.periodic_refund_replace.current_loop == 4:
+            await self.send_refund_replace(customer, kicker, purchase_id, start_timer=True)
+            await kicker.send(f"User <@{customer.id}> is waiting for your response.\nPlease Accept or Reject the session.")
+        else:
+            await self.send_refund_replace(customer, kicker, purchase_id, start_timer=False)
+            await kicker.send(f"User <@{customer.id}> is waiting for your response.\nPlease Accept or Reject the session.")
 
     async def start_periodic_refund_replace(self, customer: discord.User, kicker: discord.User, purchase_id: int):
         self.stop_event.clear()  
         await self.periodic_refund_replace.start(customer, kicker, purchase_id)
-
-        if not self.user_interacted:
-            await self.refund_handler.process_refund(
-                interaction=None,
-                success_message="",
-                kicker_message=f"User <@{customer.id}> refunded the payment!",
-                customer_message="Payment will be refunded to your wallet soon.",
-                channel=None
-            )
     
     async def stop_periodic_refund_replace(self):
         if self.periodic_refund_replace.is_running():
             self.stop_event.set()
             self.periodic_refund_replace.cancel()
-            print("Manually stopped the periodic refund replace loop.")
             
             if self.previous_view:
                 for item in self.previous_view.children:
