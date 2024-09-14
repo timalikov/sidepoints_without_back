@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from bot_instance import get_bot
 import config
 import discord
@@ -6,7 +6,6 @@ from models.private_channel_for_replace import create_channel_for_replace
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_super_kicker
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
-from services.timeout_refund_handler import TimeoutRefundHandler
 
 bot = get_bot()
 
@@ -21,9 +20,10 @@ class RefundReplaceView(discord.ui.View):
         access_reject_view: Any = None,
         channel: Any = None,
         stop_task: Callable = None, 
+        timeout: Optional[int] = 60 * 5
 
     ) -> None:
-        super().__init__(timeout=60 * 5)
+        super().__init__(timeout=timeout)
         self.customer = customer
         self.kicker = kicker
         self.purchase_id = purchase_id
@@ -40,10 +40,7 @@ class RefundReplaceView(discord.ui.View):
 
     async def auto_refund(self) -> None:
         if not self.already_pressed:
-            for item in self.children:
-                if isinstance(item, discord.ui.Button):
-                    item.disabled = True
-            await self.message.edit(view=self)
+            await self.disable_all_buttons()
             
             message=f"Sorry, we haven't received your decision in 5 minutes. The funds will be automatically refunded to your wallet."
             await self.customer.send(content=message)
@@ -55,41 +52,27 @@ class RefundReplaceView(discord.ui.View):
                 customer_message=None,
                 channel=self.channel
             )
+    
+    async def disable_all_buttons(self):
+        if self.access_reject_view:
+            await self.access_reject_view.disable_access_reject_buttons()
 
+        if self.stop_task:
+            self.stop_task()
+        
+        self.already_pressed = True
 
-    def check_already_pressed(func: Callable) -> Callable:
-        async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
-            if not self.already_pressed:
-                result: Any = await func(self, interaction, *args, **kwargs)
-                
-                if self.access_reject_view:
-                    await self.access_reject_view.disable_access_reject_buttons()
-                
-                self.already_pressed = True
-                for item in self.children:
-                    if isinstance(item, discord.ui.Button):
-                        item.disabled = True
-                
-                await self.message.edit(view=self)
-                
-                if self.stop_task:
-                    self.stop_task()
+        for item in self.children:
+            if isinstance(item, discord.ui.Button):
+                item.disabled = True
 
-                return result
-            else:
-                await send_interaction_message(
-                    interaction=interaction,
-                    message="Button has already been pressed."
-                )
-            
-        return decorator
+        await self.message.edit(view=self)
 
     @discord.ui.button(
         label="Refund",
         style=discord.ButtonStyle.red,
         custom_id="refund_button"
     )
-    @check_already_pressed
     async def refund_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
 
@@ -97,6 +80,8 @@ class RefundReplaceView(discord.ui.View):
             interaction=interaction,
             message="The refund has been requested."
         )
+
+        await self.disable_all_buttons()
 
         await self.refund_handler.process_refund(
             interaction=None,
@@ -106,22 +91,19 @@ class RefundReplaceView(discord.ui.View):
             channel=self.channel
         )
 
-
-
     @discord.ui.button(
         label="Replace Kicker",
         style=discord.ButtonStyle.green,
         custom_id="replace_button"
     )
-    @check_already_pressed
     async def replace_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-
         await send_interaction_message(
             interaction=interaction,
             message=f"The replacement has been requested. Please wait ..."
         )
-
+        
+        await self.disable_all_buttons()
         await self.replace_logic(interaction)
 
     async def replace_logic(self, interaction: discord.Interaction) -> None:
@@ -149,6 +131,16 @@ class RefundReplaceView(discord.ui.View):
         await send_message_to_customer_support(
             bot=bot,
             message=message
+        )
+
+        await send_message_to_super_kicker(
+            bot=bot,
+            message=(
+            "**Replacement has been purchased**\n"
+            f"User: {self.customer.name}\n"
+            f"Kicker: {self.kicker.name}\n"
+            f"Voice room: {invite_url}"
+            )
         )
 
         await self.kicker.send(f"User <@{self.customer.id}> has requested replace you")

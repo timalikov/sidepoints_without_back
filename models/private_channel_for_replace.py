@@ -31,11 +31,6 @@ async def create_channel_for_replace(bot, guild_id, customer, base_category_name
         if sk_member:
             overwrites[sk_member] = discord.PermissionOverwrite(read_messages=True)
 
-    for sk_id in SUPER_KICKER_IDS:
-        sk_member = guild.get_member(sk_id)
-        if sk_member:
-            overwrites[sk_member] = discord.PermissionOverwrite(read_messages=True)
-
     channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
     invite = await channel.create_invite(max_age=86400)
