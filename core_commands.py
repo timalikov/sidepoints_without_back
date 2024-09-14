@@ -15,7 +15,6 @@ import os
 
 from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, ORDER_CHANNEL_ID
 from database.dto.sql_order import Order_Database
-from services.messages.base import send_confirm_order_message
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
