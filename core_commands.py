@@ -52,7 +52,7 @@ async def forum_command(interaction: discord.Interaction):
     if not is_admin(interaction):
         await interaction.followup.send(content='Oops, you do not have right to use this command!', ephemeral=True)
         return
-    services_db = Services_Database()
+    services_db = Services_Database(order_type="ASC")
     await services_db.start_posting(forum_channel, guild, bot)
     await interaction.followup.send(content="Posts created!", ephemeral=True)
 

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Literal
 
 import asyncio
 import asyncpg
@@ -26,10 +26,16 @@ APP_CHOICES = {
 }
 
 class Services_Database(BasePsqlDTO):
-    CHUNK_SIZE = 10  # Number of rows to fetch at a time
+    CHUNK_SIZE = 100  # Number of rows to fetch at a time
     BASE_QUERY = "SELECT * FROM discord_services WHERE profile_score >= 100"
 
-    def __init__(self, app_choice="ALL", user_name=None):
+    def __init__(
+        self,
+        app_choice="ALL",
+        user_name=None,
+        order_type: Literal["DESC", "ASC"] = "DESC"
+    ) -> None:
+        self.order_type = order_type
         self.current_offset = 0
         self.current_chunk = []
         self.app_choice = app_choice
@@ -48,7 +54,7 @@ class Services_Database(BasePsqlDTO):
                 self.current_chunk.extend(user_chunk)
 
             # Fetch remaining services if user-specific services are less than CHUNK_SIZE
-            remaining_chunk_size = self.CHUNK_SIZE - len(self.current_chunk)
+            remaining_chunk_size = self.CHUNK_SIZE - len(self.current_chunk)  # 10
             if remaining_chunk_size > 0:
                 default_query = self.BASE_QUERY
                 query_args: List = []
@@ -58,7 +64,7 @@ class Services_Database(BasePsqlDTO):
                         query_args = [self.user_name, remaining_chunk_size, self.current_offset]
                     else:
                         default_query += " LIMIT $1 OFFSET $2;"
-                        query_args = [remaining_chunk_size, self.current_offset]
+                        query_args = [remaining_chunk_size, self.current_offset]  # LIMIT 10 OFFSET 0
                 else:
                     if self.user_name:
                         default_query += " AND service_type_id = $1 AND profile_username != $2 LIMIT $3 OFFSET $4;"
@@ -66,7 +72,11 @@ class Services_Database(BasePsqlDTO):
                     else:
                         default_query += " AND service_type_id = $1 LIMIT $2 OFFSET $3;"
                         query_args = [self.app_choice, remaining_chunk_size, self.current_offset]
-                default_query = default_query.replace("LIMIT", "ORDER BY profile_score LIMIT")
+                ordering = "ORDER BY profile_score"
+                if self.order_type == "DESC":
+                    ordering += " DESC"
+                default_query = default_query.replace("LIMIT", f"{ordering} LIMIT")
+                # SELECT * FROM discord_services WHERE profile_score >= 100 ORDER BY profile_score LIMIT 10 OFFSET 0
                 remaining_chunk = await conn.fetch(default_query, *query_args)
                 self.current_chunk.extend(remaining_chunk)
 
