@@ -155,7 +155,7 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/wallet")
-    guild = interaction.guild
+    guild = bot.get_guild(MAIN_GUILD_ID)
     # Check if the user is a member of the guild
     member = guild.get_member(interaction.user.id)
     if member:
