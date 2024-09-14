@@ -30,6 +30,7 @@ class OrderView(discord.ui.View):
         self.is_direct_message = is_direct_message
         self.is_pressed = False
         self.user_choises = user_choises
+        self.one_time_send_message = True
 
     async def send_all_kickers_with_current_category(self, text: str) -> None:
         for _ in range(100):
@@ -61,7 +62,8 @@ class OrderView(discord.ui.View):
                 f"New Order Alert: **{choices}** [30 minutes]\n"
                 f"You have a new order for a **{choices}** in english"
             )
-        if self.is_direct_message and not self.is_pressed:
+        if self.is_direct_message and not self.is_pressed and self.one_time_send_message:
+            self.one_time_send_message = False
             await self.customer.send(content="Sorry! No one took your order!")
         await self.message.edit(view=None)
 

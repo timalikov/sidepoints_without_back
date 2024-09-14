@@ -185,7 +185,7 @@ async def post_user_profiles():
     await asyncio.sleep(360)
     print("START LOOP POST")
     bot = get_bot()  # Assuming you have a function to get your bot instance
-    services_db = Services_Database()
+    services_db = Services_Database(order_type="ASC")
     for guild in bot.guilds:
         try:
             forum_channel: discord.channel.ForumChannel = await get_and_recreate_forum(guild)
