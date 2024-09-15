@@ -133,24 +133,4 @@ class RefundReplaceView(discord.ui.View):
             message=message
         )
 
-        await send_message_to_super_kicker(
-            bot=bot,
-            message=(
-                "**Replacement has been purchased**\n"
-                f"User: {self.customer.name}\n"
-                f"Kicker: {self.kicker.name}\n"
-                f"Voice room: {invite_url}"
-            )
-        )
-
-        await send_message_to_super_kicker(
-            bot=bot,
-            message=(
-            "**Replacement has been purchased**\n"
-            f"User: {self.customer.name}\n"
-            f"Kicker: {self.kicker.name}\n"
-            f"Voice room: {invite_url}"
-            )
-        )
-
         await self.kicker.send(f"User <@{self.customer.id}> has requested replace you")
