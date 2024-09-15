@@ -76,14 +76,12 @@ async def send_confirm_order_message(
     service = await services_db.get_services_by_username(username=kicker_username)
     if service:
         service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
-
-    
     cs_team_message = (
         "**Session has been purchased**\n"
         f"User: {customer.name}\n"
         f"Kicker: {kicker.name}\n"
-        f"Service: {service["service_category_name"] if service else 'Not found'}\n"
-        f"Price: {service["service_price"] if service else 'Not found'}\n"
+        f"Service: {service['service_category_name'] if service else 'Not found'}\n"
+        f"Price: {service['service_price'] if service else 'Not found'}\n"
     )
     await send_message_to_customer_support(bot, cs_team_message)
 

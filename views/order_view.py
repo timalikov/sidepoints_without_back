@@ -24,49 +24,19 @@ class OrderView(discord.ui.View):
     and customer get a message.
     """
 
-    def __init__(self, *, customer: discord.User, user_choises: str = "ALL", is_direct_message: bool = False):
+    def __init__(self, *, customer: discord.User, services_db: Services_Database = None):
         super().__init__(timeout=30 * 60)
         self.customer: discord.User = customer
-        self.services_db = Services_Database(app_choice=user_choises)
         self.pressed_kickers: List[discord.User] = []
-        self.is_direct_message = is_direct_message
         self.is_pressed = False
-        self.user_choises = user_choises
-        self.one_time_send_message = True
-
-    async def send_all_kickers_with_current_category(self) -> None:
-        choices = (
-            "All players"
-            if self.user_choises == "ALL"
-            else await self.services_db.get_service_category_name(
-                service_type_id=self.user_choises
-            )
-        )
-        text = (
-            f"New Order Alert: **{choices}** [30 minutes]\n"
-            f"You have a new order for a **{choices}** in english"
-        )
-        for _ in range(100):
-            service = await self.services_db.get_next_service()
-            if not service:
-                return None
-            kicker_id: int = service.get("discord_id", "")
-            try:
-                kicker_id = int(kicker_id)
-            except ValueError:
-                print(f"ID: {kicker_id} is not int")
-                return None
-            kicker = bot.get_user(kicker_id)
-            if not kicker:
-                continue
-            view = self.__class__(customer=self.customer, is_direct_message=True)
-            view.message = await kicker.send(content=text, view=view)
+        self.services_db = services_db
+        self.messages = []  # for drop button after timeout
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
-        if not self.is_direct_message and not self.is_pressed and self.one_time_send_message:
-            self.one_time_send_message = False
+        for message in self.messages:
+            await message.edit(view=None)
+        if not self.is_pressed:
             await self.customer.send(content="Sorry! No one took your order!")
-        await self.message.edit(view=None)
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -79,9 +49,7 @@ class OrderView(discord.ui.View):
             return await send_interaction_message(interaction=interaction, message="You are not kicker!")
         service = services[0]
         embed = create_profile_embed(profile_data=service)
-
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
-
         view = OrderAccessRejectView(
             customer=self.customer, main_interaction=interaction, service_id=service['service_id'], order_view=self
         )
@@ -100,7 +68,7 @@ class OrderAccessRejectView(discord.ui.View):
         order_view: Any,
 
     ) -> None:
-        super().__init__(timeout=500)
+        super().__init__(timeout=10 * 30)
         self.main_interaction = main_interaction
         self.service_id = service_id
         self.customer = customer
