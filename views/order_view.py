@@ -1,3 +1,5 @@
+from discord.ext import tasks
+import asyncio
 from typing import Coroutine, List, Callable, Any
 import discord
 import os
@@ -23,7 +25,7 @@ class OrderView(discord.ui.View):
     """
 
     def __init__(self, *, customer: discord.User, user_choises: str = "ALL", is_direct_message: bool = False):
-        super().__init__(timeout=15*60)
+        super().__init__(timeout=30 * 60)
         self.customer: discord.User = customer
         self.services_db = Services_Database(app_choice=user_choises)
         self.pressed_kickers: List[discord.User] = []
@@ -32,7 +34,18 @@ class OrderView(discord.ui.View):
         self.user_choises = user_choises
         self.one_time_send_message = True
 
-    async def send_all_kickers_with_current_category(self, text: str) -> None:
+    async def send_all_kickers_with_current_category(self) -> None:
+        choices = (
+            "All players"
+            if self.user_choises == "ALL"
+            else await self.services_db.get_service_category_name(
+                service_type_id=self.user_choises
+            )
+        )
+        text = (
+            f"New Order Alert: **{choices}** [30 minutes]\n"
+            f"You have a new order for a **{choices}** in english"
+        )
         for _ in range(100):
             service = await self.services_db.get_next_service()
             if not service:
@@ -50,19 +63,7 @@ class OrderView(discord.ui.View):
             view.message = await kicker.send(content=text, view=view)
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
-        if not self.is_direct_message and not self.is_pressed:
-            choices = (
-                "All players"
-                if self.user_choises == "ALL"
-                else await self.services_db.get_service_category_name(
-                    service_type_id=self.user_choises
-                )
-            )
-            await self.send_all_kickers_with_current_category(
-                f"New Order Alert: **{choices}** [30 minutes]\n"
-                f"You have a new order for a **{choices}** in english"
-            )
-        if self.is_direct_message and not self.is_pressed and self.one_time_send_message:
+        if not self.is_direct_message and not self.is_pressed and self.one_time_send_message:
             self.one_time_send_message = False
             await self.customer.send(content="Sorry! No one took your order!")
         await self.message.edit(view=None)
@@ -78,11 +79,13 @@ class OrderView(discord.ui.View):
             return await send_interaction_message(interaction=interaction, message="You are not kicker!")
         service = services[0]
         embed = create_profile_embed(profile_data=service)
+
+        embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
+
         view = OrderAccessRejectView(
-            customer=self.customer, main_interaction=interaction, service_id=service['service_id']
+            customer=self.customer, main_interaction=interaction, service_id=service['service_id'], order_view=self
         )
         view.message = await self.customer.send(embed=embed, view=view)
-        self.is_pressed = True
         await send_interaction_message(interaction=interaction, message="The customer has received your request!")
 
 
@@ -94,6 +97,8 @@ class OrderAccessRejectView(discord.ui.View):
         customer: discord.User,
         main_interaction: discord.Interaction,
         service_id: int,
+        order_view: Any,
+
     ) -> None:
         super().__init__(timeout=500)
         self.main_interaction = main_interaction
@@ -101,6 +106,7 @@ class OrderAccessRejectView(discord.ui.View):
         self.customer = customer
         self.already_pressed = False
         self.discord_service_id = MAIN_GUILD_ID
+        self.order_view = order_view
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
         await self.message.edit(view=None)
@@ -130,6 +136,7 @@ class OrderAccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer(ephemeral=True)
+        self.order_view.is_pressed = True
         is_member = await is_member_of_main_guild(self.customer.id)
         if not is_member:
             await interaction.followup.send("Please join the server before proceeding: https://discord.gg/sidekick", ephemeral=True)
