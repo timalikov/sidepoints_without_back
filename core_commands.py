@@ -126,16 +126,31 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(MAIN_GUILD_ID)
     channel = bot.get_channel(ORDER_CHANNEL_ID)
-    view = OrderView(customer=interaction.user, user_choises=choices.value)
-    view.message = await channel.send(
-        view=view,
-        content=(
-            "@everyone \n"
-            f"New Order Alert: **{choices.name}** [30 minutes]\n"
-            f"You have a new order for a **{choices.name}** in english"
-        )
+    text_message_order_view = (
+        f"New Order Alert: **{choices.name}** [30 minutes]\n"
+        f"You have a new order for a **{choices.name}** in english"
     )
-    await view.send_all_kickers_with_current_category()
+    services_db = Services_Database(app_choice=choices.value)
+    view = OrderView(customer=interaction.user, services_db=services_db)
+    sent_message = await channel.send(
+        view=view, content=f"@everyone\n{text_message_order_view}",
+    )
+    view.messages.append(sent_message)
+    for _ in range(100):
+        service = await services_db.get_next_service()
+        if not service:
+            break
+        kicker_id: int = service.get("discord_id", "")
+        try:
+            kicker_id = int(kicker_id)
+        except ValueError:
+            print(f"ID: {kicker_id} is not int")
+            continue
+        kicker = bot.get_user(kicker_id)
+        if not kicker:
+            continue
+        sent_message = await kicker.send(view=view, content=text_message_order_view)
+        view.messages.append(sent_message)
     await interaction.followup.send(f"Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{main_link}", ephemeral=True)
 
 
