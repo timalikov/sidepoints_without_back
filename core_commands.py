@@ -135,6 +135,7 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
             f"You have a new order for a **{choices.name}** in english"
         )
     )
+    view.send_all_kickers_with_current_category()
     await interaction.followup.send(f"Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{main_link}", ephemeral=True)
 
 
