@@ -1,24 +1,33 @@
-from typing import Union
+from typing import List
+import datetime
 import discord
 from discord import app_commands
 import discord.ext
 import discord.ext.commands
+import os
+
 from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
-
-from models.forum import get_or_create_forum
-import os
-
-from config import MAIN_GUILD_ID, DISCORD_BOT_TOKEN, ORDER_CHANNEL_ID
 from database.dto.sql_order import Order_Database
+from database.dto.psql_leaderboard import LeaderboardDatabase
+from config import (
+    MAIN_GUILD_ID,
+    DISCORD_BOT_TOKEN,
+    ORDER_CHANNEL_ID,
+    LINK_LEADERBOARD,
+    LEADERBOARD_CATEGORY_NAME,
+    LEADERBOARD_CHANNEL_NAME
+)
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
+from models.forum import get_or_create_forum
+from models.public_channel import get_or_create_channel_by_category_and_name
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -168,6 +177,7 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
         await Subscribers_Database.delete_user_data(interaction.user.id)
         await interaction.followup.send(f"You have unsubscribed from the order command.", ephemeral=True)
 
+
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
     await log_to_database(interaction.user.id, "/wallet")
@@ -206,6 +216,19 @@ async def boost(interaction: discord.Interaction, username: str):
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
     else:
         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+
+
+@bot.tree.command(name="leaderboard", description="Get leaderboard link!")
+async def leaderboard(interaction: discord.Interaction):
+    await interaction.response.send_message(
+        embed=discord.Embed(
+            color=discord.Colour.orange(),
+            title="Leaderboard!",
+            description="Click to check the leaderboard!",
+            url=LINK_LEADERBOARD
+        ),
+        ephemeral=True
+    )
 
 
 @bot.event

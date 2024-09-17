@@ -1,16 +1,21 @@
 import asyncio
 import csv
 from datetime import datetime, timezone, timedelta
-from typing import Any
+from typing import Any, List
 import discord
 from bot_instance import get_bot
 from discord.ext import tasks
-from config import MAIN_GUILD_ID
+from config import (
+    MAIN_GUILD_ID,
+    LEADERBOARD_CATEGORY_NAME,
+    LEADERBOARD_CHANNEL_NAME,
+)
+from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
 from services.sqs_client import SQSClient
 from views.refund_replace import RefundReplaceView
-from database.dto.sql_profile import Profile_Database
 from database.dto.psql_services import Services_Database
+from database.dto.psql_leaderboard import LeaderboardDatabase
 from views.session_check import SessionCheckView
 
 main_guild_id = MAIN_GUILD_ID
@@ -168,3 +173,42 @@ async def post_user_profiles():
         )
         forum_channel.overwrites[guild.default_role].read_messages = True
 
+
+@tasks.loop(hours=24)
+async def create_leaderboard():
+    guild = bot.get_guild(MAIN_GUILD_ID)
+    channel = await get_or_create_channel_by_category_and_name(
+        guild=guild,
+        category_name=LEADERBOARD_CATEGORY_NAME,
+        channel_name=LEADERBOARD_CHANNEL_NAME
+    )
+    await channel.purge()
+    now = datetime.datetime.utcnow().strftime("%m/%d/%Y")
+    try:
+        await channel.send(
+            content=(
+                f"Points Leaderboard {now}\n"
+                "Check out the top 20 points leaderboard users!\n"
+                "For the full leaderboard check it out here: https://app.sidekick.fans/leaderboard/points"
+            )
+        )
+    except discord.DiscordException:
+        print("No permissions!")
+        return None
+    for role in guild.roles:
+        if role.name != "@everyone":
+            await channel.set_permissions(role, send_messages=False)
+    dto = LeaderboardDatabase()
+    leaders: List[dict] = await dto.all()
+    for leader in leaders:
+        name: str = leader["username"]
+        position: int = leader["total_pos"]
+        score: int = leader["total_score"]
+        image_url : str= leader["public_link"]
+        embed = discord.Embed(
+            colour=discord.Colour.blue(),
+            title=f"TOP {position}. **{name}**",
+            description=f"Score: {score}"
+        )
+        embed.set_thumbnail(url=image_url)
+        await channel.send(embed=embed)

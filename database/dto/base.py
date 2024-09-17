@@ -2,8 +2,9 @@ import asyncpg
 from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
 from contextlib import asynccontextmanager
 
+from database.dto.interface import InterfaceDTO
 
-class BasePsqlDTO:
+class BasePsqlDTO(InterfaceDTO):
     HOST = HOST_PSQL
     PORT = PORT_PSQL
     USER = USER_PSQL
