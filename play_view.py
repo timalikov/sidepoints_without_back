@@ -60,7 +60,7 @@ class PlayView(View):
 
         await log_to_database(interaction.user.id, "play_user")
         serviceId = self.service['service_id']
-        discordServerId = interaction.guild.id
+        discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
         payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
         await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
 
