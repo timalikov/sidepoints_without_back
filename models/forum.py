@@ -5,7 +5,8 @@ from discord import ForumTag
 
 from database.dto.sql_forum_server import ForumsOfServerDatabase
 from database.dto.psql_services import Services_Database
-from config import FORUM_NAME
+from config import FORUM_NAME, FORUM_CATEGORY_NAME
+from models.category import get_or_create_category_by_name
 
 
 async def find_forum(guild: discord.Guild, forum_name: str) -> Optional[discord.ForumChannel]:
@@ -22,18 +23,7 @@ async def find_sidekick_forum(guild: discord.Guild) -> Optional[discord.ForumCha
 
 
 async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
-    base_category_name = "Sidekick: Match to Play"
-    category = None
-    index = 1
-    while not category:
-        category_name = f"{base_category_name}"
-        category = discord.utils.get(guild.categories, name=category_name)
-        if category and len(category.channels) >= 50:
-            category = None
-            index += 1
-        elif not category:
-            category = await guild.create_category(category_name)
-
+    category = await get_or_create_category_by_name(guild=guild, category_name=FORUM_CATEGORY_NAME)
     services_db = Services_Database()
     values_list = await services_db.get_all_active_tags()
     available_tags = [ForumTag(name=tag) for tag in values_list]
