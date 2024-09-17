@@ -2,7 +2,7 @@ import discord
 from services.messages.interaction import send_interaction_message
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 from discord.ui import View
-from config import APP_CHOICES
+from config import APP_CHOICES, MAIN_GUILD_ID
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed
 import os
