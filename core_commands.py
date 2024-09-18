@@ -1,5 +1,4 @@
 from typing import List
-import datetime
 import discord
 from discord import app_commands
 import discord.ext
@@ -8,26 +7,22 @@ import os
 
 from play_view import PlayView
 from bot_instance import get_bot
-from background_tasks import delete_old_channels, post_user_profiles
+from background_tasks import delete_old_channels, post_user_profiles, create_leaderboard
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
-from database.dto.psql_leaderboard import LeaderboardDatabase
 from config import (
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
     ORDER_CHANNEL_ID,
     LINK_LEADERBOARD,
-    LEADERBOARD_CATEGORY_NAME,
-    LEADERBOARD_CHANNEL_NAME
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from models.forum import get_or_create_forum
-from models.public_channel import get_or_create_channel_by_category_and_name
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -234,11 +229,9 @@ async def leaderboard(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
     delete_old_channels.start()
-    # bot.loop.create_task(delete_old_channels())
-    # post_weekly_leaderboard.start()
     await bot.tree.sync()
-    # await delete_all_threads_and_clear_csv()
     post_user_profiles.start()
+    create_leaderboard.start()
     print(f'We have logged in as {bot.user}')
 
 def run():
