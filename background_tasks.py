@@ -183,7 +183,7 @@ async def create_leaderboard():
         channel_name=LEADERBOARD_CHANNEL_NAME
     )
     await channel.purge()
-    now = datetime.datetime.utcnow().strftime("%m/%d/%Y")
+    now = datetime.utcnow().strftime("%m/%d/%Y")
     try:
         await channel.send(
             content=(
