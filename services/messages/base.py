@@ -1,7 +1,7 @@
 import discord
 
 from bot_instance import get_bot
-from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID
+from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID, TEST_ACCOUNTS
 
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.sqs_client import SQSClient
@@ -83,7 +83,9 @@ async def send_confirm_order_message(
         f"Service: {service['service_category_name'] if service else 'Not found'}\n"
         f"Price: {service['service_price'] if service else 'Not found'}\n"
     )
-    await send_message_to_customer_support(bot, cs_team_message)
+
+    if kicker.id not in TEST_ACCOUNTS and customer.id not in TEST_ACCOUNTS:
+        await send_message_to_customer_support(bot, cs_team_message)
 
     await customer.send(
         f"Your order has been sent to kicker <@{kicker.id}>.\n"
