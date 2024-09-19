@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional
 from bot_instance import get_bot
-import config
+from config import MAIN_GUILD_ID, TEST_ACCOUNTS
 import discord
 from models.private_channel_for_replace import create_channel_for_replace
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_super_kicker
@@ -110,7 +110,7 @@ class RefundReplaceView(discord.ui.View):
 
         invite_url = await create_channel_for_replace(
             bot=bot,
-            guild_id=config.MAIN_GUILD_ID,
+            guild_id=MAIN_GUILD_ID,
             customer=self.customer
         )
         await send_interaction_message(
@@ -124,13 +124,14 @@ class RefundReplaceView(discord.ui.View):
                 f"Voice room: {invite_url}"
             )
 
-        await send_message_to_super_kicker(
-            bot=bot,
-            message=message
-        )
-        await send_message_to_customer_support(
-            bot=bot,
-            message=message
-        )
+        if self.kicker.id not in TEST_ACCOUNTS and self.customer.id not in TEST_ACCOUNTS:
+            await send_message_to_super_kicker(
+                bot=bot,
+                message=message
+            )
+            await send_message_to_customer_support(
+                bot=bot,
+                message=message
+            )
 
-        await self.kicker.send(f"User <@{self.customer.id}> has requested replace you")
+        await self.kicker.send(f"User <@{self.customer.id}> has requested to replace you.")

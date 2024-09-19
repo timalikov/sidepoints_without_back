@@ -2,7 +2,7 @@ import discord
 import asyncio
 
 from bot_instance import get_bot
-from config import MAIN_GUILD_ID
+from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID, TEST_ACCOUNTS
 from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
 from database.dto.sql_profile import Profile_Database
@@ -74,7 +74,12 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         f"Connect via Voice room: {invite.url}"
     )
 
-    manager_message = (f"Hey! Session between kicker: @{challenged.name} and @{challenger.name} has started. Please check this private channel: {invite.url}.")
+    manager_message = (
+                    f"Session has started\n"
+                    f"Kicker: @{challenged.name}\n"
+                    f"User: @{challenger.name}\n" 
+                    f"Please check this private channel: {invite.url}."
+                    )
 
     user_message = (
         "Kicker has accepted your order:\n"
@@ -100,8 +105,9 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-    await send_message_to_customer_support(bot, manager_message)
-    await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
+    if challenged.id not in TEST_ACCOUNTS and challenger.id not in TEST_ACCOUNTS:
+        await send_message_to_customer_support(bot, manager_message)
+        await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
 
     await session_delivery_check(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
     if challenged.id == 1208433940050874429:
