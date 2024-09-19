@@ -2,6 +2,8 @@ import asyncio
 import csv
 import datetime
 import io
+import logging
+
 from flask import Flask, request, jsonify, Response
 import config
 from services.messages.base import (
@@ -19,6 +21,7 @@ import discord
 main_guild_id = config.MAIN_GUILD_ID
 bot = get_bot()
 app = Flask(__name__)
+app.logger.setLevel(logging.ERROR)
 
 @app.route('/discord_api/server_user_counts', methods=['GET'])
 async def server_user_counts():

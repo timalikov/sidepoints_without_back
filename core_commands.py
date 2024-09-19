@@ -213,7 +213,7 @@ async def boost(interaction: discord.Interaction, username: str):
         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
 
 
-@bot.tree.command(name="leaderboard", description="Get leaderboard link!")
+@bot.tree.command(name="leaderboard", description="Check out the points leaderboard")
 async def leaderboard(interaction: discord.Interaction):
     await interaction.response.send_message(
         embed=discord.Embed(
