@@ -6,11 +6,8 @@ from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID, TEST_ACCOUNTS
 from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
 from database.dto.sql_profile import Profile_Database
-from background_tasks import (
-    send_message_after_2_min,
-    send_message_after_5_min,
-    session_delivery_check,
-)
+from services.schedule_tasks.session_delivery_check import session_delivery_check
+
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_team_channel
 from views.done_button import DoneButton
 
@@ -112,22 +109,7 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         await send_message_to_customer_support(bot, manager_message)
         await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
 
-    await session_delivery_check.start(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
-
-    # if challenged in kicker_members:
-    #     if send_message_after_2_min.is_running():
-    #         print("Task 2 minutes send message is already running, stopping it first.")
-    #         send_message_after_2_min.cancel()
-    #         await asyncio.sleep(0.1) 
-    #     if send_message_after_5_min.is_running():
-    #         print("Task 5 minutes send message is already running, stopping it first.")
-    #         send_message_after_5_min.cancel()
-    #         await asyncio.sleep(0.1)
-            
-    #     await send_message_after_2_min.start(manager_members, challenged, kicker_username, invite.url)
-    #     await send_message_after_5_min.start(manager_members, challenged, kicker_username, invite.url)
-    
-    # Special handling for the specific user ID
+    await session_delivery_check(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
     if challenged.id == 1208433940050874429:
         # Creating the embed
         embed = discord.Embed(title="👋 Hi there! Welcome to the Web3 Mastery Tutorial!", description="I'm CZ, here to guide you through your first steps into an exciting world🌐✨", color=discord.Color.blue())

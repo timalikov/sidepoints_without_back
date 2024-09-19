@@ -1,10 +1,8 @@
-from discord.ext import tasks
-import asyncio
 from typing import Coroutine, List, Callable, Any
 import discord
 import os
 
-from database.dto.psql_services import Services_Database, APP_CHOICES
+from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
 from config import MAIN_GUILD_ID
 from services.messages.interaction import send_interaction_message
@@ -25,7 +23,7 @@ class OrderView(discord.ui.View):
     """
 
     def __init__(self, *, customer: discord.User, services_db: Services_Database = None):
-        super().__init__(timeout=30 * 60)
+        super().__init__(timeout=15 * 60)
         self.customer: discord.User = customer
         self.pressed_kickers: List[discord.User] = []
         self.is_pressed = False
@@ -33,8 +31,11 @@ class OrderView(discord.ui.View):
         self.messages = []  # for drop button after timeout
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
-        for message in self.messages:
-            await message.edit(view=None)
+        for message_instance in self.messages:
+            try:
+                await message_instance.delete()
+            except Exception as e:
+                print(e)
         if not self.is_pressed:
             await self.customer.send(content="Sorry! No one took your order!")
 

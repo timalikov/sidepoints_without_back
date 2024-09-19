@@ -21,34 +21,6 @@ from views.session_check import SessionCheckView
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
-@tasks.loop(count=1)
-async def session_delivery_check(
-    *,
-    customer: discord.User,
-    kicker: discord.User,
-    purchase_id: int,
-    channel: Any,
-):
-    ONE_HOUR: int = 3600
-    await asyncio.sleep(ONE_HOUR)
-    message_embed = discord.Embed(
-        colour=discord.Colour.dark_blue(),
-        title=f"Hey @{customer.name}",
-        description=(
-            f"Has your session with kicker @{kicker.name} delivered?"
-        )       
-    )
-
-    view = SessionCheckView(
-        customer=customer,
-        kicker=kicker,
-        purchase_id=purchase_id,
-        channel=channel
-    )
-    view.message = await customer.send(
-        view=view,
-        embed=message_embed
-    )
 
 @tasks.loop(seconds=20, count=4)
 async def send_user_refund_replace(
