@@ -23,7 +23,7 @@ class UserProfileView(discord.ui.View):
         print("ENTER")
         serviceId = self.profile_data['service_id']
         discordServerId = interaction.guild.id
-        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}&side_auth=DISCORD"
         try:
             await interaction.response.send_message(
                 f"To participate in this session, please complete your payment here: {payment_link}",

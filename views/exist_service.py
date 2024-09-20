@@ -44,7 +44,7 @@ class Profile_Exist(View):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "edit_service")
 
-        payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit?side_auth=DISCORD"
         await interaction.followup.send(f"To edit your service go to the link below: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
@@ -70,5 +70,5 @@ class Profile_Exist(View):
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "create_service")
-        payment_link = f"{os.getenv('WEB_APP_URL')}/services/create"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/services/create?side_auth=DISCORD"
         await interaction.followup.send(f"To create a new service go to the link below: {payment_link}", ephemeral=True)

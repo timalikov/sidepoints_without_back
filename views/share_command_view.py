@@ -79,7 +79,7 @@ class ShareCommandView(discord.ui.View):
 
         discord_server_id = interaction.guild.id
         
-        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={discord_server_id}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={discord_server_id}&side_auth=DISCORD"
         
         is_member = await self.is_member_of_main_guild(interaction.user.id)
         if not is_member:
