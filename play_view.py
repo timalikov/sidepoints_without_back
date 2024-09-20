@@ -61,7 +61,7 @@ class PlayView(View):
         await log_to_database(interaction.user.id, "play_user")
         serviceId = self.service['service_id']
         discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
-        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}&side_auth=DISCORD"
         await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
@@ -118,7 +118,7 @@ class PlayView(View):
     async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         if self.service:
-            payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.service['profile_id']}"
+            payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.service['profile_id']}?side_auth=DISCORD"
             await send_interaction_message(interaction=interaction, message=f"To boost the profile go to the link below: {payment_link}")
         else:
             await send_interaction_message(interaction=interaction, message="No user found to boost.")

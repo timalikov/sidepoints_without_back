@@ -26,13 +26,13 @@ class Wallet_exist(View):
     async def wallet_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "wallet_button")
-        await interaction.followup.send(f"Press the link to get access to the wallet: {os.getenv('WEB_APP_URL')}/manage", ephemeral=True)
+        await interaction.followup.send(f"Press the link to get access to the wallet: {os.getenv('WEB_APP_URL')}/manage?side_auth=DISCORD", ephemeral=True)
 
     @discord.ui.button(label="Top up", style=discord.ButtonStyle.primary, custom_id="top_up_button")
     async def top_up_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "top_up_button")
-        await interaction.followup.send(f"Press the link to get access to the top up: {os.getenv('WEB_APP_URL')}/topup", ephemeral=True)
+        await interaction.followup.send(f"Press the link to get access to the top up: {os.getenv('WEB_APP_URL')}/topup?side_auth=DISCORD", ephemeral=True)
 
     @discord.ui.button(label="Balance", style=discord.ButtonStyle.secondary, custom_id="balance_button")
     async def balance_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -45,5 +45,5 @@ class Wallet_exist(View):
             balance_value = get_usdt_balance(wallet_address)
             await interaction.followup.send(f"Your balance: {balance_value} USDT", ephemeral=True)
         else:
-            await interaction.followup.send(f"Please create a crypto-wallet connected to your discord account via link: {os.getenv('WEB_APP_URL')}/manage", ephemeral=True)
+            await interaction.followup.send(f"Please create a crypto-wallet connected to your discord account via link: {os.getenv('WEB_APP_URL')}/manage?side_auth=DISCORD", ephemeral=True)
 

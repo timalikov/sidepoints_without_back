@@ -112,7 +112,7 @@ class OrderAccessRejectView(discord.ui.View):
             return
 
         await log_to_database(interaction.user.id, "play_user")
-        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={self.discord_service_id}"
+        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={self.discord_service_id}&side_auth=DISCORD"
         await self.main_interaction.message.edit(content="Finished", embed=None, view=None)
         await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
 
