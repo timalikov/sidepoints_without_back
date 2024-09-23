@@ -96,6 +96,7 @@ async def handle_confirm_order():
     kickerId: str = data.get("kickerId")
     kickerUsername: str = data.get("kickerUsername")
     purchaseId: str = data.get("purchaseId")
+    discord_server_id: int = data.get("discordServerId")
     if channelName:
         channel_name = f"private-channel-{channelName}"
         challenger: discord.User = bot.get_user(int(customerId))
@@ -109,7 +110,8 @@ async def handle_confirm_order():
                 kicker=challenged,
                 kicker_username=kickerUsername,
                 service_name=serviceName,
-                purchase_id=purchaseId
+                purchase_id=purchaseId,
+                discord_server_id=discord_server_id
             ),
             bot.loop
         )

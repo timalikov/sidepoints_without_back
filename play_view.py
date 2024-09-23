@@ -79,21 +79,21 @@ class PlayView(View):
         await interaction.response.defer(ephemeral=True)
 
         user_id = self.service['discord_id']
-        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
+        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, main_guild_id)
 
+        message: str = ""
         if thread_id:
-            thread = await bot.fetch_channel(int(thread_id))
-            profile_link = thread.jump_url
-            # profile_link = f"https://discord.com/channels/{main_guild_id}/{thread_id}"
-            if interaction.response.is_done():
-                await interaction.followup.send(f"Profile account: {profile_link}", ephemeral=True)
+            thread = await bot.get_channel(int(thread_id))
+            if not thread:
+                message = "Profile not found!"
             else:
-                await interaction.response.send_message(f"Profile account: {profile_link}", ephemeral=True)
+                message = f"Profile account: {thread.jump_url}"
         else:
-            if interaction.response.is_done():
-                await interaction.followup.send("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
-            else:
-                await interaction.response.send_message("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
+            message = "The SideKicker account is not posted yet, please wait or you can share the username."
+        if interaction.response.is_done():
+            await interaction.followup.send(message, ephemeral=True)
+        else:
+            await interaction.response.send_message(message, ephemeral=True)
 
     @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_user")
     async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):

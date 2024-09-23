@@ -35,6 +35,8 @@ class ShareCommandView(discord.ui.View):
             title=f"Username: {username}",
             description=f"**Description:** {service_description}\n**Category:** {category}\n**Price:** ${price}"
         )
+        if isinstance(service_image, list):
+            service_image = service_image[0] if service_image else ""
         if service_image:
             embed.set_image(url=service_image) 
 
