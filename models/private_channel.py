@@ -1,8 +1,7 @@
 import discord
-import asyncio
 
 from bot_instance import get_bot
-from config import CUSTOMER_SUPPORT_TEAM_IDS, MAIN_GUILD_ID, TEST_ACCOUNTS
+from config import MAIN_GUILD_ID, TEST_ACCOUNTS
 from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
 from database.dto.sql_profile import Profile_Database
@@ -14,6 +13,35 @@ from views.done_button import DoneButton
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 
+
+async def send_connect_message_between_kicker_and_customer(
+    challenger: discord.User,
+    challenged: discord.User,
+    serviceName: str,
+    invite_url: str = None
+) -> None:
+    kicker_message = (
+        "**You session has started:**\n"
+        f"User: <@{challenger.id}>\n"
+        f"Service: {serviceName}\n"
+        "Reach out to the user as soon as possible:\n"
+        f"Connect via Direct message:<@{challenger.id}>\n"
+    )
+    user_message = (
+        "Kicker has accepted your order:\n"
+        f"Kicker: <@{challenged.id}>\n"
+        f"Service: {serviceName}\n"
+        f"Connect via Direct message:<@{challenged.id}>\n"
+    )
+    if invite_url:
+        kicker_message += "\n{invite_url}"
+        user_message += "\n{invite_url}"
+    try:
+        await challenger.send(user_message)
+        if challenged.id != 1208433940050874429:
+            await challenged.send(kicker_message)
+    except discord.HTTPException:
+        print("Failed to send invite links to one or more participants.")
 
 async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
@@ -64,46 +92,30 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
     
     await start_all_messages(channel)
 
-    kicker_message = (
-        "**You session has started:**\n"
-        f"User: <@{challenger.id}>\n"
-        f"Service: {serviceName}\n"
-        # f"Price: {price}\n"
-        "Reach out to the user as soon as possible:\n"
-        f"Connect via Direct message:<@{challenger.id}>\n"
-        f"Connect via Voice room: {invite.url}"
+    manager_message = (
+        f"Session has started\n"
+        f"Kicker: @{challenged.name}\n"
+        f"User: @{challenger.name}\n" 
+        f"Please check this private channel: {invite.url}."
     )
 
-    manager_message = (
-                    f"Session has started\n"
-                    f"Kicker: @{challenged.name}\n"
-                    f"User: @{challenger.name}\n" 
-                    f"Please check this private channel: {invite.url}."
-                    )
-
-    user_message = (
-        "Kicker has accepted your order:\n"
-        f"Kicker: <@{challenged.id}>\n"
-        f"Service: {serviceName}\n"
-        # f"Price: {price}\n"
-        f"Connect via Direct message:<@{challenged.id}>\n"
-        f"Connect via Voice room: {invite.url}"
+    await send_connect_message_between_kicker_and_customer(
+        challenged=challenged,
+        challenger=challenger,
+        serviceName=serviceName,
+        invite_url=invite.url
     )
     
     manager_members = []
 
-    try:
-        await challenger.send(user_message)
-        if challenged.id != 1208433940050874429:
-            await challenged.send(kicker_message)
-        
-        if challenged in kicker_members:
-            for manager_id in managers:
+    if challenged in kicker_members:
+        for manager_id in managers:
+            try:
                 manager = await bot.fetch_user(manager_id)
                 manager_members.append(manager)
                 await manager.send(manager_message)
-    except discord.HTTPException:
-        print("Failed to send invite links to one or more participants.")
+            except discord.HTTPException:
+                print("Failed to send invite links to one or more participants.")
 
     if challenged.id not in TEST_ACCOUNTS and challenger.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, manager_message)

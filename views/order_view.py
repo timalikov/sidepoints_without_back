@@ -37,7 +37,9 @@ class OrderView(discord.ui.View):
             except Exception as e:
                 print(e)
         if not self.is_pressed:
-            await self.customer.send(content="Sorry! No one took your order!")
+            await self.customer.send(
+                content="Sorry, the dispatching countdown has ended and your order has not been completed successfully."
+            )
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):

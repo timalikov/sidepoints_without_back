@@ -3,6 +3,7 @@ import os
 import discord
 
 from button_constructors import ShareButton, ChatButton
+from message_constructors import create_profile_embed
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 from serializers.profile_serializer import serialize_profile_data
 
@@ -56,14 +57,8 @@ class Post_FORUM:
         invite_link: str = f"https://app.sidekick.fans/payment/{service_id}?discordServerId={self.guild_id}"
         link_message = f"To initiate a session with {username}, please click on the link: {invite_link}"
 
-        embed = discord.Embed(
-            title=username,
-            description=f"Discord username: <@{int(self.profile_data['discord_id'])}>\n\n {self.profile_data['service_description']}"
-        )
-
-        embed.set_image(url=self.profile_data['service_image'])
-        embed.add_field(name="Price", value=f"${self.profile_data['service_price']}/hour", inline=True)
-        embed.add_field(name="Category", value=tag_name, inline=True)
+        embed = create_profile_embed(self.profile_data)
+        embed.description = f"Discord username: <@{int(self.profile_data['discord_id'])}>\n\n {self.profile_data['service_description']}"
         embed.add_field(name="Link", value=link_message, inline=False)
 
         tag = discord.utils.get(self.forum_channel.available_tags, name=tag_name)

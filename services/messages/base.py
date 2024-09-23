@@ -69,8 +69,9 @@ async def send_confirm_order_message(
     customer: discord.User,
     kicker: discord.User,
     kicker_username: str,
+    purchase_id: int,
+    discord_server_id: int,
     service_name: str = "",
-    purchase_id: int
 ) -> StatusCodes:
     services_db = Services_Database()
     service = await services_db.get_services_by_username(username=kicker_username)
@@ -83,7 +84,6 @@ async def send_confirm_order_message(
         f"Service: {service['service_category_name'] if service else 'Not found'}\n"
         f"Price: {service['service_price'] if service else 'Not found'}\n"
     )
-
     if kicker.id not in TEST_ACCOUNTS and customer.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, cs_team_message)
 
@@ -111,17 +111,25 @@ async def send_confirm_order_message(
         channel_name=channel_name,
         service_name=service_name,
         purchase_id=purchase_id,
-        sqs_client=sqs_client
+        sqs_client=sqs_client,
+        discord_server_id=discord_server_id
     )
 
+    success: bool = True
+    response: str = None
     try:
         view.message = await kicker.send(
             view=view,
             embed=message_embend
         )
-        return True, view.message.channel.id
     except Exception as e:
-        return False, f"Failed to send message: {str(e)}"
+        response = f"Failed to send message: {str(e)}"
+        success = False
+    if view.message.channel:
+        response = view.message.channel.id
+    else:
+        response = "Direct message"
+    return success, response
 
 
 async def send_reaction_message() -> StatusCodes:

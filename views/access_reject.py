@@ -5,7 +5,10 @@ import discord
 import config
 from bot_instance import get_bot
 
-from models.private_channel import create_private_discord_channel
+from models.private_channel import (
+    create_private_discord_channel,
+    send_connect_message_between_kicker_and_customer,
+)
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
 from services.refund_replace_message_manager import RefundReplaceManager
@@ -29,6 +32,7 @@ class AccessRejectView(discord.ui.View):
         channel_name: str,
         service_name: str,
         purchase_id: int,
+        discord_server_id: int,
         sqs_client: Any
     ) -> None:
         super().__init__(timeout=None)
@@ -38,6 +42,8 @@ class AccessRejectView(discord.ui.View):
         self.channel_name = channel_name
         self.service_name = service_name
         self.purchase_id = purchase_id
+        self.discord_server_id = discord_server_id
+
         self.already_pressed = False
         self.sqs_client = sqs_client
         self.user_interacted = False
@@ -112,16 +118,24 @@ class AccessRejectView(discord.ui.View):
         )
         await self.refund_manager.stop_periodic_refund_replace()
 
-        is_success, channel = await create_private_discord_channel(
-            bot_instance=bot,
-            guild_id=config.MAIN_GUILD_ID,
-            channel_name=self.channel_name,
-            challenged=self.kicker,
-            challenger=self.customer,
-            serviceName=self.service_name,
-            kicker_username=self.kicker_username,
-            purchase_id=self.purchase_id,
-        )
+        if not self.discord_server_id or str(self.discord_server_id) == str(config.MAIN_GUILD_ID):
+            is_success, channel = await create_private_discord_channel(
+                bot_instance=bot,
+                guild_id=config.MAIN_GUILD_ID,
+                channel_name=self.channel_name,
+                challenged=self.kicker,
+                challenger=self.customer,
+                serviceName=self.service_name,
+                kicker_username=self.kicker_username,
+                purchase_id=self.purchase_id,
+            )
+        else:
+            await send_connect_message_between_kicker_and_customer(
+                challenged=self.kicker,
+                challenger=self.customer,
+                serviceName=self.service_name
+            )
+            channel = None
 
         return True, channel
 
