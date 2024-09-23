@@ -1,3 +1,4 @@
+from datetime import datetime
 import discord
 import asyncio
 
@@ -51,7 +52,10 @@ async def create_private_discord_channel(bot_instance, guild_id, channel_name, c
         for kicker in kicker_members:
             overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
 
-    channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
+    formatted_time = datetime.now().strftime("%H:%M_%d.%m.%y")    
+    channel_name_new = f"{challenged.name}_{challenger.name}_{formatted_time}"
+
+    channel = await category.create_voice_channel(channel_name_new, overwrites=overwrites)
 
     invite = await channel.create_invite(max_age=86400)
 
