@@ -87,7 +87,7 @@ async def send_confirm_order_message(
         await send_message_to_customer_support(bot, cs_team_message)
 
     await customer.send(
-        f"Your order has been sent to kicker <@{kicker.id}>.\n"
+        f"Your order has been sent to kicker {kicker.name}.\n"
         "If there is no response within 1 minute, you will be able to replace the kicker, or refund the money."
     )
 
