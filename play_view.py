@@ -83,7 +83,7 @@ class PlayView(View):
 
         message: str = ""
         if thread_id:
-            thread = await bot.get_channel(int(thread_id))
+            thread = bot.get_channel(int(thread_id))
             if not thread:
                 message = "Profile not found!"
             else:
