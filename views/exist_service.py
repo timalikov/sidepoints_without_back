@@ -2,7 +2,7 @@ import discord
 from discord.ui import View
 from config import APP_CHOICES
 from dotenv import load_dotenv
-from message_constructors import create_profile_embed_2
+from message_constructors import create_profile_embed, create_profile_embed_2
 import os
 from bot_instance import get_bot
 from database.dto.sql_profile import log_to_database
@@ -33,10 +33,15 @@ class Profile_Exist(View):
     async def initialize(self):
         self.list_services = await self.service_db.get_services_by_discordId(self.discord_id)
         if self.list_services:
-            self.profile_embed = create_profile_embed_2(self.list_services[self.index])
+            for index, service in enumerate(self.list_services):
+                service = dict(service)
+                service["service_category_name"] = await self.service_db.get_service_category_name(service["service_type_id"])
+                self.list_services[index] = service
+            self.profile_embed = create_profile_embed(self.list_services[self.index])
             self.affiliate_channel_ids = await self.service_db.get_channel_ids()
         else:
             self.no_user = True
+
 
 
     @discord.ui.button(label="Edit", style=discord.ButtonStyle.success, custom_id="edit_service")
