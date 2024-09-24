@@ -44,7 +44,7 @@ async def send_connect_message_between_kicker_and_customer(
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-async def create_private_discord_channel(bot_instance, guild_id, channel_name, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms"):
+async def create_private_discord_channel(bot_instance, guild_id, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms", channel_name = None):
     guild = bot.get_guild(guild_id)
 
     services_db = Services_Database()
