@@ -13,6 +13,9 @@ def create_profile_embed(profile_data: Dict):
     embed.set_image(url=image_url)
     embed.add_field(name="Price", value=f"${profile_data['service_price']} /hour", inline=True)
     embed.add_field(name="Category", value=category_name, inline=True)
+    if profile_data.get("profile_languages"):
+        languages = ", ".join(profile_data['profile_languages']) 
+        embed.add_field(name="Languages", value=languages, inline=False)
     return embed
 
 def create_profile_embed_2(profile_data):
