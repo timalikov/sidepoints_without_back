@@ -23,6 +23,7 @@ async def send_connect_message_between_kicker_and_customer(
     kicker_message = (
         "**You session has started:**\n"
         f"User: <@{challenger.id}>\n"
+        f"Username: {challenger.name}\n"
         f"Service: {serviceName}\n"
         "Reach out to the user as soon as possible:\n"
         f"Connect via Direct message:<@{challenger.id}>\n"
@@ -30,12 +31,13 @@ async def send_connect_message_between_kicker_and_customer(
     user_message = (
         "Kicker has accepted your order:\n"
         f"Kicker: <@{challenged.id}>\n"
+        f"Kicker username: {challenged.name}\n"
         f"Service: {serviceName}\n"
         f"Connect via Direct message:<@{challenged.id}>\n"
     )
     if invite_url:
-        kicker_message += "\n{invite_url}"
-        user_message += "\n{invite_url}"
+        kicker_message += f"\n{invite_url}"
+        user_message += f"\n{invite_url}"
     try:
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
