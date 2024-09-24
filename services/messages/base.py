@@ -65,7 +65,6 @@ async def send_discord_notification(*, user_id: int, message: str) -> bool:
 
 async def send_confirm_order_message(
     *,
-    channel_name: str,
     customer: discord.User,
     kicker: discord.User,
     kicker_username: str,
@@ -108,7 +107,6 @@ async def send_confirm_order_message(
         kicker=kicker,
         customer=customer,
         kicker_username=kicker_username,
-        channel_name=channel_name,
         service_name=service_name,
         purchase_id=purchase_id,
         sqs_client=sqs_client,

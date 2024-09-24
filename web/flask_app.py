@@ -90,39 +90,35 @@ def health_check():
 async def handle_confirm_order():
     print("request has come")
     data: dict = request.json
-    channelName: str = data.get('channelName')
     customerId: str = data.get("customerId")
     serviceName = data.get("serviceName")
     kickerId: str = data.get("kickerId")
     kickerUsername: str = data.get("kickerUsername")
     purchaseId: str = data.get("purchaseId")
     discord_server_id: int = data.get("discordServerId")
-    if channelName:
-        channel_name = f"private-channel-{channelName}"
-        challenger: discord.User = bot.get_user(int(customerId))
-        challenged: discord.User = bot.get_user(int(kickerId))
-        if not all([challenger, challenged]):
-            return jsonify({"error": "One or more users could not be found in this guild."}), 400
-        future = asyncio.run_coroutine_threadsafe(
-            send_confirm_order_message(
-                channel_name=channel_name,
-                customer=challenger,
-                kicker=challenged,
-                kicker_username=kickerUsername,
-                service_name=serviceName,
-                purchase_id=purchaseId,
-                discord_server_id=discord_server_id
-            ),
-            bot.loop
-        )
-        success, response = future.result()  # This blocks until the coroutine completes
+    
+    challenger: discord.User = bot.get_user(int(customerId))
+    challenged: discord.User = bot.get_user(int(kickerId))
+    if not all([challenger, challenged]):
+        return jsonify({"error": "One or more users could not be found in this guild."}), 400
+    future = asyncio.run_coroutine_threadsafe(
+        send_confirm_order_message(
+            customer=challenger,
+            kicker=challenged,
+            kicker_username=kickerUsername,
+            service_name=serviceName,
+            purchase_id=purchaseId,
+            discord_server_id=discord_server_id
+        ),
+        bot.loop
+    )
+    success, response = future.result()  # This blocks until the coroutine completes
 
-        if success:
-            return jsonify({"message": "Private channel created", "channel_id": response}), 200
-        else:
-            return jsonify({"error": response}), 400
+    if success:
+        return jsonify({"message": "Private channel created", "channel_id": response}), 200
     else:
-        return jsonify({"error": "Challenge ID not provided"}), 400
+        return jsonify({"error": response}), 400
+    
 
 
 @app.route('/discord_api/create_private_channel', methods=['POST'])
