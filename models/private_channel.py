@@ -44,7 +44,7 @@ async def send_connect_message_between_kicker_and_customer(
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-async def create_private_discord_channel(bot_instance, guild_id, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms", channel_name = None):
+async def create_private_discord_channel(bot_instance, guild_id, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms"):
     guild = bot.get_guild(guild_id)
 
     services_db = Services_Database()
@@ -81,9 +81,9 @@ async def create_private_discord_channel(bot_instance, guild_id, challenger, cha
             overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
 
     formatted_time = datetime.now().strftime("%H:%M_%d.%m.%y")    
-    channel_name_new = f"{challenged.name}_{challenger.name}_{formatted_time}"
+    channel_name = f"{challenged.name}_{challenger.name}_{formatted_time}"
 
-    channel = await category.create_voice_channel(channel_name_new, overwrites=overwrites)
+    channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
     invite = await channel.create_invite(max_age=86400)
 

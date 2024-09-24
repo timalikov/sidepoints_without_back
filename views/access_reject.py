@@ -29,7 +29,6 @@ class AccessRejectView(discord.ui.View):
         kicker: discord.User,
         customer: discord.User,
         kicker_username: str,
-        channel_name: str,
         service_name: str,
         purchase_id: int,
         discord_server_id: int,
@@ -39,7 +38,6 @@ class AccessRejectView(discord.ui.View):
         self.kicker = kicker
         self.customer = customer
         self.kicker_username = kicker_username
-        self.channel_name = channel_name
         self.service_name = service_name
         self.purchase_id = purchase_id
         self.discord_server_id = discord_server_id
@@ -122,7 +120,6 @@ class AccessRejectView(discord.ui.View):
             is_success, channel = await create_private_discord_channel(
                 bot_instance=bot,
                 guild_id=config.MAIN_GUILD_ID,
-                channel_name=self.channel_name,
                 challenged=self.kicker,
                 challenger=self.customer,
                 serviceName=self.service_name,
