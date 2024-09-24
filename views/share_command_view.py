@@ -42,7 +42,7 @@ class ShareCommandView(discord.ui.View):
 
         for record in self.affiliate_channel_ids:
             channel_id = record["channel_id"]
-            channel = await self.bot.fetch_channel(channel_id)
+            channel = await self.bot.get_channel(channel_id)
             if channel:
                 try:
                     await channel.send(embed=embed, view=self)

@@ -18,15 +18,16 @@ class SessionDeliveryCheck:
         self.tasks = []
         self.delay = 3600
 
+    @staticmethod
     async def _main_function(
-        self,
+        delay: int,
         *,
         customer: discord.User,
         kicker: discord.User,
         purchase_id: int,
         channel: Any,
     ) -> None:
-        await asyncio.sleep(self.delay)
+        await asyncio.sleep(delay)
         message_embed = discord.Embed(
             colour=discord.Colour.dark_blue(),
             title=f"Hey @{customer.name}",
@@ -54,14 +55,15 @@ class SessionDeliveryCheck:
         purchase_id: int,
         channel: Any,
     ) -> None:
-        loop = bot.loop
-        loop.run_until_complete(
-            self._main_function(
+        asyncio.run_coroutine_threadsafe(
+            self.__class__._main_function(
+                delay=self.delay,
                 customer=customer,
                 kicker=kicker,
                 purchase_id=purchase_id,
                 channel=channel,
-            )
+            ),
+            loop=bot.loop
         )
     
     async def __call__(
