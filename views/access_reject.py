@@ -98,7 +98,6 @@ class AccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer()
-        
         self.already_pressed = True
         self.timeout_refund_handler.cancel()
         for item in self.children:
@@ -106,8 +105,6 @@ class AccessRejectView(discord.ui.View):
                 item.disabled = True
         await self.message.edit(view=self)
         self.user_interacted = True
-
-
         await send_interaction_message(
             interaction=interaction,
             message=(
@@ -115,7 +112,6 @@ class AccessRejectView(discord.ui.View):
             )
         )
         await self.refund_manager.stop_periodic_refund_replace()
-
         if not self.discord_server_id or str(self.discord_server_id) == str(config.MAIN_GUILD_ID):
             is_success, channel = await create_private_discord_channel(
                 bot_instance=bot,
@@ -161,7 +157,8 @@ class AccessRejectView(discord.ui.View):
             customer=self.customer,
             kicker=self.kicker,
             purchase_id=self.purchase_id,
-            sqs_client=self.sqs_client
+            sqs_client=self.sqs_client,
+            service_name=self.service_name
         )
         embed_message = discord.Embed(
             title=f"Sorry, the kicker {self.kicker.name} has not accepted the session.",

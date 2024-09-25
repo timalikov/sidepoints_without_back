@@ -1,7 +1,6 @@
 import discord
 
 from database.dto.psql_wallets import Wallets_Database
-from database.dto.sql_forum_posted import ForumUserPostDatabase
 from discord.ui import View
 from config import APP_CHOICES
 from dotenv import load_dotenv

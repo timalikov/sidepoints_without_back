@@ -1,14 +1,7 @@
-from typing import List, Union, Literal
+from typing import List, Literal
 
-import asyncio
-import asyncpg
-import discord
-from config import HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL, PORT_PSQL
-from contextlib import asynccontextmanager
-from database.core_kicker_list import kickers, managers
+from database.core_kicker_list import managers
 
-from models.thread_forum import find_thread_in_forum
-from models.post_forum import Post_FORUM
 from serializers.profile_serializer import serialize_profile_data
 from database.fact_list import facts
 from database.dto.base import BasePsqlDTO
@@ -40,6 +33,24 @@ class Services_Database(BasePsqlDTO):
         self.current_chunk = []
         self.app_choice = app_choice
         self.user_name = user_name
+
+    async def get_kickers(self) -> List[dict]:
+        async with self.get_connection() as conn:
+            query = self.BASE_QUERY.replace("*", "discord_id")
+            query += " GROUP BY discord_id"
+            kicker_ids = await conn.fetch(query)
+        return set(
+            [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
+        )
+    
+    async def get_kickers_by_service_title(self, service_title: str) -> List[dict]:
+        async with self.get_connection() as conn:
+            query = self.BASE_QUERY.replace("*", "discord_id")
+            query += " WHERE service_title = %s GROUP BY discord_id"
+            kicker_ids = await conn.fetch(query, (service_title,))
+        return set(
+            [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
+        )
 
     async def fetch_chunk(self):
         async with self.get_connection() as conn:
@@ -90,25 +101,6 @@ class Services_Database(BasePsqlDTO):
                 return []
         result = self.current_chunk.pop(0)
         return serialize_profile_data(result)
-    
-    async def start_posting(
-        self,
-        forum_channel: discord.ForumChannel,
-        guild: discord.Guild,
-        bot
-    ) -> None:
-        for _ in range(100):
-            profile_data = await self.get_next_service()
-            if not profile_data:
-                break
-            thread: Union[bool, discord.Thread] = await find_thread_in_forum(
-                guild=guild, forum=forum_channel, profile_data=profile_data
-            )
-            if thread and thread.archived:
-                await thread.edit(archived=False)
-            temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
-            await temp_post.post_user_profile()
-            await asyncio.sleep(4)
 
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
@@ -147,9 +139,6 @@ class Services_Database(BasePsqlDTO):
         async with self.get_connection() as conn:
             tags = await conn.fetch(default_query)
         return [tag["service_type_name"] for tag in tags]
-    
-    async def get_kickers(self):
-        return kickers
     
     async def get_managers(self):
         return managers

@@ -4,6 +4,7 @@ import discord
 from discord import ForumTag
 
 from database.dto.sql_forum_server import ForumsOfServerDatabase
+from database.dto.sql_forum_posted import ForumUserPostDatabase
 from database.dto.psql_services import Services_Database
 from config import FORUM_NAME, FORUM_CATEGORY_NAME
 from models.category import get_or_create_category_by_name
@@ -100,6 +101,8 @@ async def get_or_create_forum(guild: discord.Guild) -> discord.ForumChannel:
 async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
     forum_channel: discord.channel.ForumChannel = await find_sidekick_forum(guild)
     if forum_channel:
+        dto = ForumUserPostDatabase()
         await forum_channel.delete()
+        await dto.delete_by_forum_id(forum_channel.id)
     forum_channel = await create_base_forum(guild)
     return forum_channel

@@ -7,7 +7,9 @@ import discord
 
 from serializers.profile_serializer import serialize_profile_data
 from database.dto.sql_forum_posted import ForumUserPostDatabase
-from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
+from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID, FORUM_NAME
+from models.forum import find_forum
+
 bot = get_bot()
 
 
@@ -74,9 +76,10 @@ class ShareButton(discord.ui.Button):
         self.user_id = int(user_id)
 
     async def callback(self, interaction: discord.Interaction):
+        forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(self.user_id, str(MAIN_GUILD_ID))
         if thread_id:
-            thread = await bot.fetch_channel(int(thread_id))
+            thread = forum.get_thread(int(thread_id))
             profile_link = thread.jump_url
             try:
                 if interaction.response.is_done():

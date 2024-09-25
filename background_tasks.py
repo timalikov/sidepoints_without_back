@@ -12,11 +12,11 @@ from config import (
 )
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
+from models.thread_forum import start_posting
 from services.sqs_client import SQSClient
 from views.refund_replace import RefundReplaceView
 from database.dto.psql_services import Services_Database
 from database.dto.psql_leaderboard import LeaderboardDatabase
-from views.session_check import SessionCheckView
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -133,15 +133,14 @@ async def post_user_profiles():
     await asyncio.sleep(360)
     print("START LOOP POST")
     bot = get_bot()  # Assuming you have a function to get your bot instance
-    services_db = Services_Database(order_type="ASC")
     for guild in bot.guilds:
         try:
             forum_channel: discord.channel.ForumChannel = await get_and_recreate_forum(guild)
         except discord.DiscordException:
             return
         forum_channel.overwrites[guild.default_role].read_messages = False
-        await services_db.start_posting(
-            forum_channel=forum_channel, guild=guild, bot=bot
+        await start_posting(
+            forum_channel=forum_channel, guild=guild, bot=bot, order_type="ASC"
         )
         forum_channel.overwrites[guild.default_role].read_messages = True
 

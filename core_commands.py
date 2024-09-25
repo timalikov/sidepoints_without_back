@@ -1,4 +1,3 @@
-from typing import List
 import discord
 from discord import app_commands
 import discord.ext
@@ -23,6 +22,7 @@ from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from models.forum import get_or_create_forum
+from models.thread_forum import start_posting
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -56,8 +56,7 @@ async def forum_command(interaction: discord.Interaction):
     if not is_admin(interaction):
         await interaction.followup.send(content='Oops, you do not have right to use this command!', ephemeral=True)
         return
-    services_db = Services_Database(order_type="ASC")
-    await services_db.start_posting(forum_channel, guild, bot)
+    await start_posting(forum_channel, guild, bot, order_type="ASC")
     await interaction.followup.send(content="Posts created!", ephemeral=True)
 
 
@@ -140,11 +139,10 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
         view=view, content=f"@everyone\n{text_message_order_view}",
     )
     view.messages.append(sent_message)
-    for _ in range(100):
-        service = await services_db.get_next_service()
-        if not service:
-            break
-        kicker_id: int = service.get("discord_id", "")
+    kicker_ids = await services_db.get_kickers_by_service_title(
+        service_title=choices.name
+    )
+    for kicker_id in kicker_ids:
         try:
             kicker_id = int(kicker_id)
         except ValueError:

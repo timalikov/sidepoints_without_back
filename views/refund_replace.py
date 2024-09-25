@@ -1,7 +1,11 @@
 from typing import Any, Callable, Optional
+import discord
+
 from bot_instance import get_bot
 from config import MAIN_GUILD_ID, TEST_ACCOUNTS
-import discord
+
+from views.order_view import OrderView
+from database.dto.psql_services import Services_Database
 from models.private_channel_for_replace import create_channel_for_replace
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_super_kicker
 from services.messages.interaction import send_interaction_message
@@ -17,9 +21,10 @@ class RefundReplaceView(discord.ui.View):
         kicker: discord.User,
         purchase_id: int,
         sqs_client: Any,
+        service_name: str,
         access_reject_view: Any = None,
         channel: Any = None,
-        stop_task: Callable = None, 
+        stop_task: Callable = None,
         timeout: Optional[int] = 60 * 5
 
     ) -> None:
@@ -33,6 +38,7 @@ class RefundReplaceView(discord.ui.View):
         self.stop_task = stop_task if stop_task is not None else lambda: None
         self.already_pressed = False
         self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
+        self.service_name = service_name
     
     async def on_timeout(self):
         if not self.already_pressed:
@@ -107,31 +113,26 @@ class RefundReplaceView(discord.ui.View):
         await self.replace_logic(interaction)
 
     async def replace_logic(self, interaction: discord.Interaction) -> None:
+        self.refund_handler.sqs_client.send_message(self.purchase_id)
+        services_db = Services_Database()
+        kicker_ids = await services_db.get_kickers()
+        if self.kicker.id in kicker_ids:
+            kicker_ids.remove(self.kicker.id)
 
-        invite_url = await create_channel_for_replace(
-            bot=bot,
-            guild_id=MAIN_GUILD_ID,
-            customer=self.customer
+        text_message_order_view = (
+            f"New Order Alert: **{self.service_name}** [30 minutes]\n"
+            f"You have a new order for a **{self.service_name}** in english"
         )
-        await send_interaction_message(
-            interaction=interaction,
-            message=f"Join the channel to replace the kicker: {invite_url}"
-        )
-        message=(
-                "**Replacement has been purchased**\n"
-                f"User: {self.customer.name}\n"
-                f"Kicker: {self.kicker.name}\n"
-                f"Voice room: {invite_url}"
-            )
-
-        if self.kicker.id not in TEST_ACCOUNTS and self.customer.id not in TEST_ACCOUNTS:
-            await send_message_to_super_kicker(
-                bot=bot,
-                message=message
-            )
-            await send_message_to_customer_support(
-                bot=bot,
-                message=message
-            )
-
-        await self.kicker.send(f"User <@{self.customer.id}> has requested to replace you.")
+        view = OrderView(customer=interaction.user, services_db=services_db)
+        for kicker_id in kicker_ids:
+            try:
+                kicker_id = int(kicker_id)
+            except ValueError:
+                print(f"ID: {kicker_id} is not int")
+                continue
+            kicker = bot.get_user(kicker_id)
+            if not kicker:
+                continue
+            sent_message = await kicker.send(view=view, content=text_message_order_view)
+            view.messages.append(sent_message)
+        await send_interaction_message(interaction=interaction, message="Please wait...")

@@ -1,14 +1,17 @@
 import discord
-from services.messages.interaction import send_interaction_message
-from database.dto.sql_forum_posted import ForumUserPostDatabase
 from discord.ui import View
-from config import APP_CHOICES, MAIN_GUILD_ID
-from dotenv import load_dotenv
-from message_constructors import create_profile_embed
+
 import os
+from dotenv import load_dotenv
+
+from config import APP_CHOICES, MAIN_GUILD_ID, FORUM_NAME
+from services.messages.interaction import send_interaction_message
+from message_constructors import create_profile_embed
 from bot_instance import get_bot
+from models.forum import find_forum
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
+from database.dto.sql_forum_posted import ForumUserPostDatabase
 
 bot = get_bot()
 load_dotenv()
@@ -79,11 +82,12 @@ class PlayView(View):
         await interaction.response.defer(ephemeral=True)
 
         user_id = self.service['discord_id']
+        forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, main_guild_id)
 
         message: str = ""
         if thread_id:
-            thread = bot.get_channel(int(thread_id))
+            thread = forum.get_thread(int(thread_id))
             if not thread:
                 message = "Profile not found!"
             else:

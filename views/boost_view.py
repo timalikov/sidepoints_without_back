@@ -4,12 +4,12 @@ from database.dto.sql_forum_posted import ForumUserPostDatabase
 # from database.dto.sql_profile import Profile_Database
 from discord.ui import View
 # from datetime import datetime
-from config import APP_CHOICES, HOST_PSQL, USER_PSQL, PASSWORD_PSQL, DATABASE_PSQL
+from config import APP_CHOICES, FORUM_NAME
 from dotenv import load_dotenv
 from message_constructors import create_profile_embed_2
 import os
 from bot_instance import get_bot
-from getServices import DiscordServiceFetcher
+from models.forum import find_forum
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 
@@ -62,10 +62,11 @@ class BoostView(View):
         await interaction.response.defer(ephemeral=True)
 
         user_id = self.user_data['discord_id']
+        forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
         thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, str(main_guild_id))
 
         if thread_id:
-            thread = await bot.fetch_channel(int(thread_id))
+            thread = forum.get_thread(int(thread_id))
             profile_link = thread.jump_url
             if interaction.response.is_done():
                 await interaction.followup.send(f"Profile account: {profile_link}", ephemeral=True)

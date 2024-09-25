@@ -39,7 +39,7 @@ class ForumUserPostDatabase:
         pool = await ForumUserPostDatabase.get_pool()
         async with pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
-                query = "SELECT thread_id FROM forum_user_post WHERE user_id = %s AND server_id = %s;"
+                query = "SELECT thread_id FROM forum_user_post WHERE user_id = %s AND server_id = %s ORDER BY thread_id DESC;"
                 await cursor.execute(query, (user_id, server_id))
                 result = await cursor.fetchone()
         pool.close()
@@ -76,6 +76,17 @@ class ForumUserPostDatabase:
             async with conn.cursor() as cursor:
                 query = "DELETE FROM forum_user_post WHERE server_id = %s AND user_id = %s;"
                 await cursor.execute(query, (server_id, user_id))
+                await conn.commit()
+        pool.close()
+        await pool.wait_closed()
+
+    @staticmethod
+    async def delete_by_forum_id(forum_id):
+        pool = await ForumUserPostDatabase.get_pool()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                query = "DELETE FROM forum_user_post WHERE forum_id = %s;"
+                await cursor.execute(query, (forum_id,))
                 await conn.commit()
         pool.close()
         await pool.wait_closed()
