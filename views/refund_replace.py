@@ -106,7 +106,11 @@ class RefundReplaceView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         await send_interaction_message(
             interaction=interaction,
-            message=f"The replacement has been requested. Please wait ..."
+            message=(
+                "The replacement has been requested. "
+                "We have also issued a refund for this service to you. "
+                "Please wait while we look for a replacement kicker."
+            )
         )
         
         await self.disable_all_buttons()
@@ -118,6 +122,8 @@ class RefundReplaceView(discord.ui.View):
         kicker_ids = await services_db.get_kickers()
         if self.kicker.id in kicker_ids:
             kicker_ids.remove(self.kicker.id)
+        if self.customer.id in kicker_ids:
+            kicker_ids.remove(self.customer.id)
 
         text_message_order_view = (
             f"New Order Alert: **{self.service_name}** [30 minutes]\n"
@@ -135,4 +141,3 @@ class RefundReplaceView(discord.ui.View):
                 continue
             sent_message = await kicker.send(view=view, content=text_message_order_view)
             view.messages.append(sent_message)
-        await send_interaction_message(interaction=interaction, message="Please wait...")
