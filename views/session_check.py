@@ -91,19 +91,7 @@ class SessionCheckView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         await send_interaction_message(
             interaction=interaction,
-            message="We are sorry to hear about that!\n Would you like a refund or customer support team will help you find an online kicker?"
-        )
-
-        view = RefundReplaceView(
-            customer=self.customer,
-            kicker=self.kicker,
-            purchase_id=self.purchase_id,
-            sqs_client=self.sqs_client
-        )
-        embed_message = discord.Embed(
-            colour=discord.Colour.blue(),
-            description="Would you like a refund or replace the kicker?"
+            message="Please create a support ticket to get assistance from our customer support team in resolving the issue <#1233350206280437760>.\nRest assured, your funds are safe and securely locked in our wallet."
         )
 
         await self.kicker.send(f"User <@{self.customer.id}> has stated that the session was not delivered. Your session is no longer valid. Customer Support officer will reach out to you shortly.")
-        view.message = await self.customer.send(view=view, embed=embed_message)
