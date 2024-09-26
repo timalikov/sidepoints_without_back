@@ -46,7 +46,11 @@ class Services_Database(BasePsqlDTO):
     async def get_kickers_by_service_title(self, service_title: str) -> List[dict]:
         async with self.get_connection() as conn:
             query = self.BASE_QUERY.replace("*", "discord_id")
-            query += " AND service_title = %s GROUP BY discord_id"
+            if "WHERE" in self.BASE_QUERY:
+                query += " AND"
+            else:
+                query += " WHERE"
+            query += " service_title = %s GROUP BY discord_id"
             kicker_ids = await conn.fetch(query, (service_title,))
         return set(
             [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
