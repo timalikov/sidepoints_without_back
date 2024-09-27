@@ -139,6 +139,8 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
         view=view, content=f"@everyone\n{text_message_order_view}",
     )
     view.messages.append(sent_message)
+    await interaction.followup.send(f"Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{main_link}", ephemeral=True)
+    
     kicker_ids = await services_db.get_kickers_by_service_title(
         service_title=choices.name
     )
@@ -153,7 +155,6 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
             continue
         sent_message = await kicker.send(view=view, content=text_message_order_view)
         view.messages.append(sent_message)
-    await interaction.followup.send(f"Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{main_link}", ephemeral=True)
 
 
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
