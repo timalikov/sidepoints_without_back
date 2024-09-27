@@ -2,7 +2,7 @@ import discord
 from discord.ui import View
 from config import APP_CHOICES
 from dotenv import load_dotenv
-from message_constructors import create_profile_embed, create_profile_embed_2
+from message_constructors import create_profile_embed
 import os
 from bot_instance import get_bot
 from database.dto.sql_profile import log_to_database
@@ -61,7 +61,11 @@ class Profile_Exist(View):
         else:
             self.index = 0
 
-        self.profile_embed = create_profile_embed_2(self.list_services[self.index])
+        for index, service in enumerate(self.list_services):
+            service = dict(service)
+            service["service_category_name"] = await self.service_db.get_service_category_name(service["service_type_id"])
+            self.list_services[index] = service
+        self.profile_embed = create_profile_embed(self.list_services[self.index])
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")

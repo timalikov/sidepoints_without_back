@@ -1,4 +1,5 @@
 from typing import Coroutine, List, Callable, Any
+import uuid
 import discord
 import os
 
@@ -8,6 +9,7 @@ from config import MAIN_GUILD_ID
 from services.messages.interaction import send_interaction_message
 from models.guild import is_member_of_main_guild
 from database.dto.sql_profile import log_to_database
+from datetime import datetime
 
 from bot_instance import get_bot
 
@@ -29,6 +31,7 @@ class OrderView(discord.ui.View):
         self.is_pressed = False
         self.services_db = services_db
         self.messages = []  # for drop button after timeout
+        self.order_id = str(uuid.uuid4())
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
         for message_instance in self.messages:
@@ -59,6 +62,15 @@ class OrderView(discord.ui.View):
         view.message = await self.customer.send(embed=embed, view=view)
         await send_interaction_message(interaction=interaction, message="The customer has received your request!")
 
+        service_category = self.services_db.app_choice if self.services_db.app_choice == "ALL" else await self.services_db.get_service_category_name(self.services_db.app_choice)
+        await self.services_db.save_order(
+            order_id=self.order_id,
+            user_discord_id=self.customer.id,
+            kicker_discord_id=kicker.id,
+            order_category=service_category,
+            respond_time=datetime.now(),
+            service_price=service['service_price']
+        )
 
 class OrderAccessRejectView(discord.ui.View):
     

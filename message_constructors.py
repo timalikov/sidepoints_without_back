@@ -1,3 +1,4 @@
+import random
 from typing import Optional, Dict
 import discord
 
@@ -6,7 +7,7 @@ def create_profile_embed(profile_data: Dict):
     category_name: Optional[str] = profile_data.get("service_category_name")
     image_url = profile_data['service_image']
     if isinstance(image_url, list):
-        image_url = image_url[0] if image_url else ""
+        image_url = random.choice(image_url)
     if not category_name:
         category_name = profile_data['service_type_name']
     embed = discord.Embed(title=profile_data['profile_username'], description=profile_data['service_description'])
