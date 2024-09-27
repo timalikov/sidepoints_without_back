@@ -5,12 +5,13 @@ from typing import Any, List
 import discord
 
 from views.session_check import SessionCheckView
+from services.schedule_tasks.base import BaseScheduleTask
 from bot_instance import get_bot
 
 bot = get_bot()
 
 
-class SessionDeliveryCheck:
+class SessionDeliveryCheck(BaseScheduleTask):
     tasks: List[threading.Thread]
     delay: int
 
