@@ -32,6 +32,7 @@ class OrderView(discord.ui.View):
         self.services_db = services_db
         self.messages = []  # for drop button after timeout
         self.order_id = str(uuid.uuid4())
+        self.created_at = datetime.now()
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
         for message_instance in self.messages:
@@ -64,6 +65,7 @@ class OrderView(discord.ui.View):
 
         service_category = self.services_db.app_choice if self.services_db.app_choice == "ALL" else await self.services_db.get_service_category_name(self.services_db.app_choice)
         await self.services_db.save_order(
+            timestamp=self.created_at,
             order_id=self.order_id,
             user_discord_id=self.customer.id,
             kicker_discord_id=kicker.id,
