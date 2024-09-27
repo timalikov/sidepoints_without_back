@@ -10,9 +10,7 @@ from models.private_channel import (
     send_connect_message_between_kicker_and_customer,
 )
 from services.messages.interaction import send_interaction_message
-from services.refund_handler import RefundHandler
 from services.refund_replace_message_manager import RefundReplaceManager
-from services.timeout_refund_handler import TimeoutRefundHandler
 from views.refund_replace import RefundReplaceView
 
 bot = get_bot()
@@ -46,38 +44,32 @@ class AccessRejectView(discord.ui.View):
         self.sqs_client = sqs_client
         self.user_interacted = False
 
-        self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
-        self.refund_manager = RefundReplaceManager(kicker=kicker, refund_handler=self.refund_handler, access_reject_view=self)
-
-        self.timeout_refund_handler = TimeoutRefundHandler(
-            timeout_seconds=60,
-            on_timeout_callback=self.auto_reject  
+        self.refund_manager = RefundReplaceManager(
+            access_reject_view=self,
+            service_name=self.service_name,
+            kicker=self.kicker,
+            customer=self.customer,
+            purchase_id=self.purchase_id,
         )
-
-        asyncio.create_task(self.timeout_refund_handler.start())
+        self.auto_reject()
 
     def check_already_pressed(func: Callable) -> Callable:
         async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
             if not self.already_pressed:
                 result: Any = await func(self, interaction, *args, **kwargs)
-
                 await self.disable_access_reject_buttons()
                 self.user_interacted = True
-
-
                 return result
-            else:
-                await send_interaction_message(
-                    interaction=interaction,
-                    message="Button has already been pressed."
-                )
+            await send_interaction_message(
+                interaction=interaction,
+                message="Button has already been pressed."
+            )
             
         return decorator
 
-    async def auto_reject(self):
+    def auto_reject(self):
         if not self.user_interacted:
-            await self.refund_manager.start_periodic_refund_replace(self.customer, self.kicker, self.purchase_id)
-
+            self.refund_manager.start_periodic_refund_replace()
 
     async def disable_access_reject_buttons(self):
         self.already_pressed = True
@@ -99,7 +91,6 @@ class AccessRejectView(discord.ui.View):
     ) -> None:
         await interaction.response.defer()
         self.already_pressed = True
-        self.timeout_refund_handler.cancel()
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
