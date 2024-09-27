@@ -153,10 +153,10 @@ class Services_Database(BasePsqlDTO):
     async def get_facts(self):
         return facts
     
-    async def save_order(self, order_id: str, user_discord_id: int, kicker_discord_id: int, order_category: str, respond_time: str, service_price: float):
+    async def save_order(self, timestamp: str, order_id: str, user_discord_id: int, kicker_discord_id: int, order_category: str, respond_time: str, service_price: float):
         async with self.get_connection() as conn:
             query = """
-            INSERT INTO discord_bot.orders (order_id, user_discord_id, order_category, kicker_discord_id, respond_time, service_price)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO discord_bot.orders (timestamp, order_id, user_discord_id, order_category, kicker_discord_id, respond_time, service_price)
+            VALUES ($1, $2, $3, $4, $5, $6, $7);
             """
-            await conn.execute(query, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
+            await conn.execute(query, timestamp, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
