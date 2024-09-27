@@ -9,6 +9,7 @@ from config import MAIN_GUILD_ID
 from services.messages.interaction import send_interaction_message
 from models.guild import is_member_of_main_guild
 from database.dto.sql_profile import log_to_database
+from datetime import datetime
 
 from bot_instance import get_bot
 
@@ -67,7 +68,7 @@ class OrderView(discord.ui.View):
             user_discord_id=self.customer.id,
             kicker_discord_id=kicker.id,
             order_category=service_category,
-            respond_time=interaction.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            respond_time=datetime.now(),
             service_price=service['service_price']
         )
 
