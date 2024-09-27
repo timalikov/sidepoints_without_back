@@ -1,5 +1,4 @@
 from typing import Any, Callable, Optional
-import uuid
 import discord
 
 from bot_instance import get_bot
