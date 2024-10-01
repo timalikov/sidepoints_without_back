@@ -160,3 +160,9 @@ class Services_Database(BasePsqlDTO):
             VALUES ($1, $2, $3, $4, $5, $6, $7);
             """
             await conn.execute(query, timestamp, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
+
+    async def get_all_kickers(self):
+        async with self.get_connection() as conn:
+            query = "SELECT discord_id, profile_score FROM discord_services;"
+            services = await conn.fetch(query)
+        return services
