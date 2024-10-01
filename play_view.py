@@ -23,25 +23,22 @@ app_choices = APP_CHOICES
 
 class PlayView(View):
     @classmethod
-    async def create(cls, user_choice="ALL", username=None):
+    async def create(self, user_choice="ALL", username=None):
         services_db = Services_Database(app_choice=user_choice)
-        view = cls(None, services_db)
-        view.kicker_manager = KickerSortingService(services_db)  
+        self.services_db = services_db
+        self.kicker_manager = KickerSortingService(services_db)  
 
         if username:
             service = await services_db.get_services_by_username(username)
-            if service:
-                view.set_service(service)
-                return view  
-        
-        next_service = await view.kicker_manager.start_displaying_kickers()
-
-        if next_service:
-            view.set_service(next_service)
         else:
-            view.no_user = True
+            service = await self.kicker_manager.fetch_first_service()
 
-        return view
+        if service:
+            self.set_service(service)
+        else:
+            self.no_user = True
+
+        return self
     
     def __init__(self, service: dict = None, services_db: Services_Database = None):
         super().__init__(timeout=None)

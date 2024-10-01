@@ -161,8 +161,12 @@ class Services_Database(BasePsqlDTO):
             """
             await conn.execute(query, timestamp, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
 
-    async def get_all_kickers(self):
+    async def get_kicker_ids_and_score(self):
         async with self.get_connection() as conn:
-            query = "SELECT discord_id, profile_score FROM discord_services;"
+            query = """
+            SELECT discord_id, MAX(profile_score) AS profile_score FROM discord_services
+                GROUP BY discord_id
+                ORDER BY profile_score DESC;
+            """
             services = await conn.fetch(query)
         return services

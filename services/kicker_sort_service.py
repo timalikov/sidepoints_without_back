@@ -11,8 +11,8 @@ class KickerSortingService:
         self.sorted_kickers = []
         self.current_kicker_index = 0
 
-    async def start_displaying_kickers(self):
-        all_kickers = await self.services_db.get_all_kickers()
+    async def fetch_first_service(self):
+        all_kickers = await self.services_db.get_kicker_ids_and_score()
 
         if not all_kickers:
             return None  
@@ -21,24 +21,16 @@ class KickerSortingService:
         self.current_kicker_index = 0
         return await self.get_next_valid_service()
 
-    def is_duplicate_kicker(self, kicker):
-        return self.current_kicker_index > 0 and kicker == self.sorted_kickers[self.current_kicker_index - 1]
-
     async def get_next_valid_service(self):
         while self.current_kicker_index < len(self.sorted_kickers):
             kicker = self.sorted_kickers[self.current_kicker_index]
-
-            if not self.is_duplicate_kicker(kicker):
-                self.current_kicker_index += 1
-
-                services = await self.services_db.get_services_by_discordId(kicker['discord_id'])
-                if services:
-                    service = dict(services[0])  
-                    service["service_category_name"] = await self.services_db.get_service_category_name(service["service_type_id"])
-                    return service
-            
             self.current_kicker_index += 1
 
+            services = await self.services_db.get_services_by_discordId(kicker['discord_id'])
+            if services:
+                service = dict(services[0])  
+                service["service_category_name"] = await self.services_db.get_service_category_name(service["service_type_id"])
+                return service
         return None
     
     async def is_user_online(self, user_id):
@@ -73,9 +65,5 @@ class KickerSortingService:
                     online.append(kicker)
             else:
                 offline.append(kicker)
-        
-        online_high_score.sort(key=lambda x: x['profile_score'], reverse=True)
-        online.sort(key=lambda x: x['profile_score'], reverse=True)
-        offline.sort(key=lambda x: x['profile_score'], reverse=True)
 
         return online_high_score + online + offline
