@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from config import APP_CHOICES, MAIN_GUILD_ID, FORUM_NAME
-from services.sort_kickers import sort_kickers
+from services.kicker_sort_service import KickerSortingService
 from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
@@ -22,12 +22,11 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 app_choices = APP_CHOICES
 
 class PlayView(View):
-
     @classmethod
-    async def create(cls, user_choice="ALL", username=None, interaction=None):
+    async def create(cls, user_choice="ALL", username=None):
         services_db = Services_Database(app_choice=user_choice)
-        
         view = cls(None, services_db)
+        view.kicker_manager = KickerSortingService(services_db)  
 
         if username:
             service = await services_db.get_services_by_username(username)
@@ -35,9 +34,11 @@ class PlayView(View):
                 view.set_service(service)
                 return view  
         
-        await view.start_displaying_kickers(interaction)
+        next_service = await view.kicker_manager.start_displaying_kickers()
 
-        if not view.service:
+        if next_service:
+            view.set_service(next_service)
+        else:
             view.no_user = True
 
         return view
@@ -50,6 +51,7 @@ class PlayView(View):
         self.sorted_kickers = []  
         self.current_kicker_index = 0
         self.profile_embed = None
+        self.kicker_manager = None
 
     def set_service(self, service):
         """
@@ -58,46 +60,6 @@ class PlayView(View):
         self.service = service
         self.profile_embed = create_profile_embed(service)
         self.no_user = False  
-
-    async def start_displaying_kickers(self, interaction: discord.Interaction):
-        all_kickers = await self.services_db.get_all_kickers()
-
-        if not all_kickers:
-            return
-        
-        self.sorted_kickers = await sort_kickers(all_kickers)
-        self.current_kicker_index = 0
-
-        await self.display_kicker(interaction)
-
-    async def display_kicker(self, interaction: discord.Interaction):
-        self.service = await self.get_next_valid_service()
-
-        if self.service:
-            self.set_service(self.service)  
-            if interaction.response.is_done():
-                await interaction.edit_original_response(embed=self.profile_embed, view=self)
-            else:
-                await interaction.response.send_message(embed=self.profile_embed, view=self, ephemeral=True)
-        else:
-            await interaction.followup.send("No valid players found.", ephemeral=True)
-            self.no_user = True 
-
-    async def get_next_valid_service(self):
-        while self.current_kicker_index < len(self.sorted_kickers):
-            kicker = self.sorted_kickers[self.current_kicker_index]
-            while kicker == self.sorted_kickers[self.current_kicker_index - 1]:
-                self.current_kicker_index += 1
-                kicker = self.sorted_kickers[self.current_kicker_index]
-            self.current_kicker_index += 1 
-
-            services = await self.services_db.get_services_by_discordId(kicker['discord_id'])
-            if services:
-                service = dict(services[0])  
-                service["service_category_name"] = await self.services_db.get_service_category_name(service["service_type_id"])
-                return service
-        
-        return None 
 
     async def is_member_of_main_guild(self, user_id):
         main_guild = bot.get_guild(main_guild_id)
@@ -124,7 +86,12 @@ class PlayView(View):
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "next_user")
-        await self.display_kicker(interaction)
+        next_service = await self.kicker_manager.get_next_valid_service()
+        if next_service:
+            self.set_service(next_service)
+            await interaction.edit_original_response(embed=self.profile_embed, view=self)
+        else:
+            await interaction.followup.send("No more valid players found.", ephemeral=True)
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
