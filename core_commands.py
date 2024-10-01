@@ -17,7 +17,6 @@ from config import (
     ORDER_CHANNEL_ID,
     LINK_LEADERBOARD,
 )
-from services.sort_kickers import sort_kickers
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
@@ -91,36 +90,6 @@ async def play(interaction: discord.Interaction):
     else:
         await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
 
-
-@bot.tree.command(name="test", description="Test user online status!")
-async def test(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
-
-    user_id = 1278392054983954433  # The user ID to test
-    main_guild = bot.get_guild(MAIN_GUILD_ID)
-    member = main_guild.get_member(user_id)
-
-    if member is None:
-        await interaction.followup.send(content="Member not found in the guild.", ephemeral=True)
-        return
-
-    print(member.status)  # Debug output to check the status in the console
-
-    # Check if the member is online
-    if member.status == discord.Status.online:
-        await interaction.followup.send(content="Online.", ephemeral=True)
-    else:
-        await interaction.followup.send(content=f"Status: {member.status.name}", ephemeral=True)
-
-    services_db = Services_Database(app_choice="ALL")
-    all_kickers = await services_db.get_all_kickers()
-    sorted_kickers = await sort_kickers(all_kickers)    
-    print(all_kickers[0])
-    print(all_kickers[1])
-
-    print("sorted kickers:")
-    print(sorted_kickers[0])
-    print(sorted_kickers[1])
 
 @bot.tree.command(name="find", description="Find a user profile by their username.")
 @app_commands.describe(username="The username to find.")
