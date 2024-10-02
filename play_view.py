@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from config import APP_CHOICES, MAIN_GUILD_ID, FORUM_NAME
+from services.kicker_sort_service import KickerSortingService
 from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
@@ -20,31 +21,42 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 app_choices = APP_CHOICES
 
-
 class PlayView(View):
-
     @classmethod
     async def create(cls, user_choice="ALL", username=None):
         services_db = Services_Database(app_choice=user_choice)
+        instance = cls(None, services_db)
+        
+        instance.services_db = services_db
+        instance.kicker_sorting_service = KickerSortingService(services_db)
+
         if username:
             service = await services_db.get_services_by_username(username)
         else:
-            service = await services_db.get_next_service()
+            service = await instance.kicker_sorting_service.fetch_first_service()
 
         if service:
-            service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
+            instance.set_service(service)
+        else:
+            instance.no_user = True
 
-        return cls(service, services_db)
+        return instance 
     
     def __init__(self, service: dict = None, services_db: Services_Database = None):
         super().__init__(timeout=None)
         self.service = service
         self.services_db = services_db
-        self.no_user = False
-        if self.service:
-            self.profile_embed = create_profile_embed(service)
-        else:
-            self.no_user = True
+        self.no_user = False  
+        self.profile_embed = None
+        self.kicker_sorting_service = None
+
+    def set_service(self, service):
+        """
+        Helper function to set the service and create the embed.
+        """
+        self.service = service
+        self.profile_embed = create_profile_embed(service)
+        self.no_user = False  
 
     async def is_member_of_main_guild(self, user_id):
         main_guild = bot.get_guild(main_guild_id)
@@ -71,11 +83,12 @@ class PlayView(View):
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "next_user")
-        self.service = await self.services_db.get_next_service()
-        if self.service:
-            self.service["service_category_name"] = await self.services_db.get_service_category_name(self.service["service_type_id"])
-        self.profile_embed = create_profile_embed(self.service)
-        await interaction.edit_original_response(embed=self.profile_embed, view=self)
+        next_service = await self.kicker_sorting_service.get_next_valid_service()
+        if next_service:
+            self.set_service(next_service)
+            await interaction.edit_original_response(embed=self.profile_embed, view=self)
+        else:
+            await interaction.followup.send("No more valid players found.", ephemeral=True)
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):

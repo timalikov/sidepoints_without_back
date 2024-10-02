@@ -95,7 +95,7 @@ async def play(interaction: discord.Interaction):
 @app_commands.describe(username="The username to find.")
 async def find(interaction: discord.Interaction, username: str):
     await interaction.response.defer(ephemeral=True)
-    view = await PlayView.create(user_choice="ALL", username=username)
+    view = await PlayView.create(username=username)
     await log_to_database(interaction.user.id, "/find")
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)

@@ -4,6 +4,7 @@ import discord
 # Setup intents
 intents = discord.Intents.default()
 intents.message_content = True
+intents.presences = True
 intents.members = True
 
 # Initialize the bot

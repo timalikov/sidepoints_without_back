@@ -88,7 +88,6 @@ def health_check():
 
 @app.route('/discord_api/order/confirm', methods=['POST'])
 async def handle_confirm_order():
-    print("request has come")
     data: dict = request.json
     customerId: str = data.get("customerId")
     serviceName = data.get("serviceName")
