@@ -47,11 +47,11 @@ class OrderView(discord.ui.View):
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "kicker_go_after_order", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "kicker_go_after_order", 
+            interaction.guild.id if interaction.guild else None
+        )
         kicker = interaction.user
         if kicker in self.pressed_kickers:
             return await send_interaction_message(interaction=interaction, message="Already pressed")
@@ -128,11 +128,11 @@ class OrderAccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer(ephemeral=True)
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "user_go_after_order", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "user_go_after_order", 
+            interaction.guild.id if interaction.guild else None
+        )
         await self.order_view.services_db.update_order_kicker_selected(self.order_view.order_id, self.kicker_id)
         self.order_view.is_pressed = True
         is_member = await is_member_of_main_guild(self.customer.id)
@@ -155,9 +155,9 @@ class OrderAccessRejectView(discord.ui.View):
         interaction: discord.Interaction,
         button: discord.ui.Button
     ) -> None:
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "user_reject_after_order", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "user_reject_after_order", 
+            interaction.guild.id if interaction.guild else None
+        )
         await interaction.message.edit(embed=discord.Embed(description="Canceled"), view=None)

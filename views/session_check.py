@@ -68,11 +68,11 @@ class SessionCheckView(discord.ui.View):
     @check_already_pressed
     async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "session_check_yes", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "session_check_yes", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         self.already_pressed = True
         for item in self.children:
@@ -94,11 +94,11 @@ class SessionCheckView(discord.ui.View):
     @check_already_pressed
     async def no_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "session_check_no", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "session_check_no", 
+            interaction.guild.id if interaction.guild else None
+        )
         await send_interaction_message(
             interaction=interaction,
             message="Please create a support ticket to get assistance from our customer support team in resolving the issue <#1233350206280437760>.\nRest assured, your funds are safe and securely locked in our wallet."

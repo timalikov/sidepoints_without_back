@@ -81,11 +81,11 @@ class RefundReplaceView(discord.ui.View):
     )
     async def refund_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "refund", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "refund", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         await send_interaction_message(
             interaction=interaction,
@@ -109,11 +109,11 @@ class RefundReplaceView(discord.ui.View):
     )
     async def replace_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
-        # await Services_Database().log_to_database(
-        #     interaction.user.id, 
-        #     "replace", 
-        #     interaction.guild.id if interaction.guild else None
-        # )
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "replace", 
+            interaction.guild.id if interaction.guild else None
+        )
         await send_interaction_message(
             interaction=interaction,
             message=(

@@ -8,7 +8,6 @@ from play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles, create_leaderboard
 from database.dto.sql_subscriber import Subscribers_Database
-from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
 from config import (
@@ -47,11 +46,11 @@ def is_admin(interaction: discord.Interaction) -> bool:
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/forum", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/forum", 
+        interaction.guild.id if interaction.guild else None
+    )
 
     guild: discord.guild.Guild = interaction.guild
     try:
@@ -69,11 +68,11 @@ async def forum_command(interaction: discord.Interaction):
 @bot.tree.command(name="profile", description="Use this command if you wish to be part of the Sidekick Playmates network.")
 async def profile(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/profile", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/profile", 
+        interaction.guild.id if interaction.guild else None
+    )
     profile_exist = Profile_Exist(str(interaction.user.id))
     await profile_exist.initialize()
     if profile_exist.no_user:
@@ -93,11 +92,11 @@ async def list_all_users_with_online_status(guild):
 async def play(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     view = await PlayView.create(user_choice="ALL")
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/go", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/go", 
+        interaction.guild.id if interaction.guild else None
+    )
 
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
@@ -110,11 +109,11 @@ async def play(interaction: discord.Interaction):
 async def find(interaction: discord.Interaction, username: str):
     await interaction.response.defer(ephemeral=True)
     view = await PlayView.create(username=username)
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/find", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/find", 
+        interaction.guild.id if interaction.guild else None
+    )
     if view.no_user:
         await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
     else:
@@ -139,11 +138,11 @@ async def get_guild_invite_link(guild_id):
                                ])
 async def order(interaction: discord.Interaction, choices: app_commands.Choice[str]):
     await interaction.response.defer(ephemeral=True)
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/order", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/order", 
+        interaction.guild.id if interaction.guild else None
+    )
     order_data = {
         'user_id': interaction.user.id,
         'task_id': choices.value
@@ -185,11 +184,11 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
                                ])
 async def subscribe(interaction: discord.Interaction, choices: app_commands.Choice[int]):
     await interaction.response.defer(ephemeral=True)
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/subscribe", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/subscribe", 
+        interaction.guild.id if interaction.guild else None
+    )
     if choices.value == 1:
         await Subscribers_Database.set_user_data(interaction.user.id)
         await interaction.followup.send(f"You have successfully subscribed to the order command. Each time the /order command is used by users, you will receive a notification.", ephemeral=True)
@@ -200,11 +199,11 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
 
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/wallet", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/wallet", 
+        interaction.guild.id if interaction.guild else None
+    )
     guild = bot.get_guild(MAIN_GUILD_ID)
     # Check if the user is a member of the guild
     member = guild.get_member(interaction.user.id)
@@ -225,11 +224,11 @@ async def wallet(interaction: discord.Interaction):
 
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
 async def points(interaction: discord.Interaction):
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/tasks", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/tasks", 
+        interaction.guild.id if interaction.guild else None
+    )
     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
 
 
@@ -237,11 +236,11 @@ async def points(interaction: discord.Interaction):
 @app_commands.describe(username="The username to find.")
 async def boost(interaction: discord.Interaction, username: str):
     await interaction.response.defer(ephemeral=True)
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/boost", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/boost", 
+        interaction.guild.id if interaction.guild else None
+    )
     view = BoostView(user_name=username)
     await view.initialize()
     if view.no_user:
@@ -252,11 +251,11 @@ async def boost(interaction: discord.Interaction, username: str):
 
 @bot.tree.command(name="leaderboard", description="Check out the points leaderboard")
 async def leaderboard(interaction: discord.Interaction):
-    # await Services_Database().log_to_database(
-    #     interaction.user.id, 
-    #     "/leaderboard", 
-    #     interaction.guild.id if interaction.guild else None
-    # )
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/leaderboard", 
+        interaction.guild.id if interaction.guild else None
+    )
     await interaction.response.send_message(
         embed=discord.Embed(
             color=discord.Colour.orange(),
