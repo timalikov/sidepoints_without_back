@@ -80,11 +80,11 @@ class ShareCommandView(discord.ui.View):
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="go_after_profile_share")
     async def go(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "/go_after_profile_share", 
-            interaction.guild.id if interaction.guild else None
-        )
+        # await Services_Database().log_to_database(
+        #     interaction.user.id, 
+        #     "/go_after_profile_share", 
+        #     interaction.guild.id if interaction.guild else None
+        # )
 
         discord_server_id = interaction.guild.id
         

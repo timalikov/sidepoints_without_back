@@ -42,11 +42,11 @@ class BoostView(View):
     @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost")
     async def edit_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "boost", 
-            interaction.guild.id if interaction.guild else None
-        )
+        # await Services_Database().log_to_database(
+        #     interaction.user.id, 
+        #     "boost", 
+        #     interaction.guild.id if interaction.guild else None
+        # )
 
         payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.user_data['profile_id']}?side_auth=DISCORD"
         await interaction.followup.send(f"To boost the profile go to the link below: {payment_link}", ephemeral=True)
@@ -54,11 +54,11 @@ class BoostView(View):
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_kicker")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "next_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
+        # await Services_Database().log_to_database(
+        #     interaction.user.id, 
+        #     "next_kicker", 
+        #     interaction.guild.id if interaction.guild else None
+        # )
 
         self.user_data = await self.service_db.get_next_service()
 
@@ -68,11 +68,11 @@ class BoostView(View):
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_kicker")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "share_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
+        # await Services_Database().log_to_database(
+        #     interaction.user.id, 
+        #     "share_kicker", 
+        #     interaction.guild.id if interaction.guild else None
+        # )
 
         user_id = self.user_data['discord_id']
         forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)

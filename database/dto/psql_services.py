@@ -188,3 +188,15 @@ class Services_Database(BasePsqlDTO):
             else:
                 query = "INSERT INTO discord_bot.command_logs (discord_id, command_type, server_id) VALUES ($1, $2, $3);"
                 await conn.execute(query, discord_id, command_type, server_id)
+            
+    async def save_user_wot_tournament(self, discord_id):
+        async with self.get_connection() as conn:
+            query = "INSERT INTO discord_bot.discord_users (discord_id) VALUES ($1);"
+            await conn.execute(query, discord_id)
+    
+    async def get_user_ids_wot_tournament(self):
+        async with self.get_connection() as conn:
+            query = "SELECT discord_id FROM discord_bot.discord_users"
+            user_ids = await conn.fetch(query)
+        
+        return [record['discord_id'] for record in user_ids]
