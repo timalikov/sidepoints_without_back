@@ -28,12 +28,12 @@ class PlayView(View):
         instance = cls(None, services_db)
         
         instance.services_db = services_db
-        instance.kicker_manager = KickerSortingService(services_db)
+        instance.kicker_sorting_service = KickerSortingService(services_db)
 
         if username:
             service = await services_db.get_services_by_username(username)
         else:
-            service = await instance.kicker_manager.fetch_first_service()
+            service = await instance.kicker_sorting_service.fetch_first_service()
 
         if service:
             instance.set_service(service)
@@ -47,10 +47,8 @@ class PlayView(View):
         self.service = service
         self.services_db = services_db
         self.no_user = False  
-        self.sorted_kickers = []  
-        self.current_kicker_index = 0
         self.profile_embed = None
-        self.kicker_manager = None
+        self.kicker_sorting_service = None
 
     def set_service(self, service):
         """
@@ -85,7 +83,7 @@ class PlayView(View):
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await log_to_database(interaction.user.id, "next_user")
-        next_service = await self.kicker_manager.get_next_valid_service()
+        next_service = await self.kicker_sorting_service.get_next_valid_service()
         if next_service:
             self.set_service(next_service)
             await interaction.edit_original_response(embed=self.profile_embed, view=self)
