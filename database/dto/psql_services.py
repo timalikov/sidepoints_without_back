@@ -161,6 +161,15 @@ class Services_Database(BasePsqlDTO):
             """
             await conn.execute(query, timestamp, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
 
+    async def update_order_kicker_selected(self, order_id: str, kicker_discord_id: int):
+        async with self.get_connection() as conn:
+            query = """
+            UPDATE discord_bot.orders
+            SET kicker_selected = TRUE
+            WHERE order_id = $1 AND kicker_discord_id = $2;
+            """
+            await conn.execute(query, order_id, str(kicker_discord_id))
+
     async def get_kicker_ids_and_score(self):
         async with self.get_connection() as conn:
             query = """
@@ -170,3 +179,12 @@ class Services_Database(BasePsqlDTO):
             """
             services = await conn.fetch(query)
         return services
+    
+    async def log_to_database(self, discord_id, command_type, server_id):
+        async with self.get_connection() as conn:
+            if server_id is None:
+                query = "INSERT INTO discord_bot.command_logs (discord_id, command_type) VALUES ($1, $2);"
+                await conn.execute(query, discord_id, command_type)
+            else:
+                query = "INSERT INTO discord_bot.command_logs (discord_id, command_type, server_id) VALUES ($1, $2, $3);"
+                await conn.execute(query, discord_id, command_type, server_id)

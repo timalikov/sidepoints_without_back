@@ -47,6 +47,11 @@ class OrderView(discord.ui.View):
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/kicker_go_after_order", 
+            interaction.guild.id if interaction.guild else None
+        )
         kicker = interaction.user
         if kicker in self.pressed_kickers:
             return await send_interaction_message(interaction=interaction, message="Already pressed")
@@ -58,7 +63,7 @@ class OrderView(discord.ui.View):
         embed = create_profile_embed(profile_data=service)
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
         view = OrderAccessRejectView(
-            customer=self.customer, main_interaction=interaction, service_id=service['service_id'], order_view=self
+            customer=self.customer, main_interaction=interaction, service_id=service['service_id'], kicker_id=kicker.id, order_view=self
         )
         view.message = await self.customer.send(embed=embed, view=view)
         await send_interaction_message(interaction=interaction, message="The customer has received your request!")
@@ -82,12 +87,14 @@ class OrderAccessRejectView(discord.ui.View):
         customer: discord.User,
         main_interaction: discord.Interaction,
         service_id: int,
+        kicker_id: int,
         order_view: Any,
 
     ) -> None:
         super().__init__(timeout=10 * 30)
         self.main_interaction = main_interaction
         self.service_id = service_id
+        self.kicker_id = kicker_id
         self.customer = customer
         self.already_pressed = False
         self.discord_service_id = MAIN_GUILD_ID
@@ -121,6 +128,12 @@ class OrderAccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/user_go_after_order", 
+            interaction.guild.id if interaction.guild else None
+        )
+        await self.order_view.services_db.update_order_kicker_selected(self.order_view.order_id, self.kicker_id)
         self.order_view.is_pressed = True
         is_member = await is_member_of_main_guild(self.customer.id)
         if not is_member:
@@ -143,4 +156,9 @@ class OrderAccessRejectView(discord.ui.View):
         interaction: discord.Interaction,
         button: discord.ui.Button
     ) -> None:
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/user_reject_after_order", 
+            interaction.guild.id if interaction.guild else None
+        )
         await interaction.message.edit(embed=discord.Embed(description="Canceled"), view=None)

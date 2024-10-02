@@ -1,5 +1,7 @@
 from config import MAIN_GUILD_ID
 from datetime import datetime, timedelta
+from database.dto.psql_services import Services_Database
+from database.dto.sql_profile import log_to_database
 import discord 
 import os
 
@@ -75,9 +77,14 @@ class ShareCommandView(discord.ui.View):
         else:
             await interaction.response.send_message(message, ephemeral=True)
     
-    @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="share_go_button")
+    @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="go_after_profile_share")
     async def go(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/go_after_profile_share", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         discord_server_id = interaction.guild.id
         
