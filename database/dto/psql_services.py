@@ -170,3 +170,12 @@ class Services_Database(BasePsqlDTO):
             """
             services = await conn.fetch(query)
         return services
+    
+    async def update_order_kicker_selected(self, order_id: str, kicker_discord_id: int):
+        async with self.get_connection() as conn:
+            query = """
+            UPDATE discord_bot.orders
+                SET kicker_selected = TRUE
+                WHERE order_id = $1 AND kicker_discord_id = $2;
+            """
+            await conn.execute(query, order_id, str(kicker_discord_id))
