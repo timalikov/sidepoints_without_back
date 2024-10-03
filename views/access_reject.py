@@ -1,5 +1,4 @@
-import asyncio
-from typing import Callable, Any
+from typing import Callable, Any, Literal
 import discord
 
 import config
@@ -12,9 +11,9 @@ from models.private_channel import (
 from services.messages.interaction import send_interaction_message
 from services.refund_replace_message_manager import RefundReplaceManager
 from views.refund_replace import RefundReplaceView
+from translate import translations
 
 bot = get_bot()
-
 
 class AccessRejectView(discord.ui.View):
     """
@@ -30,7 +29,8 @@ class AccessRejectView(discord.ui.View):
         service_name: str,
         purchase_id: int,
         discord_server_id: int,
-        sqs_client: Any
+        sqs_client: Any,
+        lang: Literal["en", "ru"] = "en"
     ) -> None:
         super().__init__(timeout=None)
         self.kicker = kicker
@@ -43,6 +43,7 @@ class AccessRejectView(discord.ui.View):
         self.already_pressed = False
         self.sqs_client = sqs_client
         self.user_interacted = False
+        self.lang = lang
 
         self.refund_manager = RefundReplaceManager(
             access_reject_view=self,
@@ -50,6 +51,7 @@ class AccessRejectView(discord.ui.View):
             kicker=self.kicker,
             customer=self.customer,
             purchase_id=self.purchase_id,
+            lang=self.lang
         )
         self.auto_reject()
 
@@ -62,7 +64,7 @@ class AccessRejectView(discord.ui.View):
                 return result
             await send_interaction_message(
                 interaction=interaction,
-                message="Button has already been pressed."
+                message=translations["button_already_pressed"][self.lang]
             )
             
         return decorator
@@ -98,9 +100,7 @@ class AccessRejectView(discord.ui.View):
         self.user_interacted = True
         await send_interaction_message(
             interaction=interaction,
-            message=(
-                f"Thanks for accepting the session with {self.customer.name}!"
-            )
+            message=translations["accept_session_message"][self.lang].format(customer_name=self.customer.name)
         )
         await self.refund_manager.stop_periodic_refund_replace()
         if not self.discord_server_id or str(self.discord_server_id) == str(config.MAIN_GUILD_ID):
@@ -112,12 +112,14 @@ class AccessRejectView(discord.ui.View):
                 serviceName=self.service_name,
                 kicker_username=self.kicker_username,
                 purchase_id=self.purchase_id,
+                lang=self.lang
             )
         else:
             await send_connect_message_between_kicker_and_customer(
                 challenged=self.kicker,
                 challenger=self.customer,
-                serviceName=self.service_name
+                serviceName=self.service_name,
+                lang=self.lang
             )
             channel = None
 
@@ -137,9 +139,7 @@ class AccessRejectView(discord.ui.View):
         await interaction.response.defer()
         await send_interaction_message(
             interaction=interaction,
-            message=(
-                "You have rejected the session. The session is no longer valid."
-            )
+            message=translations["reject_session_message"][self.lang]
         )
         await self.refund_manager.stop_periodic_refund_replace()
         self.user_interacted = True
@@ -149,16 +149,12 @@ class AccessRejectView(discord.ui.View):
             kicker=self.kicker,
             purchase_id=self.purchase_id,
             sqs_client=self.sqs_client,
-            service_name=self.service_name
+            service_name=self.service_name,
+            lang=self.lang
         )
         embed_message = discord.Embed(
-            title=f"Sorry, the kicker {self.kicker.name} has not accepted the session.",
+            title=translations["kicker_not_accepted_title"][self.lang].format(kicker_name=self.kicker.name),
             colour=discord.Colour.blue(),
-            description="Would you like a refund or replace the kicker?"
+            description=translations["refund_replace_prompt"][self.lang]
         )
         view.message = await self.customer.send(embed=embed_message, view=view)
-
-
-
-
-        

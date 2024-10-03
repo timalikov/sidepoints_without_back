@@ -25,13 +25,16 @@ async def send_scheduled_messages(channel):
         except discord.HTTPException as e:
             print(f"Failed to send message to channel {channel}: {e}")
 
+
 @tasks.loop(count=1)
 async def send_stop_button(channel):
     await asyncio.sleep(11)
     stop_button_view = StopButton(lambda: stop_all_messages(channel))
     await channel.send("**If the kicker has already joined the channel, please click on the \"Stop\" button to stop receiving notifications**", view=stop_button_view)
 
+
 active_tasks = {}
+
 
 async def handle_task(task, channel, action='start', task_name=None):
     task_key = f"{task_name}_{channel.name}"
@@ -58,7 +61,9 @@ async def start_all_messages(channel):
     await handle_task(send_scheduled_messages, channel, action='start', task_name='send_scheduled_messages')
     await handle_task(send_stop_button, channel, action='start', task_name='send_stop_button')
 
+
 stop_lock = asyncio.Lock()
+
 
 async def stop_all_messages(channel):
     async with stop_lock:
