@@ -43,6 +43,13 @@ def is_owner(interaction: discord.Interaction) -> bool:
 def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
 
+async def save_user_id(user_id):
+    services_db = Services_Database()
+    existing_user_ids = await services_db.get_user_ids_wot_tournament()
+    if user_id in existing_user_ids:
+        return
+    else:
+        await services_db.save_user_wot_tournament(user_id)
 
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
@@ -84,6 +91,7 @@ async def profile(interaction: discord.Interaction):
         "/profile", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     profile_exist = Profile_Exist(str(interaction.user.id))
     lang = get_lang_prefix(interaction.guild.id)
     if profile_exist.no_user:
@@ -111,6 +119,7 @@ async def play(interaction: discord.Interaction):
         "/go", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     lang = get_lang_prefix(interaction.guild.id)
     view = await PlayView.create(user_choice="ALL", lang=lang)
 
@@ -137,6 +146,7 @@ async def find(interaction: discord.Interaction, username: str):
         "/find", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     lang = get_lang_prefix(interaction.guild.id)
     view = await PlayView.create(username=username, lang=lang)
 
@@ -178,6 +188,7 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
         "/order", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     order_data = {
         'user_id': interaction.user.id,
         'task_id': choices.value
@@ -225,6 +236,7 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
         "/subscribe", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     if choices.value == 1:
         await Subscribers_Database.set_user_data(interaction.user.id)
         await interaction.followup.send(f"You have successfully subscribed to the order command. Each time the /order command is used by users, you will receive a notification.", ephemeral=True)
@@ -240,6 +252,7 @@ async def wallet(interaction: discord.Interaction):
         "/wallet", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     main_guild = bot.get_guild(MAIN_GUILD_ID)
     lang = get_lang_prefix(interaction.guild.id)
     # Check if the user is a member of the guild
@@ -276,6 +289,7 @@ async def points(interaction: discord.Interaction):
         "/tasks", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
     lang = get_lang_prefix(interaction.guild.id)
     link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
@@ -294,6 +308,7 @@ async def boost(interaction: discord.Interaction, username: str):
         "/boost", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     lang = get_lang_prefix(interaction.guild.id)
     view = BoostView(user_name=username, lang=lang)
     await view.initialize()
@@ -317,6 +332,7 @@ async def leaderboard(interaction: discord.Interaction):
         "/leaderboard", 
         interaction.guild.id if interaction.guild else None
     )
+    await save_user_id(interaction.user.id)
     lang = get_lang_prefix(interaction.guild.id)
     await interaction.response.send_message(
         embed=discord.Embed(
