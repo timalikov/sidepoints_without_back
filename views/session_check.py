@@ -1,5 +1,6 @@
 from typing import Any, Callable, Literal
 from bot_instance import get_bot
+from database.dto.psql_services import Services_Database
 import discord
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
@@ -53,7 +54,6 @@ class SessionCheckView(discord.ui.View):
         return decorator
 
     async def session_successful(self) -> None:
-        print("session_successful after 1 hour")
         for item in self.children:
             if isinstance(item, discord.ui.Button):
                 item.disabled = True
@@ -70,6 +70,11 @@ class SessionCheckView(discord.ui.View):
     @check_already_pressed
     async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "session_check_yes", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         self.already_pressed = True
         for item in self.children:
@@ -91,6 +96,11 @@ class SessionCheckView(discord.ui.View):
     @check_already_pressed
     async def no_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "session_check_no", 
+            interaction.guild.id if interaction.guild else None
+        )
         await send_interaction_message(
             interaction=interaction,
             message=translations["support_ticket"][self.lang]

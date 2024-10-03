@@ -12,7 +12,6 @@ from translate import translations
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 from message_constructors import create_profile_embed_2
 from models.forum import find_forum
-from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 
 bot = get_bot()
@@ -41,10 +40,15 @@ class BoostView(View):
         else:
             self.no_user = True
 
-    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="edit_service")
+
+    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost")
     async def edit_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "edit_service")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "boost", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.user_data['profile_id']}?side_auth=DISCORD"
         await interaction.followup.send(
@@ -52,19 +56,28 @@ class BoostView(View):
             ephemeral=True
         )
 
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_kicker")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "next_user")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "next_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         self.user_data = await self.service_db.get_next_service()
 
         self.profile_embed = create_profile_embed_2(self.user_data, lang=self.lang)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
 
-    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
+    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_kicker")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "share_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         user_id = self.user_data['discord_id']
         forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)

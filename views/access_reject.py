@@ -1,3 +1,4 @@
+from database.dto.psql_services import Services_Database
 from typing import Callable, Any, Literal
 import discord
 
@@ -92,6 +93,11 @@ class AccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer()
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "accept", 
+            interaction.guild.id if interaction.guild else None
+        )
         self.already_pressed = True
         for item in self.children:
             if isinstance(item, discord.ui.Button):
@@ -137,6 +143,11 @@ class AccessRejectView(discord.ui.View):
         button: discord.ui.Button
     ) -> None:
         await interaction.response.defer()
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "reject", 
+            interaction.guild.id if interaction.guild else None
+        )
         await send_interaction_message(
             interaction=interaction,
             message=translations["reject_session_message"][self.lang]

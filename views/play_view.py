@@ -13,7 +13,6 @@ from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
 from models.forum import find_forum
-from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 
@@ -75,10 +74,15 @@ class PlayView(View):
         member = main_guild.get_member(user_id)
         return member is not None
 
-    @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_user")
+    @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        is_member = await self.is_member_of_main_guild(interaction.user.id)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "play_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
+
         if not is_member:
             await interaction.followup.send(
                 translations["please_join"][self.lang].format(link="https://discord.gg/sidekick"),
@@ -86,7 +90,6 @@ class PlayView(View):
             )
             return
 
-        await log_to_database(interaction.user.id, "play_user")
         serviceId = self.service['service_id']
         discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
         payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}&side_auth=DISCORD"
@@ -95,10 +98,14 @@ class PlayView(View):
             ephemeral=True
         )
 
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_kicker")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "next_user")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "next_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
         next_service = await self.kicker_sorting_service.get_next_valid_service()
         if next_service:
             self.set_service(next_service)
@@ -109,9 +116,14 @@ class PlayView(View):
                 ephemeral=True
             )
 
-    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
+    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_kicker")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "share_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         user_id = self.service['discord_id']
         forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
@@ -134,10 +146,15 @@ class PlayView(View):
         else:
             await interaction.response.send_message(message, ephemeral=True)
 
-    @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_user")
+    @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_kicker")
     async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "chat_user")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "chat_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
+
         user_id = self.service['discord_id']
         member = interaction.guild.get_member(int(user_id))
         if member:
@@ -153,9 +170,15 @@ class PlayView(View):
                 ephemeral=True
             )
 
-    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_user")
+    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_kicker")
     async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "boost_kicker", 
+            interaction.guild.id if interaction.guild else None
+        )
+
         if self.service:
             payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.service['profile_id']}?side_auth=DISCORD"
             await send_interaction_message(

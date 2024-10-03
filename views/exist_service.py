@@ -48,18 +48,26 @@ class Profile_Exist(View):
         else:
             self.no_user = True
 
-    @discord.ui.button(label="Edit", style=discord.ButtonStyle.success, custom_id="edit_service")
-    async def edit_service(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "edit_service")
+
+
+    @discord.ui.button(label="Edit", style=discord.ButtonStyle.success, custom_id="profile_edit")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/profile_edit", 
+            interaction.guild.id if interaction.guild else None
+        )
 
         payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit?side_auth=DISCORD"
         await interaction.followup.send(translations["edit_service_link"][self.lang].format(link=payment_link), ephemeral=True)
 
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_user")
+    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="profile_next")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "next_user")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/profile_next", 
+            interaction.guild.id if interaction.guild else None
+        )
         if self.index < len(self.list_services) - 1:
             self.index += 1
         else:
@@ -72,9 +80,14 @@ class Profile_Exist(View):
         self.profile_embed = create_profile_embed(self.list_services[self.index], lang=self.lang)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
 
-    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
+    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="profile_share")
     async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/profile_share", 
+            interaction.guild.id if interaction.guild else None
+        )
         share_command_view = ShareCommandView(
             bot,
             self.list_services,
@@ -87,6 +100,10 @@ class Profile_Exist(View):
     @discord.ui.button(label="Create a new service", style=discord.ButtonStyle.secondary, custom_id="create_service")
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "create_service")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "/profile_create_service", 
+            interaction.guild.id if interaction.guild else None
+        )
         payment_link = f"{os.getenv('WEB_APP_URL')}/services/create?side_auth=DISCORD"
         await interaction.followup.send(translations["create_service_link"][self.lang].format(link=payment_link), ephemeral=True)

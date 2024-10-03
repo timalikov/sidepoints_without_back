@@ -1,15 +1,16 @@
+
+import discord
+from translate import translations
+from database.dto.psql_wallets import Wallets_Database
 from dotenv import load_dotenv
 import os
 
-import discord
 from discord.ui import View
 
 from config import APP_CHOICES
 from bot_instance import get_bot
-from translate import translations
+from database.dto.psql_services import Services_Database
 
-from database.dto.psql_wallets import Wallets_Database
-from database.dto.sql_profile import log_to_database
 from web3_interaction.balance_checker import get_usdt_balance
 
 bot = get_bot()
@@ -27,7 +28,11 @@ class Wallet_exist(View):
     @discord.ui.button(label="Wallet", style=discord.ButtonStyle.success, custom_id="wallet_button")
     async def wallet_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "wallet_button")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "wallet", 
+            interaction.guild.id if interaction.guild else None
+        )
         url = f"{os.getenv('WEB_APP_URL')}/manage?side_auth=DISCORD"
         message = translations["press_wallet_link"][self.lang].format(url=url)
         await interaction.followup.send(message, ephemeral=True)
@@ -35,7 +40,11 @@ class Wallet_exist(View):
     @discord.ui.button(label="Top up", style=discord.ButtonStyle.primary, custom_id="top_up_button")
     async def top_up_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "top_up_button")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "top_up", 
+            interaction.guild.id if interaction.guild else None
+        )
         url = f"{os.getenv('WEB_APP_URL')}/topup?side_auth=DISCORD"
         message = translations["press_top_up_link"][self.lang].format(url=url)
         await interaction.followup.send(message, ephemeral=True)
@@ -43,7 +52,11 @@ class Wallet_exist(View):
     @discord.ui.button(label="Balance", style=discord.ButtonStyle.secondary, custom_id="balance_button")
     async def balance_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
-        await log_to_database(interaction.user.id, "balance_button")
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "balance", 
+            interaction.guild.id if interaction.guild else None
+        )
         wallet_obj = Wallets_Database()
         wallet_address = await wallet_obj.get_wallet_by_discord_id(str(interaction.user.id))
         
