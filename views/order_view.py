@@ -78,7 +78,6 @@ class OrderView(discord.ui.View):
             lang=self.lang
         )
         view.message = await self.customer.send(embed=embed, view=view)
-        await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
 
         service_category = self.services_db.app_choice if self.services_db.app_choice == "ALL" else await self.services_db.get_service_category_name(self.services_db.app_choice)
         await self.services_db.save_order(
@@ -90,6 +89,7 @@ class OrderView(discord.ui.View):
             respond_time=datetime.now(),
             service_price=service['service_price']
         )
+        await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
 
 
 class OrderAccessRejectView(discord.ui.View):
