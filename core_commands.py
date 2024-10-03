@@ -13,7 +13,8 @@ from database.dto.sql_order import Order_Database
 from config import (
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
-    ORDER_CHANNEL_ID,
+    ORDER_CATEGORY_NAME,
+    ORDER_CHANNEL_NAME,
     LINK_LEADERBOARD,
 )
 from views.boost_view import BoostView
@@ -22,6 +23,7 @@ from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
+from models.public_channel import get_or_create_channel_by_category_and_name
 from translate import get_lang_prefix, translations
 
 main_guild_id = MAIN_GUILD_ID
@@ -155,7 +157,6 @@ async def find(interaction: discord.Interaction, username: str):
 async def get_guild_invite_link(guild_id):
     guild = bot.get_guild(guild_id)
     if guild:
-        # Create an invite link
         invite = "https://discord.gg/sidekick"  # Expires in 1 day, 1 use
         return invite
     return None
@@ -183,8 +184,12 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
         'task_id': choices.value
     }
     await Order_Database.set_user_data(order_data)
-    main_link = await get_guild_invite_link(MAIN_GUILD_ID)
-    channel = bot.get_channel(ORDER_CHANNEL_ID)
+    main_link = await get_guild_invite_link(guild_id)
+    channel = await get_or_create_channel_by_category_and_name(
+        category_name=ORDER_CATEGORY_NAME,
+        channel_name=ORDER_CHANNEL_NAME,
+        guild=interaction.guild
+    )
     text_message_order_view = \
         translations["order_new_alert"][lang].format(choice=choices.name)
     services_db = Services_Database(app_choice=choices.value)
