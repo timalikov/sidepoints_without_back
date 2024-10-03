@@ -278,7 +278,6 @@ async def points(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
-    await log_to_database(interaction.user.id, "/tasks")
     lang = get_lang_prefix(interaction.guild.id)
     link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
     await interaction.response.send_message(
