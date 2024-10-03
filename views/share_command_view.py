@@ -1,12 +1,22 @@
-from config import MAIN_GUILD_ID
-from datetime import datetime, timedelta
 import discord 
 import os
+from datetime import datetime, timedelta
+from typing import Literal
+
+from translate import translations
+from config import MAIN_GUILD_ID
 
 class ShareCommandView(discord.ui.View):
     cooldowns = {}  
 
-    def __init__(self, bot, list_services, index, affiliate_channel_ids):
+    def __init__(
+        self,
+        bot,
+        list_services,
+        index,
+        affiliate_channel_ids,
+        lang: Literal["en", "ru"] = "en"
+    ):
         super().__init__()
         self.bot = bot
         self.list_services = list_services
@@ -14,7 +24,7 @@ class ShareCommandView(discord.ui.View):
         self.affiliate_channel_ids = affiliate_channel_ids
         self.user_id = self.list_services[self.index]["discord_id"]
         self.service_id = self.list_services[self.index]["service_id"]
-
+        self.lang = lang
 
     async def share(self, interaction: discord.Interaction):
         user_id = interaction.user.id
@@ -32,8 +42,14 @@ class ShareCommandView(discord.ui.View):
         service_image = self.list_services[self.index].get("service_image", None)  
 
         embed = discord.Embed(
-            title=f"Username: {username}",
-            description=f"**Description:** {service_description}\n**Category:** {category}\n**Price:** ${price}"
+            title=(
+                translations["share_embed_title"][self.lang]
+                .format(username=username)
+            ),
+            description=(
+                translations["share_embed_description"][self.lang]
+                .format(service_description=service_description, category=category, price=price)
+            )
         )
         if isinstance(service_image, list):
             service_image = service_image[0] if service_image else ""
@@ -49,7 +65,7 @@ class ShareCommandView(discord.ui.View):
                 except Exception as e:
                     print(f"Failed to send message to channel {channel_id}: {e}")
 
-        message = "Message has been shared across all affiliate channels."
+        message = translations["message_shared"][self.lang]
         if interaction.response.is_done():
             await interaction.followup.send(message, ephemeral=True)
         else:
@@ -69,7 +85,7 @@ class ShareCommandView(discord.ui.View):
         hours, minutes = divmod(int(remaining_time.seconds), 3600)
         minutes, seconds = divmod(minutes, 60)
         
-        message = f"Please wait {hours} hours {minutes} minutes {seconds} seconds before sharing again."
+        message = translations["cooldown_message"][self.lang].format(hours=hours, minutes=minutes, seconds=seconds)
         if interaction.response.is_done():
             await interaction.followup.send(message, ephemeral=True)
         else:
@@ -85,10 +101,16 @@ class ShareCommandView(discord.ui.View):
         
         is_member = await self.is_member_of_main_guild(interaction.user.id)
         if not is_member:
-            await interaction.followup.send("Please join the server before proceeding: https://discord.gg/sidekick", ephemeral=True)
+            await interaction.followup.send(
+                translations["please_join"][self.lang].format(link="https://discord.gg/sidekick"),
+                ephemeral=True
+            )
             return
 
-        await interaction.followup.send(f"To participate in this session, please complete your payment here: {payment_link}", ephemeral=True)
+        await interaction.followup.send(
+            translations["payment_message"][self.lang].format(payment_link=payment_link),
+            ephemeral=True
+        )
         
     async def is_member_of_main_guild(self, user_id):
         main_guild = self.bot.get_guild(MAIN_GUILD_ID)

@@ -1,8 +1,12 @@
+from typing import Literal
+
 from datetime import datetime
 import discord
 
 from bot_instance import get_bot
 from config import MAIN_GUILD_ID, TEST_ACCOUNTS
+from translate import get_lang_prefix, translations
+
 from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
 from database.dto.sql_profile import Profile_Database
@@ -19,26 +23,24 @@ async def send_connect_message_between_kicker_and_customer(
     challenger: discord.User,
     challenged: discord.User,
     serviceName: str,
-    invite_url: str = None
+    invite_url: str = None,
+    lang: Literal["en", "ru"] = "en",
 ) -> None:
-    kicker_message = (
-        "**You session has started:**\n"
-        f"User: <@{challenger.id}>\n"
-        f"Username: {challenger.name}\n"
-        f"Service: {serviceName}\n"
-        "Reach out to the user as soon as possible:\n"
-        f"Connect via Direct message:<@{challenger.id}>\n"
+    kicker_message = translations["kicker_session_started_message"][lang].format(
+        challenger_id=challenger.id,
+        challenger_name=challenger.name,
+        service_name=serviceName
     )
-    user_message = (
-        "Kicker has accepted your order:\n"
-        f"Kicker: <@{challenged.id}>\n"
-        f"Kicker username: {challenged.name}\n"
-        f"Service: {serviceName}\n"
-        f"Connect via Direct message:<@{challenged.id}>\n"
+    user_message = translations["user_order_accepted_message"][lang].format(
+        challenged_id=challenged.id,
+        challenged_name=challenged.name,
+        service_name=serviceName
     )
+    
     if invite_url:
         kicker_message += f"\n{invite_url}"
         user_message += f"\n{invite_url}"
+
     try:
         await challenger.send(user_message)
         if challenged.id != 1208433940050874429:
@@ -46,9 +48,19 @@ async def send_connect_message_between_kicker_and_customer(
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-async def create_private_discord_channel(bot_instance, guild_id, challenger, challenged, serviceName, kicker_username, purchase_id, base_category_name = "Sidekick Chatrooms"):
-    guild = bot.get_guild(guild_id)
 
+async def create_private_discord_channel(
+    bot_instance,
+    guild_id,
+    challenger,
+    challenged,
+    serviceName,
+    kicker_username,
+    purchase_id,
+    base_category_name="Sidekick Chatrooms",
+    lang: Literal["en", "ru"] = "en",
+):
+    guild = bot.get_guild(guild_id)
     services_db = Services_Database()
     kickers = await services_db.get_kickers()
     managers = await services_db.get_managers()
@@ -89,27 +101,23 @@ async def create_private_discord_channel(bot_instance, guild_id, challenger, cha
 
     invite = await channel.create_invite(max_age=86400)
 
-    await channel.send(
-        f"Welcome to the Sidekick Private Session Room!\n" +
-        "We hope you enjoy the games and the time spent together ❤️.\n" +
-        f"If anything goes wrong, please create a ticket in our <#1233350206280437760> channel!\n" +
-        f"Your Kicker's username is @{kicker_username}"
-    )
+    welcome_message = translations["welcome_message"][lang].format(kicker_username=kicker_username)
+    await channel.send(welcome_message)
     
     await start_all_messages(channel)
 
-    manager_message = (
-        f"Session has started\n"
-        f"Kicker: @{challenged.name}\n"
-        f"User: @{challenger.name}\n" 
-        f"Please check this private channel: {invite.url}."
+    manager_message = translations["session_started_message"][lang].format(
+        challenged=challenged,
+        challenger=challenger,
+        invite_url=invite.url
     )
 
     await send_connect_message_between_kicker_and_customer(
         challenged=challenged,
         challenger=challenger,
         serviceName=serviceName,
-        invite_url=invite.url
+        invite_url=invite.url,
+        lang=lang
     )
     
     manager_members = []
@@ -127,31 +135,46 @@ async def create_private_discord_channel(bot_instance, guild_id, challenger, cha
         await send_message_to_customer_support(bot, manager_message)
         await send_message_to_team_channel(bot=bot, customer=challenger, kicker=challenged, invite_url=invite.url)
 
-    await session_delivery_check(customer=challenger, kicker=challenged, purchase_id=purchase_id, channel=channel)
+    await session_delivery_check(
+        customer=challenger,
+        kicker=challenged,
+        purchase_id=purchase_id,
+        channel=channel,
+        lang=lang
+    )
     if challenged.id == 1208433940050874429:
         # Creating the embed
-        embed = discord.Embed(title="👋 Hi there! Welcome to the Web3 Mastery Tutorial!", description="I'm CZ, here to guide you through your first steps into an exciting world🌐✨", color=discord.Color.blue())
-        embed.add_field(name="Congratulations on successfully placing your order 🎉", value="You've just unlocked the title of \"Web3 Master,\" but the journey doesn't stop here.", inline=False)
-        embed.add_field(name="Learn and Earn", value="Go through the info we’ve shared here carefully and hit the 'I’ve learnt all the acknowledgments above' button to claim your campaign POINTS.", inline=False)
-        embed.add_field(name="Refund Alert", value="Remember, the $4 you spent will be refunded back to your account at the end of the campaign. Keep an eye on your balance!", inline=False)
-        embed.add_field(name="More Points, More Power", value="Place more orders and boost your POINTs tally significantly.", inline=False)
-        embed.add_field(name="Exploring Sidekick: All You Need to Know!", value="[Watch Here](https://youtu.be/h9fzscEdC1Y)", inline=False)
-        embed.set_footer(text="Let's make your crypto journey rewarding 🚀")
-        view = DoneButton()
+        embed = discord.Embed(
+            title="👋 Hi there! Welcome to the Web3 Mastery Tutorial!", 
+            description=translations["kicker_intro_message"][lang], 
+            color=discord.Color.blue()
+        )
+        view = DoneButton(lang=lang)
         await channel.send(embed=embed, view=view)
     return True, channel
 
 
-
-async def send_challenge_invites(challenger, challenged, invite_url):
-    await challenger.send(f"Your session is ready! Join the private channel: {invite_url}")
+async def send_challenge_invites(
+    challenger: discord.User,
+    challenged: discord.User, 
+    invite_url: str,
+    lang: Literal["en", "ru"] = "en",
+):
+    invite_message = translations["challenge_invite_message"][lang].format(invite_url=invite_url)
+    await challenger.send(invite_message)
     if challenged.id != challenger.id:
-        await challenged.send(f"You've been challenged! Join the private channel: {invite_url}")
+        await challenged.send(invite_message)
 
 
-async def join_or_create_private_discord_channel(bot, guild_id, challenge, challenger, challenged):
+async def join_or_create_private_discord_channel(
+    bot,
+    guild_id: int,
+    challenge,
+    challenger: discord.User,
+    challenged: discord.User
+):
     guild = bot.get_guild(guild_id)
-
+    lang = get_lang_prefix(guild_id)
     existing_channel_ids = await Profile_Database.get_channel_id_by_user_id(challenged.id)
     channel = None
 
@@ -164,7 +187,16 @@ async def join_or_create_private_discord_channel(bot, guild_id, challenge, chall
     channel_name = f"team-{challenged.display_name}"
     # If no valid channel is found, create a new one
     if not channel:
-        success, channel = await create_private_discord_channel(bot, guild_id, challenge, channel_name, challenger, challenged, base_category_name="Sidekick Team Rooms")
+        success, channel = await create_private_discord_channel(
+            bot,
+            guild_id,
+            challenge,
+            channel_name,
+            challenger,
+            challenged,
+            base_category_name="Sidekick Team Rooms",
+            lang=lang
+        )
         if not success:
             return False, "Failed to create a new private channel"
         await Profile_Database.add_channel_to_user(challenged.id, channel.id)
@@ -173,8 +205,8 @@ async def join_or_create_private_discord_channel(bot, guild_id, challenge, chall
     await channel.set_permissions(challenged, read_messages=True)
 
     try:
-        invite = await channel.create_invite(max_age=14400)  # Create a 24-hour invite
-        await send_challenge_invites(challenger, challenged, invite.url)
+        invite = await channel.create_invite(max_age=14400)  # Create a 4-hour invite
+        await send_challenge_invites(challenger, challenged, invite.url, lang=lang)
         return True, channel
     except discord.HTTPException:
         return False, "Failed to send invite links to one or more participants."

@@ -1,9 +1,10 @@
-from typing import Any, Callable, Coroutine
+from typing import Any, Callable, Literal
 from bot_instance import get_bot
 import discord
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
-from views.refund_replace import RefundReplaceView
+
+from translate import translations, get_lang_prefix
 
 bot = get_bot()
 
@@ -14,7 +15,8 @@ class SessionCheckView(discord.ui.View):
         customer: discord.User,
         kicker: discord.User,
         purchase_id: int,    
-        channel: Any
+        channel: discord.VoiceChannel,
+        lang: Literal["en", "ru"] = "en"
     ) -> None:
         super().__init__(timeout=60*60)
         self.customer = customer
@@ -23,6 +25,7 @@ class SessionCheckView(discord.ui.View):
         self.channel = channel
         self.already_pressed = False
         self.sqs_client = SQSClient()
+        self.lang = get_lang_prefix(channel.guild.id)
 
     async def on_timeout(self):
         if not self.already_pressed:
@@ -44,7 +47,7 @@ class SessionCheckView(discord.ui.View):
             else:
                 await send_interaction_message(
                     interaction=interaction,
-                    message="Button has already been pressed."
+                    message=translations["button_already_pressed"][self.lang]
                 )
             
         return decorator
@@ -56,10 +59,9 @@ class SessionCheckView(discord.ui.View):
                 item.disabled = True
         await self.message.edit(view=self)
 
-        await self.customer.send(f"Thank you for using Sidekick!\n Hope you enjoyed the session with <@{self.kicker.id}>.")
-        await self.kicker.send("Thank you for your service! The funds will be transferred to your wallet soon!")
-        
-        
+        await self.customer.send(translations["thank_you_customer"][self.lang].format(kicker=self.kicker.id))
+        await self.kicker.send(translations["thank_you_kicker"][self.lang])
+
     @discord.ui.button(
         label="Yes",
         style=discord.ButtonStyle.green,
@@ -77,9 +79,9 @@ class SessionCheckView(discord.ui.View):
 
         await send_interaction_message(
             interaction=interaction,
-            message=f"Thank you for using Sidekick!\n Hope you enjoyed the session with <@{self.kicker.id}>."
+            message=translations["thank_you_customer"][self.lang].format(kicker=self.kicker.id)
         )
-        await self.kicker.send("Thank you for your service! The funds will be transferred to your wallet soon!")
+        await self.kicker.send(translations["thank_you_kicker"][self.lang])
 
     @discord.ui.button(
         label="No",
@@ -91,7 +93,7 @@ class SessionCheckView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         await send_interaction_message(
             interaction=interaction,
-            message="Please create a support ticket to get assistance from our customer support team in resolving the issue <#1233350206280437760>.\nRest assured, your funds are safe and securely locked in our wallet."
+            message=translations["support_ticket"][self.lang]
         )
 
-        await self.kicker.send(f"User <@{self.customer.id}> has stated that the session was not delivered. Your session is no longer valid. Customer Support officer will reach out to you shortly.")
+        await self.kicker.send(translations["session_not_delivered"][self.lang].format(customer=self.customer.id))

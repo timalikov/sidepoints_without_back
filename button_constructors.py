@@ -1,27 +1,35 @@
+from typing import Literal
 import os
-from datetime import datetime
-from bot_instance import get_bot
-# from database.dto.sql_profile import Profile_Database
-from message_constructors import create_profile_embed
+
 import discord
 
+from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID, FORUM_NAME
+from bot_instance import get_bot
+from translate import get_lang_prefix, translations
+
+from message_constructors import create_profile_embed
 from serializers.profile_serializer import serialize_profile_data
 from database.dto.sql_forum_posted import ForumUserPostDatabase
-from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID, FORUM_NAME
 from models.forum import find_forum
 
 bot = get_bot()
 
-
 class AcceptView(discord.ui.View):
-    def __init__(self, user_id, task_id, profile_data):
+    def __init__(
+        self,
+        user_id,
+        task_id,
+        profile_data,
+        lang: Literal["ru", "en"] = "en"
+    ):
         super().__init__(timeout=None)
         self.profile_data = serialize_profile_data(profile_data)
         self.user_id = user_id
         self.task_id = task_id
-        button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.primary, custom_id=f"go_{user_id}")
+        button = discord.ui.Button(label=translations["accept_button"][get_lang_prefix(user_id)], style=discord.ButtonStyle.primary, custom_id=f"go_{user_id}")
         button.callback = self.button_callback  # Set the callback for the button
         self.add_item(button)
+        self.lang = lang
 
     async def button_callback(self, interaction: discord.Interaction):
         # Fetch profile data for the user_id
@@ -34,12 +42,12 @@ class AcceptView(discord.ui.View):
             # Check if initial response is done, then follow up
             try:
                 await interaction.response.send_message(
-                    f"To participate in this session, please complete your payment here: {payment_link}",
+                    translations["payment_message"][self.lang].format(payment_link=payment_link),
                     ephemeral=True
                 )
             except discord.errors.InteractionResponded:
                 await interaction.followup.send(
-                    f"To participate in this session, please complete your payment here: {payment_link}",
+                    translations["payment_message"][self.lang].format(payment_link=payment_link),
                     ephemeral=True
                 )
             except discord.errors.HTTPException as e:
@@ -48,32 +56,40 @@ class AcceptView(discord.ui.View):
                 print(f"Unhandled exception: {e}")
 
 class ButtonAcceptView(discord.ui.View):
-    def __init__(self, user_id, task_id, order_id, profile_data):
+    def __init__(
+        self,
+        user_id,
+        task_id,
+        order_id,
+        profile_data,
+        lang: Literal["ru", "en"] = "en"
+    ):
         super().__init__(timeout=None)
         self.profile_data = serialize_profile_data(profile_data)
         self.user_id = int(user_id)  # Store user_id to use in the callback
         self.task_id = task_id
         self.order_id = order_id
-        button = discord.ui.Button(label="Accept", style=discord.ButtonStyle.primary, custom_id=f"go_{user_id}")
-        button.callback = self.button_callback  # Set the callback for the button
-        self.add_item(button)  # Add the button to the view
+        button = discord.ui.Button(label=translations["accept_button"][get_lang_prefix(user_id)], style=discord.ButtonStyle.primary, custom_id=f"go_{user_id}")
+        button.callback = self.button_callback
+        self.add_item(button)
+        self.lang = lang
 
     async def button_callback(self, interaction: discord.Interaction):
         kicker_data = self.profile_data
         kicker_data['task_desc'] = TASK_DESCRIPTIONS[self.task_id]
-        # print("KICKER TASK DESK:", kicker_data['task_desc'])
         user = await bot.fetch_user(self.user_id)
-        button = AcceptView(self.user_id, self.task_id)
+        button = AcceptView(self.user_id, self.task_id, lang=self.lang)
         embed = create_profile_embed(kicker_data)
         await user.send(content=f"Here a new respond for your last order ✅\nPlease check it now!: {self.order_id}", embed=embed, view=button)
 
         # Send a confirmation message to the user who clicked the button
-        await interaction.response.send_message(content="Your sidekick card has been sent to the user.", ephemeral=False)
+        await interaction.response.send_message(content=translations["sidekick_card_message"][self.lang], ephemeral=False)
 
 class ShareButton(discord.ui.Button):
-    def __init__(self, user_id):
+    def __init__(self, user_id, lang: Literal["ru", "en"] = "en"):
         super().__init__(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
         self.user_id = int(user_id)
+        self.lang = lang
 
     async def callback(self, interaction: discord.Interaction):
         forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
@@ -83,30 +99,32 @@ class ShareButton(discord.ui.Button):
             profile_link = thread.jump_url
             try:
                 if interaction.response.is_done():
-                    await interaction.followup.send(f"Profile account: {profile_link}", ephemeral=True)
+                    await interaction.followup.send(translations["profile_account_message"][self.lang].format(profile_link=profile_link), ephemeral=True)
                 else:
-                    await interaction.response.send_message(f"Profile account: {profile_link}", ephemeral=True)
+                    await interaction.response.send_message(translations["profile_account_message"][self.lang].format(profile_link=profile_link), ephemeral=True)
             except discord.errors.NotFound:
                 print("Failed to send follow-up message. Interaction webhook not found.")
         else:
             try:
                 if interaction.response.is_done():
-                    await interaction.followup.send("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
+                    await interaction.followup.send(translations["not_posted_yet"][self.lang], ephemeral=True)
                 else:
-                    await interaction.response.send_message("The SideKicker account is not posted yet, please wait or you can share the username.", ephemeral=True)
+                    await interaction.response.send_message(translations["not_posted_yet"][self.lang], ephemeral=True)
             except discord.errors.NotFound:
                 print("Failed to send follow-up message. Interaction webhook not found.")
 
 class ChatButton(discord.ui.Button):
-    def __init__(self, user_id):
+    def __init__(self, user_id, lang: Literal["ru", "en"] = "en"):
         super().__init__(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_user")
         self.user_id = int(user_id)
+        self.lang = lang
+    
     async def callback(self, interaction: discord.Interaction):
         member = interaction.guild.get_member(int(self.user_id))
         if member:
-            chat_link = f"Trial chat with the Kicker: <@!{self.user_id}>"
+            chat_link = translations["trial_chat_link"][self.lang].format(user_id=self.user_id)
         else:
-            chat_link = f"Click below to connect with user https://discord.com/users/{self.user_id}"
+            chat_link = translations["connect_chat_link"][self.lang].format(user_id=self.user_id)
 
         try:
             if interaction.response.is_done():
@@ -116,31 +134,35 @@ class ChatButton(discord.ui.Button):
         except discord.errors.NotFound:
             print("Failed to send follow-up message. Interaction webhook not found.")
 
-
 class GoButton(discord.ui.Button):
-    def __init__(self, user_profile):
+    def __init__(self, user_profile, lang: Literal["ru", "en"] = "en"):
         super().__init__(label="Go", style=discord.ButtonStyle.success, custom_id="play_user")
+        self.lang = lang
 
     async def callback(self, interaction: discord.Interaction):
         payment_link = f"https://sidekick.fans/payment/test"
         try:
             if interaction.response.is_done():
-                await interaction.followup.send(f"{payment_link}", ephemeral=False)
+                await interaction.followup.send(
+                    translations["payment_link"][self.lang].format(payment_link=payment_link), ephemeral=False
+                )
             else:
-                await interaction.response.send_message(f"{payment_link}", ephemeral=False)
+                await interaction.response.send_message(
+                    translations["payment_link"][self.lang].format(payment_link=payment_link), ephemeral=False
+                )
         except discord.errors.NotFound:
             print("Failed to send follow-up message. Interaction webhook not found.")
 
-
 class StopButton(discord.ui.View):
-    def __init__(self, stop_callback):
+    def __init__(self, stop_callback, lang: Literal["ru", "en"] = "en"):
         super().__init__(timeout=None)
         self.stop_callback = stop_callback
+        self.lang = lang
 
-    @discord.ui.button(label='Stop', style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Inform Kicker", style=discord.ButtonStyle.danger)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         if await self.stop_callback():
-            message = "Stopped all notifications"
+            message = translations["stopped_notifications"][self.lang]
             if interaction.response.is_done():
                 await interaction.followup.send(message, ephemeral=False)
             else:
@@ -148,17 +170,17 @@ class StopButton(discord.ui.View):
         else:
             print("Failed to stop all notifications")
 
-    
 class InformKickerButton(discord.ui.View):
-    def __init__(self, kicker: discord.User):
+    def __init__(self, kicker: discord.User, lang: Literal["ru", "en"] = "en"):
         super().__init__(timeout=None)
         self.kicker = kicker
         self.informed = False
+        self.lang = lang
 
     @discord.ui.button(label="Inform Kicker", style=discord.ButtonStyle.primary, custom_id="inform_kicker_button")
     async def inform_kicker(self, interaction: discord.Interaction, button: discord.ui.Button):
         if not self.informed:
-            button.label = "Kicker Informed"
+            button.label = translations["kicker_informed"][self.lang]
             button.style = discord.ButtonStyle.success
             button.disabled = True
             self.informed = True

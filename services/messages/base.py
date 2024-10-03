@@ -2,6 +2,7 @@ import discord
 
 from bot_instance import get_bot
 from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID, TEST_ACCOUNTS
+from translate import translations, get_lang_prefix
 
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.sqs_client import SQSClient
@@ -19,20 +20,10 @@ async def send_kickers_reaction_test() -> StatusCodes:
     kickers = await service.get_kickers()
     for kicker_id in kickers:
         kicker: discord.User = bot.get_user(kicker_id)
-        btn = CheckReactionView(kicker=kicker)
-        await kicker.send(
-            (
-                f"Hi {kicker.name}, we’re "
-                "doing a quick check to see "
-                "if you're available online. "
-                "Please click the 'Check' button "
-                "below within the next 5 minutes "
-                "to pass the test.!"
-            ),
-            view=btn
-        )
+        btn = CheckReactionView(kicker=kicker, lang="en")
+        message = translations["kicker_reaction_test_message"][btn.lang].format(kicker_name=kicker.name)
+        await kicker.send(message, view=btn)
     return StatusCodes.SUCCESS
-
 
 async def send_boost_message(*, image_url: str, message: str) -> StatusCodes:
     guild = bot.get_guild(MAIN_GUILD_ID)
@@ -53,7 +44,6 @@ async def send_boost_message(*, image_url: str, message: str) -> StatusCodes:
         return StatusCodes.BAD, "Bot do not have right to send message!"
     return StatusCodes.SUCCESS, "ok"
 
-
 async def send_discord_notification(*, user_id: int, message: str) -> bool:
     try:
         user: discord.User = await bot.fetch_user(int(user_id))
@@ -61,7 +51,6 @@ async def send_discord_notification(*, user_id: int, message: str) -> bool:
     except (ValueError, discord.NotFound, discord.errors.Forbidden):
         return False
     return True
-
 
 async def send_confirm_order_message(
     *,
@@ -72,32 +61,32 @@ async def send_confirm_order_message(
     discord_server_id: int,
     service_name: str = "",
 ) -> StatusCodes:
+    lang = get_lang_prefix(int(discord_server_id))
     services_db = Services_Database()
     service = await services_db.get_services_by_username(username=kicker_username)
     if service:
         service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
-    cs_team_message = (
-        "**Session has been purchased**\n"
-        f"User: {customer.name}\n"
-        f"Kicker: {kicker.name}\n"
-        f"Service: {service['service_category_name'] if service else 'Not found'}\n"
-        f"Price: {service['service_price'] if service else 'Not found'}\n"
+
+    cs_team_message = translations["session_purchased"][lang].format(
+        customer_name=customer.name,
+        kicker_name=kicker.name,
+        service_name=service['service_category_name'] if service else 'Not found',
+        service_price=service['service_price'] if service else 'Not found'
     )
+    
     if kicker.id not in TEST_ACCOUNTS and customer.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, cs_team_message)
 
     await customer.send(
-        f"Your order has been sent to kicker {kicker.name}.\n"
-        "If there is no response within 1 minute, you will be able to replace the kicker, or refund the money."
+        translations["order_sent"][lang].format(kicker_name=kicker.name)
     )
 
     message_embend = discord.Embed(
         colour=discord.Colour.dark_blue(),
-        title=f"Your service has been purchased:",
-        description=(
-            f"Service: {service['service_category_name'] if service else 'Not found'}\n" 
-            f"Price: {service['service_price'] if service else 'Not found'}\n"
-            "Please Accept or Reject the session"
+        title=translations["service_purchased_title"][lang],
+        description=translations["service_details"][lang].format(
+            service_name=service['service_category_name'] if service else 'Not found',
+            service_price=service['service_price'] if service else 'Not found'
         )       
     )
     
@@ -110,7 +99,8 @@ async def send_confirm_order_message(
         service_name=service_name,
         purchase_id=purchase_id,
         sqs_client=sqs_client,
-        discord_server_id=discord_server_id
+        discord_server_id=discord_server_id,
+        lang=lang
     )
 
     success: bool = True
@@ -121,14 +111,13 @@ async def send_confirm_order_message(
             embed=message_embend
         )
     except Exception as e:
-        response = f"Failed to send message: {str(e)}"
+        response = translations["failed_to_send_message"][lang].format(error=str(e))
         success = False
     if view.message.channel:
         response = view.message.channel.id
     else:
         response = "Direct message"
     return success, response
-
 
 async def send_reaction_message() -> StatusCodes:
     ...
