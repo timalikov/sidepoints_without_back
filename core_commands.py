@@ -86,8 +86,6 @@ async def profile(interaction: discord.Interaction):
     )
     profile_exist = Profile_Exist(str(interaction.user.id))
     lang = get_lang_prefix(interaction.guild.id)
-    profile_exist = Profile_Exist(str(interaction.user.id), lang=lang)
-    await profile_exist.initialize()
     if profile_exist.no_user:
         await interaction.followup.send(
             translations["profile_not_created"][lang].format(link=os.getenv('WEB_APP_URL')),
@@ -141,6 +139,7 @@ async def find(interaction: discord.Interaction, username: str):
     )
     lang = get_lang_prefix(interaction.guild.id)
     view = await PlayView.create(username=username, lang=lang)
+
     if view.no_user:
         await interaction.followup.send(
             content=translations["no_players"][lang],

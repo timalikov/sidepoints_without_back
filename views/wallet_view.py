@@ -2,12 +2,15 @@
 import discord
 from translate import translations
 from database.dto.psql_wallets import Wallets_Database
-from discord.ui import View
-from config import APP_CHOICES
 from dotenv import load_dotenv
 import os
+
+from discord.ui import View
+
+from config import APP_CHOICES
 from bot_instance import get_bot
 from database.dto.psql_services import Services_Database
+
 from web3_interaction.balance_checker import get_usdt_balance
 
 bot = get_bot()

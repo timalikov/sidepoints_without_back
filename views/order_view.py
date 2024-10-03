@@ -149,7 +149,6 @@ class OrderAccessRejectView(discord.ui.View):
             interaction.guild.id if interaction.guild else None
         )
         await self.order_view.services_db.update_order_kicker_selected(self.order_view.order_id, self.kicker_id)
-        self.order_view.is_pressed = True
         is_member = await is_member_of_main_guild(self.customer.id)
         if not is_member:
             await interaction.followup.send(translations['please_join'][self.lang].format(link="https://discord.gg/sidekick"), ephemeral=True)

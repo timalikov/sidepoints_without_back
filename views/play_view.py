@@ -83,7 +83,6 @@ class PlayView(View):
             interaction.guild.id if interaction.guild else None
         )
 
-        is_member = await self.is_member_of_main_guild(interaction.user.id)
         if not is_member:
             await interaction.followup.send(
                 translations["please_join"][self.lang].format(link="https://discord.gg/sidekick"),
@@ -155,6 +154,7 @@ class PlayView(View):
             "chat_kicker", 
             interaction.guild.id if interaction.guild else None
         )
+
         user_id = self.service['discord_id']
         member = interaction.guild.get_member(int(user_id))
         if member:
@@ -178,6 +178,7 @@ class PlayView(View):
             "boost_kicker", 
             interaction.guild.id if interaction.guild else None
         )
+
         if self.service:
             payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.service['profile_id']}?side_auth=DISCORD"
             await send_interaction_message(

@@ -51,8 +51,6 @@ class Profile_Exist(View):
 
 
     @discord.ui.button(label="Edit", style=discord.ButtonStyle.success, custom_id="profile_edit")
-    async def edit_service(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
         await Services_Database().log_to_database(
             interaction.user.id, 
             "/profile_edit", 
