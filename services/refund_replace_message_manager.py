@@ -1,10 +1,14 @@
+from typing import Any, Literal
 import asyncio
 import threading
-from typing import Any
+
 import discord
+
+from translate import translations
+from bot_instance import get_bot
+
 from services.sqs_client import SQSClient
 from views.refund_replace import RefundReplaceView
-from bot_instance import get_bot
 
 bot = get_bot()
 
@@ -16,6 +20,7 @@ class RefundReplaceManager:
         kicker: discord.User,
         customer: discord.User,
         purchase_id: int,
+        lang: Literal["ru", "en"] = "en",
         access_reject_view: Any = None
     ) -> None:
         self.previous_message = None
@@ -27,7 +32,7 @@ class RefundReplaceManager:
         self.kicker = kicker
         self.customer = customer
         self.purchase_id = purchase_id
-        self.access_reject_view = access_reject_view
+        self.lang = lang
 
     async def send_refund_replace(self, start_timer: bool):
         if self.previous_message and self.previous_view:
@@ -37,7 +42,7 @@ class RefundReplaceManager:
             try:
                 await self.previous_message.edit(view=self.previous_view)
             except Exception as e:
-                print(f"Failed to edit previous message: {e}")
+                print(translations["failed_to_edit_message"][self.lang].format(error=e))
 
         timeout = 60 * 5 if start_timer else None
 
@@ -49,12 +54,13 @@ class RefundReplaceManager:
             stop_task=self.stop_event.set,
             access_reject_view=self.access_reject_view,
             service_name=self.service_name,
-            timeout=timeout
+            timeout=timeout,
+            lang=self.lang
         )
 
         embed = discord.Embed(
-            title="The kicker has not responded yet",
-            description="Would you like to refund or replace the kicker?",
+            title=translations["kicker_not_accepted_title"][self.lang].format(kicker_name=self.kicker.name),
+            description=translations["refund_replace_prompt"][self.lang],
             color=discord.Color.blue()
         )
 
@@ -77,7 +83,7 @@ class RefundReplaceManager:
             start_timer = True if index == 4 else False
             await self.send_refund_replace(start_timer=start_timer)
             await self.kicker.send(
-                f"User <@{self.customer.id}> is waiting for your response.\nPlease Accept or Reject the session."
+                translations["waiting_for_response"][self.lang].format(customer_id=self.customer.id)
             )
 
     def start_periodic_refund_replace(self):
@@ -97,4 +103,4 @@ class RefundReplaceManager:
             try:
                 await self.previous_message.edit(view=self.previous_view)
             except Exception as e:
-                print(f"Failed to edit previous message to disable buttons: {e}")
+                print(translations["failed_to_edit_message"][self.lang].format(error=e))

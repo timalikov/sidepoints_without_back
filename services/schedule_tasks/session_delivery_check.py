@@ -1,6 +1,6 @@
 import threading
 import asyncio
-from typing import Any, List
+from typing import Any, List, Literal
 
 import discord
 
@@ -27,6 +27,7 @@ class SessionDeliveryCheck(BaseScheduleTask):
         kicker: discord.User,
         purchase_id: int,
         channel: Any,
+        lang: Literal["en", "ru"] = "en"
     ) -> None:
         await asyncio.sleep(delay)
         message_embed = discord.Embed(
@@ -55,6 +56,7 @@ class SessionDeliveryCheck(BaseScheduleTask):
         kicker: discord.User,
         purchase_id: int,
         channel: Any,
+        lang: Literal["en", "ru"] = "en"
     ) -> None:
         asyncio.run_coroutine_threadsafe(
             self.__class__._main_function(
@@ -63,6 +65,7 @@ class SessionDeliveryCheck(BaseScheduleTask):
                 kicker=kicker,
                 purchase_id=purchase_id,
                 channel=channel,
+                lang=lang
             ),
             loop=bot.loop
         )
@@ -74,6 +77,7 @@ class SessionDeliveryCheck(BaseScheduleTask):
         kicker: discord.User,
         purchase_id: int,
         channel: Any,
+        lang: Literal["en", "ru"] = "en"
     ) -> None:
         task = threading.Thread(
             target=self._start,
@@ -82,6 +86,7 @@ class SessionDeliveryCheck(BaseScheduleTask):
                 "kicker": kicker,
                 "purchase_id": purchase_id,
                 "channel": channel,
+                "lang": lang
             }
         )
         self.tasks.append(task)

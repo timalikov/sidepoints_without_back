@@ -1,13 +1,12 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Literal
 import discord
 
 from bot_instance import get_bot
-from config import MAIN_GUILD_ID, TEST_ACCOUNTS
+from config import MAIN_GUILD_ID
+from translate import translations
 
 from views.order_view import OrderView
 from database.dto.psql_services import Services_Database
-from models.private_channel_for_replace import create_channel_for_replace
-from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_super_kicker
 from services.messages.interaction import send_interaction_message
 from services.refund_handler import RefundHandler
 
@@ -25,6 +24,7 @@ class RefundReplaceView(discord.ui.View):
         access_reject_view: Any = None,
         channel: Any = None,
         stop_task: Callable = None,
+        lang: Literal["en", "ru"] = "en",
         timeout: Optional[int] = 60 * 5
 
     ) -> None:
@@ -37,8 +37,9 @@ class RefundReplaceView(discord.ui.View):
         self.channel = channel
         self.stop_task = stop_task if stop_task is not None else lambda: None
         self.already_pressed = False
-        self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker)
+        self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker, lang=lang)
         self.service_name = service_name
+        self.lang = lang
     
     async def on_timeout(self):
         if not self.already_pressed:
@@ -47,8 +48,8 @@ class RefundReplaceView(discord.ui.View):
     async def auto_refund(self) -> None:
         if not self.already_pressed:
             await self.disable_all_buttons()
-            
-            message=f"Sorry, we haven't received your decision in 5 minutes. The funds will be automatically refunded to your wallet."
+
+            message = translations['timeout_auto_refund'][self.lang]
             await self.customer.send(content=message)
 
             await self.refund_handler.process_refund(
@@ -89,16 +90,16 @@ class RefundReplaceView(discord.ui.View):
 
         await send_interaction_message(
             interaction=interaction,
-            message="The refund has been requested."
+            message=translations['refund_requested'][self.lang]
         )
 
         await self.disable_all_buttons()
 
         await self.refund_handler.process_refund(
             interaction=None,
-            success_message="Your funds will be refunded to your wallet soon! Until then, you can search for a new kicker.",
+            success_message=translations['refund_success_customer'][self.lang],
             kicker_message=f"User <@{self.customer.id}> refunded the payment!",
-            customer_message=f"Your funds will be refunded to your wallet soon! Until then, you can search for a new kicker.",
+            customer_message=translations['refund_success_customer'][self.lang],
             channel=self.channel
         )
 
@@ -116,11 +117,7 @@ class RefundReplaceView(discord.ui.View):
         )
         await send_interaction_message(
             interaction=interaction,
-            message=(
-                "The replacement has been requested. "
-                "We have also issued a refund for this service to you. "
-                "Please wait while we look for a replacement kicker."
-            )
+            message=translations['replace_requested'][self.lang]
         )
         
         await self.disable_all_buttons()
@@ -135,11 +132,8 @@ class RefundReplaceView(discord.ui.View):
         if self.customer.id in kicker_ids:
             kicker_ids.remove(self.customer.id)
 
-        text_message_order_view = (
-            f"New Order Alert: **{self.service_name}** [30 minutes]\n"
-            f"You have a new order for a **{self.service_name}** in english"
-        )
-        view = OrderView(customer=interaction.user, services_db=services_db)
+        text_message_order_view = translations['order_new_alert'][self.lang].format(choice=self.service_name)
+        view = OrderView(customer=interaction.user, services_db=services_db, lang=MAIN_GUILD_ID)
         for kicker_id in kicker_ids:
             try:
                 kicker_id = int(kicker_id)

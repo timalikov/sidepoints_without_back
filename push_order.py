@@ -1,13 +1,9 @@
 import asyncio
-import time
 from bot_instance import get_bot
-from database.dto.sql_profile import Profile_Database
 from database.dto.sql_order import Order_Database
 import random
-from getServices import DiscordServiceFetcher
 from database.dto.sql_subscriber import Subscribers_Database
-from message_constructors import create_profile_embed
-from button_constructors import AcceptView, ButtonAcceptView
+from button_constructors import ButtonAcceptView
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
 bot = get_bot()
 
@@ -23,18 +19,9 @@ async def get_guild_invite_link(guild_id):
 
 async def send_push_notifications(order_id):
     order_data = await Order_Database.get_order_data(order_id)
-    # task_id = int(order_data.get("task_id"))
     all_user_ids = await Subscribers_Database.get_all_discord_ids()
-    # Get all user IDs from Profile_Database
-    # all_user_ids = await Profile_Database.get_all_user_ids()
-
-    # Get the pushed user IDs for the given order_id
     pushed_user_ids = await Order_Database.get_pushed_user_ids(order_id)
-
-    # Filter out users who have already been pushed
     users_to_push = [user_id for user_id in all_user_ids if user_id not in pushed_user_ids]
-
-    # users_to_push = ['930005621728763904', '689328299247534080', '676632838455427092']
 
     # Limit to 20 users
     users_to_push = random.sample(users_to_push, min(20, len(users_to_push)))
@@ -51,16 +38,13 @@ async def process_user_push(order_id, user_id):
             order_data = await Order_Database.get_order_data(order_id)
             customer_user_id = order_data.get("user_id")
             task_id = order_data.get("task_id")
-
-            # customer_data = await Profile_Database.get_user_data(user_id)
-            button = ButtonAcceptView(customer_user_id, task_id, order_id, current_user)
-
+            button = ButtonAcceptView(customer_user_id, task_id, order_id, user)
             task_desc = TASK_DESCRIPTIONS[task_id]
-
             main_link = await get_guild_invite_link(MAIN_GUILD_ID)
-
-            await user.send(content=f"New Order Summon Alert: {task_desc}.\n You have a new order summon for a {task_desc}.\nAccept to send your profile to the user.\nPlease ensure to join our server using the link below: {main_link}", view=button)
-
+            await user.send(
+                content=f"New Order Summon Alert: {task_desc}.\n You have a new order summon for a {task_desc}.\nAccept to send your profile to the user.\nPlease ensure to join our server using the link below: {main_link}",
+                view=button
+            )
             await Order_Database.insert_push_order(order_id, user_id)
 
             # Update push_count

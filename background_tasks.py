@@ -1,21 +1,22 @@
 import asyncio
 import csv
 from datetime import datetime, timezone, timedelta
-from typing import Any, List
+from typing import Any, List, Literal
 import discord
 from bot_instance import get_bot
+from translate import translations, get_lang_prefix
 from discord.ext import tasks
 from config import (
     MAIN_GUILD_ID,
     LEADERBOARD_CATEGORY_NAME,
     LEADERBOARD_CHANNEL_NAME,
+    GUILDS_FOR_TASKS,
 )
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
 from models.thread_forum import start_posting
 from services.sqs_client import SQSClient
 from views.refund_replace import RefundReplaceView
-from database.dto.psql_services import Services_Database
 from database.dto.psql_leaderboard import LeaderboardDatabase
 
 main_guild_id = MAIN_GUILD_ID
@@ -30,7 +31,8 @@ async def send_user_refund_replace(
     purchase_id: int,
     channel: Any = None,
     invite_url: str = None,
-    stop_event: asyncio.Event
+    stop_event: asyncio.Event,
+    lang: Literal["en", "ru"] = "en"
 ):
     if stop_event.is_set():
         print("send_user_refund_replace task stopped.")
@@ -42,10 +44,8 @@ async def send_user_refund_replace(
     print("send_user_refund_replace starting to send message")
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
-        title=f"The kicker has not responded yet",
-        description=(
-            f"Would you like a refund or replace the kicker?"
-        )       
+        title=translations["kicker_not_responded_yet"][lang],
+        description=translations["refund_replace_prompt"][lang]
     )
 
     view = RefundReplaceView(
@@ -54,7 +54,8 @@ async def send_user_refund_replace(
         purchase_id=purchase_id,
         sqs_client=sqs_client,
         channel=channel,
-        stop_task=stop_event.set
+        stop_task=stop_event.set,
+        lang=lang
     )
     view.message = await customer.send(
         view=view,
@@ -147,39 +148,42 @@ async def post_user_profiles():
 
 @tasks.loop(hours=24)
 async def create_leaderboard():
-    guild = bot.get_guild(MAIN_GUILD_ID)
-    channel = await get_or_create_channel_by_category_and_name(
-        guild=guild,
-        category_name=LEADERBOARD_CATEGORY_NAME,
-        channel_name=LEADERBOARD_CHANNEL_NAME
-    )
-    await channel.purge()
-    now = datetime.utcnow().strftime("%m/%d/%Y")
-    try:
-        await channel.send(
-            content=(
-                f"Points Leaderboard {now}\n"
-                "Check out the top 20 points leaderboard users!\n"
-                "For the full leaderboard check it out here: https://app.sidekick.fans/leaderboard/points"
+    for guild_id in GUILDS_FOR_TASKS:
+        guild = bot.get_guild(guild_id)
+        if not guild:
+            continue
+        lang = get_lang_prefix(guild.id)
+        channel = await get_or_create_channel_by_category_and_name(
+            guild=guild,
+            category_name=LEADERBOARD_CATEGORY_NAME,
+            channel_name=LEADERBOARD_CHANNEL_NAME
+        )
+        await channel.purge()
+        now = datetime.utcnow().strftime("%m/%d/%Y")
+        try:
+            await channel.send(
+                content=translations["points_leaderboard_message"][lang].format(
+                    now=now,
+                    leaderboard_url="https://app.sidekick.fans/leaderboard/points"
+                )
             )
-        )
-    except discord.DiscordException:
-        print("No permissions!")
-        return None
-    for role in guild.roles:
-        if role.name != "@everyone":
-            await channel.set_permissions(role, send_messages=False)
-    dto = LeaderboardDatabase()
-    leaders: List[dict] = await dto.all()
-    for leader in leaders:
-        name: str = leader["username"]
-        position: int = leader["total_pos"]
-        score: int = leader["total_score"]
-        image_url : str= leader["public_link"]
-        embed = discord.Embed(
-            colour=discord.Colour.blue(),
-            title=f"TOP {position}. **{name}**",
-            description=f"Score: {score}"
-        )
-        embed.set_thumbnail(url=image_url)
-        await channel.send(embed=embed)
+        except discord.DiscordException:
+            print("No permissions!")
+            return None
+        for role in guild.roles:
+            if role.name != "@everyone":
+                await channel.set_permissions(role, send_messages=False)
+        dto = LeaderboardDatabase()
+        leaders: List[dict] = await dto.all()
+        for leader in leaders:
+            name: str = leader["username"]
+            position: int = leader["total_pos"]
+            score: int = leader["total_score"]
+            image_url : str= leader["public_link"]
+            embed = discord.Embed(
+                colour=discord.Colour.blue(),
+                title=f"TOP {position}. **{name}**",
+                description=translations["leaderboard_score"][lang].format(score=score)
+            )
+            embed.set_thumbnail(url=image_url)
+            await channel.send(embed=embed)

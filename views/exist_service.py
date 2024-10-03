@@ -1,10 +1,15 @@
+from dotenv import load_dotenv
+from typing import Literal
+import os
+
 import discord
 from discord.ui import View
+
+from translate import translations
 from config import APP_CHOICES
-from dotenv import load_dotenv
-from message_constructors import create_profile_embed
-import os
 from bot_instance import get_bot
+
+from message_constructors import create_profile_embed
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 from views.share_command_view import ShareCommandView
@@ -18,7 +23,7 @@ app_choices = APP_CHOICES
 
 
 class Profile_Exist(View):
-    def __init__(self, discord_id, user_choice="ALL"):
+    def __init__(self, discord_id, user_choice="ALL", lang: Literal["ru", "en"] = "en"):
         super().__init__(timeout=None)
         self.discord_id = discord_id
         self.user_choice = user_choice
@@ -29,6 +34,7 @@ class Profile_Exist(View):
         self.profile_embed = None
         self.affiliate_channel_ids = []  
         self.cooldowns = {}
+        self.lang = lang
 
     async def initialize(self):
         self.list_services = await self.service_db.get_services_by_discordId(self.discord_id)
@@ -37,7 +43,7 @@ class Profile_Exist(View):
                 service = dict(service)
                 service["service_category_name"] = await self.service_db.get_service_category_name(service["service_type_id"])
                 self.list_services[index] = service
-            self.profile_embed = create_profile_embed(self.list_services[self.index])
+            self.profile_embed = create_profile_embed(self.list_services[self.index], lang=self.lang)
             self.affiliate_channel_ids = await self.service_db.get_channel_ids()
         else:
             self.no_user = True
@@ -54,7 +60,7 @@ class Profile_Exist(View):
         )
 
         payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit?side_auth=DISCORD"
-        await interaction.followup.send(f"To edit your service go to the link below: {payment_link}", ephemeral=True)
+        await interaction.followup.send(translations["edit_service_link"][self.lang].format(link=payment_link), ephemeral=True)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="profile_next")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -73,7 +79,7 @@ class Profile_Exist(View):
             service = dict(service)
             service["service_category_name"] = await self.service_db.get_service_category_name(service["service_type_id"])
             self.list_services[index] = service
-        self.profile_embed = create_profile_embed(self.list_services[self.index])
+        self.profile_embed = create_profile_embed(self.list_services[self.index], lang=self.lang)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="profile_share")
@@ -84,11 +90,16 @@ class Profile_Exist(View):
             "/profile_share", 
             interaction.guild.id if interaction.guild else None
         )
-        share_command_view = ShareCommandView(bot, self.list_services, self.index, self.affiliate_channel_ids)
+        share_command_view = ShareCommandView(
+            bot,
+            self.list_services,
+            self.index,
+            self.affiliate_channel_ids,
+            lang=self.lang
+        )
         await share_command_view.share(interaction)
 
-
-    @discord.ui.button(label="Create a new service", style=discord.ButtonStyle.secondary, custom_id="profile_create_service")
+    @discord.ui.button(label="Create a new service", style=discord.ButtonStyle.secondary, custom_id="create_service")
     async def create_service(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
         await Services_Database().log_to_database(
@@ -97,4 +108,4 @@ class Profile_Exist(View):
             interaction.guild.id if interaction.guild else None
         )
         payment_link = f"{os.getenv('WEB_APP_URL')}/services/create?side_auth=DISCORD"
-        await interaction.followup.send(f"To create a new service go to the link below: {payment_link}", ephemeral=True)
+        await interaction.followup.send(translations["create_service_link"][self.lang].format(link=payment_link), ephemeral=True)

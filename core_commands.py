@@ -4,7 +4,7 @@ import discord.ext
 import discord.ext.commands
 import os
 
-from play_view import PlayView
+from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles, create_leaderboard
 from database.dto.sql_subscriber import Subscribers_Database
@@ -22,6 +22,7 @@ from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
+from translate import get_lang_prefix, translations
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -53,16 +54,26 @@ async def forum_command(interaction: discord.Interaction):
     )
 
     guild: discord.guild.Guild = interaction.guild
+    lang = get_lang_prefix(guild.id)
     try:
         forum_channel: discord.channel.ForumChannel = await get_or_create_forum(guild)
     except discord.DiscordException:
-        await interaction.response.send_message(content="Discord channel is not community!", ephemeral=True)
+        await interaction.response.send_message(
+            content=translations["not_community"][lang],
+            ephemeral=True
+        )
         return
     if not is_admin(interaction):
-        await interaction.followup.send(content='Oops, you do not have right to use this command!', ephemeral=True)
+        await interaction.followup.send(
+            content=translations["forum_no_permission"][lang],
+            ephemeral=True
+        )
         return
     await start_posting(forum_channel, guild, bot, order_type="ASC")
-    await interaction.followup.send(content="Posts created!", ephemeral=True)
+    await interaction.followup.send(
+        content=translations["forum_posts_created"][lang],
+        ephemeral=True
+    )
 
 
 @bot.tree.command(name="profile", description="Use this command if you wish to be part of the Sidekick Playmates network.")
@@ -74,9 +85,14 @@ async def profile(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     profile_exist = Profile_Exist(str(interaction.user.id))
+    lang = get_lang_prefix(interaction.guild.id)
+    profile_exist = Profile_Exist(str(interaction.user.id), lang=lang)
     await profile_exist.initialize()
     if profile_exist.no_user:
-        await interaction.followup.send(f"Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{os.getenv('WEB_APP_URL')}/profile?side_auth=DISCORD", ephemeral=True)
+        await interaction.followup.send(
+            translations["profile_not_created"][lang].format(link=os.getenv('WEB_APP_URL')),
+            ephemeral=True
+        )
     else:
         await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
 
@@ -97,11 +113,20 @@ async def play(interaction: discord.Interaction):
         "/go", 
         interaction.guild.id if interaction.guild else None
     )
+    lang = get_lang_prefix(interaction.guild.id)
+    view = await PlayView.create(user_choice="ALL", lang=lang)
 
     if view.no_user:
-        await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
+        await interaction.followup.send(
+            content=translations["no_players"][lang],
+            ephemeral=True
+        )
     else:
-        await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+        await interaction.followup.send(
+            embed=view.profile_embed,
+            view=view,
+            ephemeral=True
+        )
 
 
 @bot.tree.command(name="find", description="Find a user profile by their username.")
@@ -114,10 +139,19 @@ async def find(interaction: discord.Interaction, username: str):
         "/find", 
         interaction.guild.id if interaction.guild else None
     )
+    lang = get_lang_prefix(interaction.guild.id)
+    view = await PlayView.create(username=username, lang=lang)
     if view.no_user:
-        await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
+        await interaction.followup.send(
+            content=translations["no_players"][lang],
+            ephemeral=True
+        )
     else:
-        await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+        await interaction.followup.send(
+            embed=view.profile_embed,
+            view=view,
+            ephemeral=True
+        )
 
 async def get_guild_invite_link(guild_id):
     guild = bot.get_guild(guild_id)
@@ -137,6 +171,8 @@ async def get_guild_invite_link(guild_id):
                                app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9")
                                ])
 async def order(interaction: discord.Interaction, choices: app_commands.Choice[str]):
+    guild_id = interaction.guild.id
+    lang = get_lang_prefix(guild_id)
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
@@ -150,17 +186,18 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(MAIN_GUILD_ID)
     channel = bot.get_channel(ORDER_CHANNEL_ID)
-    text_message_order_view = (
-        f"New Order Alert: **{choices.name}** [30 minutes]\n"
-        f"You have a new order for a **{choices.name}** in english"
-    )
+    text_message_order_view = \
+        translations["order_new_alert"][lang].format(choice=choices.name)
     services_db = Services_Database(app_choice=choices.value)
-    view = OrderView(customer=interaction.user, services_db=services_db)
+    view = OrderView(customer=interaction.user, services_db=services_db, lang=lang)
     sent_message = await channel.send(
         view=view, content=f"@everyone\n{text_message_order_view}",
     )
     view.messages.append(sent_message)
-    await interaction.followup.send(f"Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{main_link}", ephemeral=True)
+    await interaction.followup.send(
+        translations["order_dispatching"][lang].format(link=main_link),
+        ephemeral=True
+    )
     
     kicker_ids = await services_db.get_kickers_by_service_title(
         service_title=choices.name
@@ -204,21 +241,32 @@ async def wallet(interaction: discord.Interaction):
         "/wallet", 
         interaction.guild.id if interaction.guild else None
     )
-    guild = bot.get_guild(MAIN_GUILD_ID)
+    main_guild = bot.get_guild(MAIN_GUILD_ID)
+    lang = get_lang_prefix(interaction.guild.id)
     # Check if the user is a member of the guild
-    member = guild.get_member(interaction.user.id)
+    member = main_guild.get_member(interaction.user.id)
     if member:
-        view = Wallet_exist()
-        await interaction.response.send_message("Welcome to SideKick!\nClick on Wallet 🏦 to manage it.\nClick on Top Up 💵 to add funds.\nClick on Balance 📊 to view your USDT balance.", view=view, ephemeral=True)
+        view = Wallet_exist(lang=lang)
+        await interaction.response.send_message(
+            translations["wallet_message"][lang],
+            view=view,
+            ephemeral=True
+        )
         return
     else:
         await interaction.response.defer(ephemeral=True)
         try:
             # Create an invite that expires in 24 hours with a maximum of 10 uses
-            invite = await guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
-            await interaction.response.send_message(f"You must join our main guild to access your profile. Please join using this invite: {invite.url}", ephemeral=True)
+            invite = await main_guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
+            await interaction.response.send_message(
+                translations["invite_join_guild"][lang].format(invite_url=invite.url),
+                ephemeral=True
+            )
         except Exception as e:
-            await interaction.response.send_message("Failed to create an invite. Please check my permissions and try again.", ephemeral=True)
+            await interaction.response.send_message(
+                translations["failed_invite"][lang],
+                ephemeral=True
+            )
             print(e)
 
 
@@ -230,6 +278,13 @@ async def points(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
+    await log_to_database(interaction.user.id, "/tasks")
+    lang = get_lang_prefix(interaction.guild.id)
+    link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
+    await interaction.response.send_message(
+        translations["points_message"][lang].format(link=link),
+        ephemeral=True
+    )
 
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
@@ -241,12 +296,20 @@ async def boost(interaction: discord.Interaction, username: str):
         "/boost", 
         interaction.guild.id if interaction.guild else None
     )
-    view = BoostView(user_name=username)
+    lang = get_lang_prefix(interaction.guild.id)
+    view = BoostView(user_name=username, lang=lang)
     await view.initialize()
     if view.no_user:
-        await interaction.followup.send(content="Sorry, there are no players.", ephemeral=True)
+        await interaction.followup.send(
+            content=translations["no_players"][lang],
+            ephemeral=True
+        )
     else:
-        await interaction.followup.send(embed=view.profile_embed, view=view, ephemeral=True)
+        await interaction.followup.send(
+            embed=view.profile_embed,
+            view=view,
+            ephemeral=True
+        )
 
 
 @bot.tree.command(name="leaderboard", description="Check out the points leaderboard")
@@ -256,11 +319,12 @@ async def leaderboard(interaction: discord.Interaction):
         "/leaderboard", 
         interaction.guild.id if interaction.guild else None
     )
+    lang = get_lang_prefix(interaction.guild.id)
     await interaction.response.send_message(
         embed=discord.Embed(
             color=discord.Colour.orange(),
-            title="Leaderboard!",
-            description="Click to check the leaderboard!",
+            title=translations["leaderboard_title"][lang],
+            description=translations["leaderboard"][lang],
             url=LINK_LEADERBOARD
         ),
         ephemeral=True
