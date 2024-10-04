@@ -109,10 +109,18 @@ class AccessRejectView(discord.ui.View):
             message=translations["accept_session_message"][self.lang].format(customer_name=self.customer.name)
         )
         await self.refund_manager.stop_periodic_refund_replace()
-        if not self.discord_server_id or str(self.discord_server_id) == str(config.MAIN_GUILD_ID):
+        guild: discord.Guild = bot.get_guild(self.discord_server_id)
+        together_guild_members: bool = True
+        if guild:
+            together_guild_members = (
+                bool(guild.get_member(self.kicker.id))
+                and
+                bool(guild.get_member(self.customer.id))
+            )
+        if together_guild_members:
             is_success, channel = await create_private_discord_channel(
                 bot_instance=bot,
-                guild_id=config.MAIN_GUILD_ID,
+                guild_id=self.discord_server_id,
                 challenged=self.kicker,
                 challenger=self.customer,
                 serviceName=self.service_name,

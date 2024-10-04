@@ -227,7 +227,10 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
         kicker = bot.get_user(kicker_id)
         if not kicker:
             continue
-        sent_message = await kicker.send(view=view, content=text_message_order_view)
+        try:
+            sent_message = await kicker.send(view=view, content=text_message_order_view)
+        except discord.DiscordException:
+            continue
         view.messages.append(sent_message)
 
 
