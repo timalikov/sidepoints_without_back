@@ -49,6 +49,7 @@ class KickerSortingService:
         """
 
         online_high_score = []
+        offline_high_score = []
         online = []
         offline = []
 
@@ -58,12 +59,15 @@ class KickerSortingService:
 
             is_online = await self.is_user_online(user_id)
 
-            if is_online:
-                if score >= 100:
+            if score >= 100:
+                if is_online:
                     online_high_score.append(kicker)
                 else:
-                    online.append(kicker)
+                    offline_high_score.append(kicker)
             else:
-                offline.append(kicker)
+                if is_online:
+                    online.append(kicker)
+                else:
+                    offline.append(kicker)
 
-        return online_high_score + online + offline
+        return online_high_score + offline_high_score + online + offline
