@@ -127,7 +127,7 @@ class PlayView(View):
 
         user_id = self.service['discord_id']
         forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
-        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, main_guild_id)
+        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, interaction.guild.id)
 
         message: str = ""
         if thread_id:
