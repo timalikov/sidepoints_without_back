@@ -82,7 +82,7 @@ class PlayView(View):
             "play_kicker", 
             interaction.guild.id if interaction.guild else None
         )
-
+        is_member = await self.is_member_of_main_guild(interaction.user.id)
         if not is_member:
             await interaction.followup.send(
                 translations["please_join"][self.lang].format(link="https://discord.gg/sidekick"),
