@@ -94,8 +94,9 @@ async def profile(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    profile_exist = Profile_Exist(str(interaction.user.id))
     lang = get_lang_prefix(interaction.guild.id)
+    profile_exist = Profile_Exist(discord_id=interaction.user.id, lang=lang)
+    await profile_exist.initialize()
     if profile_exist.no_user:
         await interaction.followup.send(
             translations["profile_not_created"][lang].format(link=os.getenv('WEB_APP_URL')),
