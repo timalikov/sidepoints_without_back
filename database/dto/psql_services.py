@@ -209,3 +209,11 @@ class Services_Database(BasePsqlDTO):
                 WHERE order_id = $1 AND kicker_discord_id = $2;
             """
             await conn.execute(query, order_id, str(kicker_discord_id))
+
+    async def is_user_registered(self, discord_id):
+        async with self.get_connection() as conn:
+            query = "SELECT 1 FROM discord_profiles_all WHERE discord_id = $1"
+            result = await conn.fetchrow(query, str(discord_id))
+            
+        return result is not None
+

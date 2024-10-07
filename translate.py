@@ -26,6 +26,10 @@ translations = {
         'ru': "Похоже, вы еще не создали профиль! Пожалуйста, перейдите по ссылке, чтобы создать профиль.\n{link}/profile?side_auth=DISCORD",
         'en': "Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{link}/profile?side_auth=DISCORD"
     },
+    'profile_no_service': {
+        'ru': "Похоже, вы создали профиль, но не создали услугу. Нажмите на ссылку ниже, чтобы создать свою первую услугу.\n{link}/services/create?side_auth=DISCORD",
+        'en': "Seems like you have created a profile, but you haven't created a service. Please click on the link below to create your first service.\n{link}/services/create?side_auth=DISCORD"
+    },
     'profile_found': {
         'ru': 'Ваш профиль найден!',
         'en': 'Your profile has been found!',
@@ -347,6 +351,7 @@ translations = {
             "**Your session has started:**\n"
             "User: <@{challenger_id}>\n"
             "Username: {challenger_name}\n"
+            "User discord id: {challenger_id}\n"
             "Service: {service_name}\n"
             "Reach out to the user as soon as possible:\n"
             "Connect via Direct message:<@{challenger_id}>\n"
@@ -355,6 +360,7 @@ translations = {
             "**Ваша сессия началась:**\n"
             "Пользователь: <@{challenger_id}>\n"
             "Имя пользователя: {challenger_name}\n"
+            "Discord ID пользователя: {challenger_id}\n"
             "Услуга: {service_name}\n"
             "Свяжитесь с пользователем как можно скорее:\n"
             "Подключитесь через Личное сообщение:<@{challenger_id}>\n"
@@ -365,6 +371,7 @@ translations = {
             "Kicker has accepted your order:\n"
             "Kicker: <@{challenged_id}>\n"
             "Kicker username: {challenged_name}\n"
+            "Kicker discord id: {challenged_id}\n"
             "Service: {service_name}\n"
             "Connect via Direct message:<@{challenged_id}>\n"
         ),
@@ -372,6 +379,7 @@ translations = {
             "Кикер принял ваш заказ:\n"
             "Кикер: <@{challenged_id}>\n"
             "Имя кикера: {challenged_name}\n"
+            "Discord ID кикера: {challenged_id}\n"
             "Услуга: {service_name}\n"
             "Подключитесь через Личное сообщение:<@{challenged_id}>\n"
         )
