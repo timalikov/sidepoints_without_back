@@ -107,7 +107,7 @@ async def handle_confirm_order():
             kicker_username=kickerUsername,
             service_name=serviceName,
             purchase_id=purchaseId,
-            discord_server_id=discord_server_id
+            discord_server_id=int(discord_server_id)
         ),
         bot.loop
     )
