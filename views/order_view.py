@@ -111,7 +111,11 @@ class OrderAccessRejectView(discord.ui.View):
         self.kicker_id = kicker_id
         self.customer = customer
         self.already_pressed = False
-        self.discord_service_id = MAIN_GUILD_ID
+        self.discord_service_id = (
+            main_interaction.guild_id
+            if main_interaction.guild_id
+            else MAIN_GUILD_ID
+        )
         self.order_view = order_view
         self.lang = lang
 
