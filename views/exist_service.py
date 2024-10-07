@@ -5,6 +5,7 @@ import os
 import discord
 from discord.ui import View
 
+from services.messages.interaction import send_interaction_message
 from translate import translations
 from config import APP_CHOICES
 from bot_instance import get_bot
@@ -28,6 +29,7 @@ class Profile_Exist(View):
         self.discord_id = discord_id
         self.user_choice = user_choice
         self.no_user = False
+        self.no_service = False
         self.service_db = Services_Database()
         self.list_services = []
         self.index = 0
@@ -38,6 +40,11 @@ class Profile_Exist(View):
 
     async def initialize(self):
         self.list_services = await self.service_db.get_services_by_discordId(self.discord_id)
+        is_user_registered = await self.service_db.is_user_registered(discord_id=self.discord_id)
+        if not is_user_registered:
+            self.no_user = True
+            return
+        
         if self.list_services:
             for index, service in enumerate(self.list_services):
                 service = dict(service)
@@ -46,7 +53,7 @@ class Profile_Exist(View):
             self.profile_embed = create_profile_embed(self.list_services[self.index], lang=self.lang)
             self.affiliate_channel_ids = await self.service_db.get_channel_ids()
         else:
-            self.no_user = True
+            self.no_service = True
 
 
 
@@ -59,7 +66,7 @@ class Profile_Exist(View):
         )
 
         payment_link = f"{os.getenv('WEB_APP_URL')}/services/{self.list_services[self.index]['service_id']}/edit?side_auth=DISCORD"
-        await interaction.followup.send(translations["edit_service_link"][self.lang].format(link=payment_link), ephemeral=True)
+        await send_interaction_message(interaction=interaction, message=translations["edit_service_link"][self.lang].format(link=payment_link))
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="profile_next")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):

@@ -4,6 +4,7 @@ import discord.ext
 import discord.ext.commands
 import os
 
+from services.messages.interaction import send_interaction_message
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import delete_old_channels, post_user_profiles, create_leaderboard
@@ -98,10 +99,9 @@ async def profile(interaction: discord.Interaction):
     profile_exist = Profile_Exist(discord_id=interaction.user.id, lang=lang)
     await profile_exist.initialize()
     if profile_exist.no_user:
-        await interaction.followup.send(
-            translations["profile_not_created"][lang].format(link=os.getenv('WEB_APP_URL')),
-            ephemeral=True
-        )
+        await send_interaction_message(interaction=interaction, message=translations["profile_not_created"][lang].format(link=os.getenv('WEB_APP_URL')))
+    elif profile_exist.no_service:
+        await send_interaction_message(interaction=interaction, message=translations["profile_no_service"][lang].format(link=os.getenv('WEB_APP_URL')))
     else:
         await interaction.followup.send(embed=profile_exist.profile_embed, view=profile_exist, ephemeral=True)
 
