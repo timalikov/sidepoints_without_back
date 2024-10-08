@@ -54,6 +54,7 @@ async def save_user_id(user_id):
     else:
         await services_db.save_user_wot_tournament(user_id)
 
+
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
@@ -113,7 +114,7 @@ async def list_all_users_with_online_status(guild):
     return all_member_ids
 
 
-@bot.tree.command(name="go", description="Use this command and start looking for playmates!")
+@bot.tree.command(name="start", description="Use this command and start looking for playmates!")
 async def play(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     view = await PlayView.create(user_choice="ALL")
@@ -172,6 +173,66 @@ async def get_guild_invite_link(guild_id):
         return invite
     return None
 
+
+@bot.tree.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
+async def order(interaction: discord.Interaction):
+    guild_id = interaction.guild.id
+    lang = get_lang_prefix(guild_id)
+    await interaction.response.defer(ephemeral=True)
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/order", 
+        interaction.guild.id if interaction.guild else None
+    )
+    await save_user_id(interaction.user.id)
+    order_data = {
+        'user_id': interaction.user.id,
+        'task_id': "ALL"
+    }
+    await Order_Database.set_user_data(order_data)
+    main_link = await get_guild_invite_link(guild_id)
+    channel = await get_or_create_channel_by_category_and_name(
+        category_name=ORDER_CATEGORY_NAME,
+        channel_name=ORDER_CHANNEL_NAME,
+        guild=interaction.guild
+    )
+    text_message_order_view = \
+        translations["order_new_alert"][lang].format(choice="All players")
+    services_db = Services_Database(app_choice="ALL")
+    view = OrderView(
+        customer=interaction.user,
+        services_db=services_db,
+        lang=lang,
+        guild_id=guild_id
+    )
+    sent_message = await channel.send(
+        view=view, content=f"@everyone\n{text_message_order_view}",
+    )
+    view.messages.append(sent_message)
+    await interaction.followup.send(
+        translations["order_dispatching"][lang].format(link=main_link),
+        ephemeral=True
+    )
+    
+    kicker_ids = await services_db.get_kickers_by_service_title(
+        service_title="All players"
+    )
+    for kicker_id in kicker_ids:
+        try:
+            kicker_id = int(kicker_id)
+        except ValueError:
+            print(f"ID: {kicker_id} is not int")
+            continue
+        kicker = bot.get_user(kicker_id)
+        if not kicker:
+            continue
+        try:
+            sent_message = await kicker.send(view=view, content=text_message_order_view)
+        except discord.DiscordException:
+            continue
+        view.messages.append(sent_message)
+
+
 @bot.tree.command(name="order", description="Use this command to post your service request and summon Kickers to take the order.")
 @app_commands.choices(choices=[app_commands.Choice(name="All players", value="ALL"),
                                app_commands.Choice(name="Casual", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
@@ -206,7 +267,12 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     text_message_order_view = \
         translations["order_new_alert"][lang].format(choice=choices.name)
     services_db = Services_Database(app_choice=choices.value)
-    view = OrderView(customer=interaction.user, services_db=services_db, lang=lang)
+    view = OrderView(
+        customer=interaction.user,
+        services_db=services_db,
+        lang=lang,
+        guild_id=guild_id
+    )
     sent_message = await channel.send(
         view=view, content=f"@everyone\n{text_message_order_view}",
     )

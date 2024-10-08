@@ -5,7 +5,6 @@ import os
 
 from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
-from config import MAIN_GUILD_ID
 from services.messages.interaction import send_interaction_message
 from models.guild import is_member_of_main_guild
 from database.dto.sql_profile import log_to_database
@@ -15,7 +14,6 @@ from translate import translations
 from bot_instance import get_bot
 
 bot = get_bot()
-
 
 
 class OrderView(discord.ui.View):
@@ -30,6 +28,7 @@ class OrderView(discord.ui.View):
         self,
         *,
         customer: discord.User,
+        guild_id: int,
         lang: Literal["en", "ru"] = "en",
         services_db: Services_Database = None
     ):
@@ -41,6 +40,7 @@ class OrderView(discord.ui.View):
         self.messages = []  # for drop button after timeout
         self.order_id = str(uuid.uuid4())
         self.created_at = datetime.now()
+        self.guild_id = int(guild_id)
         self.lang = lang
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
@@ -54,10 +54,11 @@ class OrderView(discord.ui.View):
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
         await Services_Database().log_to_database(
             interaction.user.id, 
             "kicker_go_after_order", 
-            interaction.guild.id if interaction.guild else None
+            self.guild_id
         )
         kicker = interaction.user
         if kicker in self.pressed_kickers:
@@ -75,6 +76,7 @@ class OrderView(discord.ui.View):
             service_id=service['service_id'],
             kicker_id=kicker.id,
             order_view=self,
+            guild_id=self.guild_id,
             lang=self.lang
         )
         view.message = await self.customer.send(embed=embed, view=view)
@@ -101,6 +103,7 @@ class OrderAccessRejectView(discord.ui.View):
         main_interaction: discord.Interaction,
         service_id: int,
         kicker_id: int,
+        guild_id: int,
         order_view: Any,
         lang: Literal["en", "ru"]
 
@@ -111,11 +114,7 @@ class OrderAccessRejectView(discord.ui.View):
         self.kicker_id = kicker_id
         self.customer = customer
         self.already_pressed = False
-        self.discord_service_id = (
-            main_interaction.guild_id
-            if main_interaction.guild_id
-            else MAIN_GUILD_ID
-        )
+        self.discord_service_id = guild_id
         self.order_view = order_view
         self.lang = lang
 
@@ -150,7 +149,7 @@ class OrderAccessRejectView(discord.ui.View):
         await Services_Database().log_to_database(
             interaction.user.id, 
             "user_go_after_order", 
-            interaction.guild.id if interaction.guild else None
+            self.discord_service_id
         )
         await self.order_view.services_db.update_order_kicker_selected(self.order_view.order_id, self.kicker_id)
         is_member = await is_member_of_main_guild(self.customer.id)

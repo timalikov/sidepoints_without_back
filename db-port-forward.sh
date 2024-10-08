@@ -4,4 +4,4 @@ EC2_INSTANCE_ID=$(aws ecs describe-container-instances --container-instances $(a
 aws ssm start-session \
     --target "$EC2_INSTANCE_ID" \
     --document-name AWS-StartPortForwardingSessionToRemoteHost \
-    --parameters '{"host":["sidekick-dev.cc5otbogv4ap.eu-central-1.rds.amazonaws.com"],"portNumber":["5432"], "localPortNumber":["55432"]}'
+    --parameters '{"host":["sidekick-dev2.cc5otbogv4ap.eu-central-1.rds.amazonaws.com"],"portNumber":["5432"], "localPortNumber":["55432"]}'
