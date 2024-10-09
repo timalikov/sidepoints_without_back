@@ -37,8 +37,15 @@ async def start_posting(
     order_type: Literal["DESC", "ASC"] = "DESC"
 ) -> None:
     dto = Services_Database(order_type=order_type)
-    for _ in range(100):
-        profile_data = await dto.get_next_service()
+    all_users = await dto.get_kicker_ids_and_score()
+    high_priority = []
+    for user in all_users:
+        if guild.get_member(int(user['discord_id'])):
+            high_priority.append(int(user['discord_id']))
+            all_users.remove(user)
+    combined = high_priority + all_users
+    for i in range(100):
+        profile_data = await dto.get_services_by_discordId(combined[i])
         if not profile_data:
             break
         thread: Union[bool, discord.Thread] = await find_thread_in_forum(
