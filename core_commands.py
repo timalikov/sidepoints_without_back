@@ -175,7 +175,7 @@ async def get_guild_invite_link(guild_id):
 
 
 @bot.tree.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
-async def order(interaction: discord.Interaction):
+async def order_all(interaction: discord.Interaction):
     guild_id = interaction.guild.id
     lang = get_lang_prefix(guild_id)
     await interaction.response.defer(ephemeral=True)

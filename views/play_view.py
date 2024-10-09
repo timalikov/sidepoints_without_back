@@ -160,13 +160,13 @@ class PlayView(View):
         if member:
             chat_link = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
             if interaction.response.is_done():
-                await interaction.followup.send(f"{chat_link}", ephemeral=True)
+                await interaction.followup.send(chat_link, ephemeral=True)
             else:
-                await interaction.response.send_message(f"{chat_link}", ephemeral=True)
+                await interaction.response.send_message(chat_link, ephemeral=True)
         else:
             chat_link = translations["connect_with_user"][self.lang].format(user_id=user_id)
             await interaction.followup.send(
-                translations["connect_with_user"][self.lang].format(chat_link=chat_link),
+                translations["connect_with_user"][self.lang].format(user_id=user_id),
                 ephemeral=True
             )
 
