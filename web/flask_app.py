@@ -96,29 +96,41 @@ async def handle_confirm_order():
     purchaseId: str = data.get("purchaseId")
     discord_server_id: int = data.get("discordServerId")
     
-    try: 
-        challenger: discord.User = await bot.fetch_user(int(customerId))
-        challenged: discord.User = await bot.fetch_user(int(kickerId))
+    try:
+        challenger: discord.User = await asyncio.wrap_future(
+            asyncio.run_coroutine_threadsafe(bot.fetch_user(int(customerId)), bot.loop)
+        )
+        challenged: discord.User = await asyncio.wrap_future(
+            asyncio.run_coroutine_threadsafe(bot.fetch_user(int(kickerId)), bot.loop)
+        )
+
     except discord.NotFound:
         return jsonify({"error": "One or more users could not be found in this guild."}), 400
-    future = asyncio.run_coroutine_threadsafe(
-        send_confirm_order_message(
-            customer=challenger,
-            kicker=challenged,
-            kicker_username=kickerUsername,
-            service_name=serviceName,
-            purchase_id=purchaseId,
-            discord_server_id=int(discord_server_id)
-        ),
-        bot.loop
-    )
-    success, response = future.result()  # This blocks until the coroutine completes
+    except Exception as e:
+        return jsonify({"error": f"Error fetching users: {str(e)}"}), 500
 
-    if success:
-        return jsonify({"message": "Private channel created", "channel_id": response}), 200
-    else:
-        return jsonify({"error": response}), 400
-    
+    try:
+        success, response = await asyncio.wrap_future(
+            asyncio.run_coroutine_threadsafe(
+                send_confirm_order_message(
+                    customer=challenger,
+                    kicker=challenged,
+                    kicker_username=kickerUsername,
+                    service_name=serviceName,
+                    purchase_id=purchaseId,
+                    discord_server_id=int(discord_server_id)
+                ),
+                bot.loop
+            )
+        )
+
+        if success:
+            return jsonify({"message": "Private channel created", "channel_id": response}), 200
+        else:
+            return jsonify({"error": response}), 400
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
 @app.route('/discord_api/create_private_channel', methods=['POST'])
