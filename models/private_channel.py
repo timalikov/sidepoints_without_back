@@ -67,7 +67,7 @@ async def send_message_and_invite_if_needed(
 
 
 async def manage_connection_messages(
-    guild, challenger, challenged, serviceName, invite, channel_name, guild_id, lang, translations
+    guild, challenger, challenged, serviceName, invite, channel_name, guild_id, lang
 ):
     """
     Sends messages and invites based on their membership status in the guild.
@@ -186,7 +186,6 @@ async def create_private_discord_channel(
         channel_name=channel_name,
         guild_id=guild_id,
         lang=lang,
-        translations=translations
     )
         
     manager_members = []
