@@ -49,45 +49,25 @@ async def send_connect_message_between_kicker_and_customer(
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-async def send_message_and_invite_if_needed(
-    user, is_in_guild, message, invite_url, channel_name, guild_id
-):
-    
-    if not is_in_guild:
-        await send_invitation(
-            discord_user=user,
-            invite_link=invite_url,
-            channel_name=channel_name,
-            guild_id=guild_id
-        )
-    else:
-        message += f"\n{invite_url}"
-
-    await user.send(message)
-
-
 async def manage_connection_messages(
-    guild, challenger, challenged, serviceName, invite, channel_name, guild_id, lang
+    guild, challenger, challenged, serviceName, invite_url, channel_name, guild_id, lang
 ):
-    """
-    Sends messages and invites based on their membership status in the guild.
-    """
-    challenger_in_guild = guild.get_member(challenger.id) is not None
     challenged_in_guild = guild.get_member(challenged.id) is not None
     
-    if challenger_in_guild and challenged_in_guild:
+    if challenged_in_guild:
         await send_connect_message_between_kicker_and_customer(
             challenger=challenger,
             challenged=challenged,
             serviceName=serviceName,
-            invite_url=invite.url,
+            invite_url=invite_url,
             lang=lang
         )
     else:
-        kicker_message = translations["kicker_session_started_message"][lang].format(
-            challenger_id=challenger.id,
-            challenger_name=challenger.name,
-            service_name=serviceName
+        await send_invitation(
+            discord_user=challenged,
+            invite_link=invite_url,
+            channel_name=channel_name,
+            guild_id=guild_id
         )
         
         user_message = translations["user_order_accepted_message"][lang].format(
@@ -95,24 +75,8 @@ async def manage_connection_messages(
             challenged_name=challenged.name,
             service_name=serviceName
         )
-        
-        await send_message_and_invite_if_needed(
-            user=challenged,
-            is_in_guild=challenged_in_guild,
-            message=kicker_message,
-            invite_url=invite.url,
-            channel_name=channel_name,
-            guild_id=guild_id
-        )
-        
-        await send_message_and_invite_if_needed(
-            user=challenger,
-            is_in_guild=challenger_in_guild,
-            message=user_message,
-            invite_url=invite.url,
-            channel_name=channel_name,
-            guild_id=guild_id
-        )
+        user_message += f"\n{invite_url}"
+        await challenger.send(user_message)
         
 async def create_private_discord_channel(
     bot_instance,
@@ -182,7 +146,7 @@ async def create_private_discord_channel(
         challenger=challenger,
         challenged=challenged,
         serviceName=serviceName,
-        invite=invite,
+        invite_url=invite.url,
         channel_name=channel_name,
         guild_id=guild_id,
         lang=lang,
