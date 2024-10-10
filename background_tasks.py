@@ -173,9 +173,10 @@ async def on_member_join(member):
         invite_link = user_info["invite_link"]
         guild_id = user_info["guild_id"]
         guild = bot.get_guild(guild_id)
+        lang = get_lang_prefix(guild.id)
         private_channel = discord.utils.get(guild.voice_channels, name=channel_name)
         if private_channel is None:
-            await member.send("Sorry, the private channel has been deleted.")
+            await member.send(translations["private_channel_deleted"][lang])
             return
         if private_channel:
             try:

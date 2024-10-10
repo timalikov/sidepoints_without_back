@@ -531,5 +531,9 @@ translations = {
     "kicker_not_responded_yet": {
         "en": "The kicker has not responded yet.",
         "ru": "Исполнитель пока не ответил."
-    }
+    },
+    "private_channel_deleted": {
+        "en": "Sorry, the private channel has been deleted.",
+        "ru": "Приватный канал был удален."
+    },
 }
