@@ -191,6 +191,3 @@ async def on_member_join(member):
                 print(f"Error: Unable to send a DM to {member.name}. They may have DMs disabled or the bot lacks permissions.")
             except discord.HTTPException as http_error:
                 print(f"HTTPException: Failed to send a message to {member.name}. Error: {http_error}")
-
-        else:
-            await member.send("Sorry, the private channel has been deleted.")
