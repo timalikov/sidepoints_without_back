@@ -18,6 +18,7 @@ from models.thread_forum import start_posting
 from services.sqs_client import SQSClient
 from views.refund_replace import RefundReplaceView
 from database.dto.psql_leaderboard import LeaderboardDatabase
+from services.cache.client import custom_cache
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -41,7 +42,6 @@ async def send_user_refund_replace(
     
     sqs_client = SQSClient()
     
-    print("send_user_refund_replace starting to send message")
     message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
         title=translations["kicker_not_responded_yet"][lang],
@@ -61,29 +61,6 @@ async def send_user_refund_replace(
         view=view,
         embed=message_embed
     )
-
-@tasks.loop(count=1)
-async def send_message_after_2_min(managers, challenged, kicker_username, invite_url):
-    await asyncio.sleep(120)
-    message_after_2_min = (f"Hey @{kicker_username}! It's been 2 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
-
-    try:
-        await challenged.send(message_after_2_min)
-        for manager in managers:
-            await manager.send(message_after_2_min)
-    except discord.HTTPException as e:
-        print(f"Failed to send message to {manager.name}: {e}")
-
-@tasks.loop(count=1)
-async def send_message_after_5_min(managers, challenged, kicker_username, invite_url):
-    await asyncio.sleep(300)
-    message_after_5_min = (f"Hey @{kicker_username}! It's been 5 minutes since the session started. If you haven't responded yet, please check the private channel: {invite_url}.")
-    try:
-        await challenged.send(message_after_5_min)
-        for manager in managers:
-            await manager.send(message_after_5_min)
-    except discord.HTTPException as e:
-        print(f"Failed to send message to {manager.name}: {e}")
 
 
 @tasks.loop(count=1)  # Ensure this runs only once
@@ -187,3 +164,33 @@ async def create_leaderboard():
             )
             embed.set_thumbnail(url=image_url)
             await channel.send(embed=embed)
+
+@bot.event
+async def on_member_join(member):
+    user_info = custom_cache.get_user_invite(member.id)
+    if user_info:
+        channel_name = user_info["channel_name"]
+        invite_link = user_info["invite_link"]
+        guild_id = user_info["guild_id"]
+        guild = bot.get_guild(guild_id)
+        private_channel = discord.utils.get(guild.voice_channels, name=channel_name)
+        if private_channel is None:
+            await member.send("Sorry, the private channel has been deleted.")
+            return
+        if private_channel:
+            try:
+                await private_channel.set_permissions(member, read_messages=True)
+            except discord.Forbidden:
+                print(f"Error: Bot does not have permission to set permissions for the channel '{channel_name}' in guild '{guild.name}'.")
+            except discord.HTTPException as http_error:
+                print(f"HTTPException: Failed to set permissions for the member in '{channel_name}' due to an HTTP error: {http_error}")
+
+            try:
+                await member.send(f"Here is your invite link to the private channel: {invite_link}")
+            except discord.Forbidden:
+                print(f"Error: Unable to send a DM to {member.name}. They may have DMs disabled or the bot lacks permissions.")
+            except discord.HTTPException as http_error:
+                print(f"HTTPException: Failed to send a message to {member.name}. Error: {http_error}")
+
+        else:
+            await member.send("Sorry, the private channel has been deleted.")

@@ -96,8 +96,8 @@ async def handle_confirm_order():
     purchaseId: str = data.get("purchaseId")
     discord_server_id: int = data.get("discordServerId")
     
-    challenger: discord.User = bot.get_user(int(customerId))
-    challenged: discord.User = bot.get_user(int(kickerId))
+    challenger: discord.User = await bot.fetch_user(int(customerId))
+    challenged: discord.User = await bot.fetch_user(int(kickerId))
     if not all([challenger, challenged]):
         return jsonify({"error": "One or more users could not be found in this guild."}), 400
     future = asyncio.run_coroutine_threadsafe(
