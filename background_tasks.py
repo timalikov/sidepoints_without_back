@@ -181,14 +181,8 @@ async def on_member_join(member):
         if private_channel:
             try:
                 await private_channel.set_permissions(member, read_messages=True)
-            except discord.Forbidden:
-                print(f"Error: Bot does not have permission to set permissions for the channel '{channel_name}' in guild '{guild.name}'.")
-            except discord.HTTPException as http_error:
-                print(f"HTTPException: Failed to set permissions for the member in '{channel_name}' due to an HTTP error: {http_error}")
-
-            try:
                 await member.send(f"Here is your invite link to the private channel: {invite_link}")
             except discord.Forbidden:
-                print(f"Error: Unable to send a DM to {member.name}. They may have DMs disabled or the bot lacks permissions.")
+                print(f"Error: Bot does not have permission to set permissions for the channel '{channel_name}' in guild '{guild.name}' or Unable to send a DM to {member.name}")
             except discord.HTTPException as http_error:
-                print(f"HTTPException: Failed to send a message to {member.name}. Error: {http_error}")
+                print(f"HTTPException: Failed to set permissions for the member in '{channel_name}' due to an HTTP error: {http_error} or Failed to send a message to {member.name}")
