@@ -6,6 +6,7 @@ import discord
 
 from translate import translations
 from bot_instance import get_bot
+from config import MAIN_GUILD_ID
 
 from services.sqs_client import SQSClient
 from views.refund_replace import RefundReplaceView
@@ -20,6 +21,7 @@ class RefundReplaceManager:
         kicker: discord.User,
         customer: discord.User,
         purchase_id: int,
+        discord_server_id: int = int(MAIN_GUILD_ID),
         lang: Literal["ru", "en"] = "en",
         access_reject_view: Any = None
     ) -> None:
@@ -33,6 +35,7 @@ class RefundReplaceManager:
         self.customer = customer
         self.purchase_id = purchase_id
         self.lang = lang
+        self.discord_server_id = discord_server_id
 
     async def send_refund_replace(self, start_timer: bool):
         if self.previous_message and self.previous_view:
@@ -55,7 +58,8 @@ class RefundReplaceManager:
             access_reject_view=self.access_reject_view,
             service_name=self.service_name,
             timeout=timeout,
-            lang=self.lang
+            lang=self.lang,
+            discord_server_id=self.discord_server_id
         )
 
         embed = discord.Embed(

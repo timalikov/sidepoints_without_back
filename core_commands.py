@@ -25,6 +25,7 @@ from views.order_view import OrderView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
 from models.public_channel import get_or_create_channel_by_category_and_name
+from models.enums import Genders, Languages
 from translate import get_lang_prefix, translations
 
 main_guild_id = MAIN_GUILD_ID
@@ -175,7 +176,7 @@ async def get_guild_invite_link(guild_id):
 
 
 @bot.tree.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
-async def order(interaction: discord.Interaction):
+async def order_all(interaction: discord.Interaction):
     guild_id = interaction.guild.id
     lang = get_lang_prefix(guild_id)
     await interaction.response.defer(ephemeral=True)
@@ -191,13 +192,6 @@ async def order(interaction: discord.Interaction):
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(guild_id)
-    channel = await get_or_create_channel_by_category_and_name(
-        category_name=ORDER_CATEGORY_NAME,
-        channel_name=ORDER_CHANNEL_NAME,
-        guild=interaction.guild
-    )
-    text_message_order_view = \
-        translations["order_new_alert"][lang].format(choice="All players")
     services_db = Services_Database(app_choice="ALL")
     view = OrderView(
         customer=interaction.user,
@@ -205,45 +199,54 @@ async def order(interaction: discord.Interaction):
         lang=lang,
         guild_id=guild_id
     )
-    sent_message = await channel.send(
-        view=view, content=f"@everyone\n{text_message_order_view}",
-    )
-    view.messages.append(sent_message)
     await interaction.followup.send(
         translations["order_dispatching"][lang].format(link=main_link),
         ephemeral=True
     )
-    
-    kicker_ids = await services_db.get_kickers_by_service_title(
-        service_title="All players"
-    )
-    for kicker_id in kicker_ids:
-        try:
-            kicker_id = int(kicker_id)
-        except ValueError:
-            print(f"ID: {kicker_id} is not int")
-            continue
-        kicker = bot.get_user(kicker_id)
-        if not kicker:
-            continue
-        try:
-            sent_message = await kicker.send(view=view, content=text_message_order_view)
-        except discord.DiscordException:
-            continue
-        view.messages.append(sent_message)
+    await view.send_all_messages()
 
 
 @bot.tree.command(name="order", description="Use this command to post your service request and summon Kickers to take the order.")
-@app_commands.choices(choices=[app_commands.Choice(name="All players", value="ALL"),
-                               app_commands.Choice(name="Casual", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
-                               app_commands.Choice(name="Coaching", value="88169d78-85b4-4fa3-8298-3df020f13a6f"),
-                               app_commands.Choice(name="Just Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
-                               app_commands.Choice(name="Watch Youtube", value="d3ae39d2-fd86-41d7-bc38-0b582ce338b5"),
-                               app_commands.Choice(name="Play Games", value="79bf303a-318b-4815-bd56-7b0b49ae7bff"),
-                               app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"),
-                               app_commands.Choice(name="World Of Tanks", value="2e851835-c033-4c90-a920-ffa75318235a")
-                               ])
-async def order(interaction: discord.Interaction, choices: app_commands.Choice[str]):
+@app_commands.choices(choices=[
+    app_commands.Choice(name="All players", value="ALL"),
+    app_commands.Choice(name="Casual", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
+    app_commands.Choice(name="Coaching", value="88169d78-85b4-4fa3-8298-3df020f13a6f"),
+    app_commands.Choice(name="Just Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
+    app_commands.Choice(name="Watch Youtube", value="d3ae39d2-fd86-41d7-bc38-0b582ce338b5"),
+    app_commands.Choice(name="Play Games", value="79bf303a-318b-4815-bd56-7b0b49ae7bff"),
+    app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"),
+    app_commands.Choice(name="World Of Tanks", value="2e851835-c033-4c90-a920-ffa75318235a")
+])
+@app_commands.choices(sex=[
+    app_commands.Choice(name="Female", value=Genders.FEMALE.value),
+    app_commands.Choice(name="Male", value=Genders.MALE.value),
+    app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
+])
+@app_commands.choices(language=[
+    app_commands.Choice(name="Russian", value=Languages.RU.value),
+    app_commands.Choice(name="English", value=Languages.EN.value),
+    app_commands.Choice(name="Spanish", value=Languages.ES.value),
+    app_commands.Choice(name="French", value=Languages.FR.value),
+    app_commands.Choice(name="German", value=Languages.DE.value),
+    app_commands.Choice(name="Italian", value=Languages.IT.value),
+    app_commands.Choice(name="Portuguese", value=Languages.PT.value),
+    app_commands.Choice(name="Chinese", value=Languages.ZH.value),
+    app_commands.Choice(name="Japanese", value=Languages.JA.value),
+    app_commands.Choice(name="Korean", value=Languages.KO.value),
+    app_commands.Choice(name="Arabic", value=Languages.AR.value),
+    app_commands.Choice(name="Hindi", value=Languages.HI.value),
+    app_commands.Choice(name="Turkish", value=Languages.TR.value),
+    app_commands.Choice(name="Persian", value=Languages.FA.value),
+    app_commands.Choice(name="Unimportant", value=Languages.UNIMPORTANT.value),
+])
+@app_commands.describe(text='Order description')
+async def order(
+    interaction: discord.Interaction,
+    choices: app_commands.Choice[str],
+    sex: app_commands.Choice[str],
+    language: app_commands.Choice[str],
+    text: str = ""
+):
     guild_id = interaction.guild.id
     lang = get_lang_prefix(guild_id)
     await interaction.response.defer(ephemeral=True)
@@ -259,47 +262,23 @@ async def order(interaction: discord.Interaction, choices: app_commands.Choice[s
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(guild_id)
-    channel = await get_or_create_channel_by_category_and_name(
-        category_name=ORDER_CATEGORY_NAME,
-        channel_name=ORDER_CHANNEL_NAME,
-        guild=interaction.guild
+    services_db = Services_Database(
+        app_choice=choices.value,
+        sex_choice=sex.value,
+        language_choice=language.value
     )
-    text_message_order_view = \
-        translations["order_new_alert"][lang].format(choice=choices.name)
-    services_db = Services_Database(app_choice=choices.value)
     view = OrderView(
         customer=interaction.user,
         services_db=services_db,
         lang=lang,
-        guild_id=guild_id
+        guild_id=guild_id,
+        extra_text=text
     )
-    sent_message = await channel.send(
-        view=view, content=f"@everyone\n{text_message_order_view}",
-    )
-    view.messages.append(sent_message)
     await interaction.followup.send(
         translations["order_dispatching"][lang].format(link=main_link),
         ephemeral=True
     )
-    
-    kicker_ids = await services_db.get_kickers_by_service_title(
-        service_title=choices.name
-    )
-    for kicker_id in kicker_ids:
-        try:
-            kicker_id = int(kicker_id)
-        except ValueError:
-            print(f"ID: {kicker_id} is not int")
-            continue
-        kicker = bot.get_user(kicker_id)
-        if not kicker:
-            continue
-        try:
-            sent_message = await kicker.send(view=view, content=text_message_order_view)
-        except discord.DiscordException:
-            continue
-        view.messages.append(sent_message)
-
+    await view.send_all_messages()
 
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
 @app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),

@@ -159,7 +159,8 @@ class AccessRejectView(discord.ui.View):
             purchase_id=self.purchase_id,
             sqs_client=self.sqs_client,
             service_name=self.service_name,
-            lang=self.lang
+            lang=self.lang,
+            discord_server_id=self.discord_server_id
         )
         embed_message = discord.Embed(
             title=translations["kicker_not_accepted_title"][self.lang].format(kicker_name=self.kicker.name),

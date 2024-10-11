@@ -37,17 +37,19 @@ async def start_posting(
     order_type: Literal["DESC", "ASC"] = "DESC"
 ) -> None:
     dto = Services_Database(order_type=order_type)
-    all_users = await dto.get_kicker_ids_and_score()
-    high_priority = []
-    for user in all_users:
-        if guild.get_member(int(user['discord_id'])):
-            high_priority.append(int(user['discord_id']))
-            all_users.remove(user)
-    combined = high_priority + all_users
-    for i in range(100):
-        profile_data = await dto.get_services_by_discordId(combined[i])
-        if not profile_data:
-            break
+
+    services = await dto.get_all_services()
+    guild_members: list[dict] = []
+    not_guild_members: list[dict] = []
+    for service in services:
+        if guild.get_member(
+            int(service["discord_id"])
+        ):
+            guild_members.append(service)
+        else:
+            not_guild_members.append(service)
+    services = not_guild_members + guild_members
+    for profile_data in services:
         thread: Union[bool, discord.Thread] = await find_thread_in_forum(
             guild=guild, forum=forum_channel, profile_data=profile_data
         )
@@ -55,4 +57,4 @@ async def start_posting(
             await thread.edit(archived=False)
         temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
         await temp_post.post_user_profile()
-        await asyncio.sleep(4)
+        await asyncio.sleep(1)

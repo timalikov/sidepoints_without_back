@@ -102,7 +102,7 @@ async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
     forum_channel: discord.channel.ForumChannel = await find_sidekick_forum(guild)
     if forum_channel:
         dto = ForumUserPostDatabase()
-        await forum_channel.delete()
+        _ = [await thread.delete() for thread in forum_channel.threads]
         await dto.delete_by_forum_id(forum_channel.id)
     forum_channel = await create_base_forum(guild)
     return forum_channel

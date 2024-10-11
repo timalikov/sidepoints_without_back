@@ -24,6 +24,7 @@ class RefundReplaceView(discord.ui.View):
         access_reject_view: Any = None,
         channel: Any = None,
         stop_task: Callable = None,
+        discord_server_id: int = int(MAIN_GUILD_ID),
         lang: Literal["en", "ru"] = "en",
         timeout: Optional[int] = 60 * 5
 
@@ -40,6 +41,7 @@ class RefundReplaceView(discord.ui.View):
         self.refund_handler = RefundHandler(sqs_client, purchase_id, customer, kicker, lang=lang)
         self.service_name = service_name
         self.lang = lang
+        self.discord_server_id = discord_server_id
     
     async def on_timeout(self):
         if not self.already_pressed:
@@ -131,20 +133,11 @@ class RefundReplaceView(discord.ui.View):
             kicker_ids.remove(self.kicker.id)
         if self.customer.id in kicker_ids:
             kicker_ids.remove(self.customer.id)
-
-        text_message_order_view = translations['order_new_alert'][self.lang].format(choice=self.service_name)
-        view = OrderView(customer=interaction.user, services_db=services_db, lang=MAIN_GUILD_ID)
-        for kicker_id in kicker_ids:
-            try:
-                kicker_id = int(kicker_id)
-            except ValueError:
-                print(f"ID: {kicker_id} is not int")
-                continue
-            kicker = bot.get_user(kicker_id)
-            if not kicker:
-                continue
-            try:
-                sent_message = await kicker.send(view=view, content=text_message_order_view)
-            except discord.DiscordException:
-                continue
-            view.messages.append(sent_message)
+            
+        view = OrderView(
+            customer=interaction.user,
+            services_db=services_db,
+            lang=self.lang,
+            guild_id=self.discord_server_id
+        )
+        await view.send_kickers_message()
