@@ -20,7 +20,7 @@ translations = {
     },
     'order_new_alert': {
         'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\n{extra_text}',
-        'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\n{extra_text}',
+        'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
     'profile_not_created': {
         'ru': "Похоже, вы еще не создали профиль! Пожалуйста, перейдите по ссылке, чтобы создать профиль.\n{link}/profile?side_auth=DISCORD",
@@ -537,7 +537,7 @@ translations = {
         "ru": "Приватный канал был удален."
     },
     "private_channel_created": {
-        "eng": (
+        "en": (
             "Also We've created a private channel for you!\n"
             "First you need to join the server: {invite_link}\nand then I will send you an invite to the private channel"
         ),

@@ -64,9 +64,8 @@ async def forum_command(interaction: discord.Interaction):
         "/forum", 
         interaction.guild.id if interaction.guild else None
     )
-
     guild: discord.guild.Guild = interaction.guild
-    lang = get_lang_prefix(guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     try:
         forum_channel: discord.channel.ForumChannel = await get_or_create_forum(guild)
     except discord.DiscordException:
@@ -97,7 +96,7 @@ async def profile(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     profile_exist = Profile_Exist(discord_id=interaction.user.id, lang=lang)
     await profile_exist.initialize()
     if profile_exist.no_user:
@@ -125,7 +124,7 @@ async def play(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     view = await PlayView.create(user_choice="ALL", lang=lang)
 
     if view.no_user:
@@ -152,7 +151,7 @@ async def find(interaction: discord.Interaction, username: str):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     view = await PlayView.create(username=username, lang=lang)
 
     if view.no_user:
@@ -177,7 +176,7 @@ async def get_guild_invite_link(guild_id):
 
 @bot.tree.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
 async def order_all(interaction: discord.Interaction):
-    guild_id = interaction.guild.id
+    guild_id = interaction.guild.id if interaction.guild else None
     lang = get_lang_prefix(guild_id)
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
@@ -217,7 +216,7 @@ async def order_all(interaction: discord.Interaction):
     app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"),
     app_commands.Choice(name="World Of Tanks", value="2e851835-c033-4c90-a920-ffa75318235a")
 ])
-@app_commands.choices(sex=[
+@app_commands.choices(gender=[
     app_commands.Choice(name="Female", value=Genders.FEMALE.value),
     app_commands.Choice(name="Male", value=Genders.MALE.value),
     app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
@@ -243,12 +242,12 @@ async def order_all(interaction: discord.Interaction):
 async def order(
     interaction: discord.Interaction,
     choices: app_commands.Choice[str],
-    sex: app_commands.Choice[str],
+    gender: app_commands.Choice[str],
     language: app_commands.Choice[str],
     text: str = ""
 ):
-    guild_id = interaction.guild.id
-    lang = get_lang_prefix(guild_id)
+    guild_id = interaction.guild.id if interaction.guild else None
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
@@ -264,7 +263,7 @@ async def order(
     main_link = await get_guild_invite_link(guild_id)
     services_db = Services_Database(
         app_choice=choices.value,
-        sex_choice=sex.value,
+        sex_choice=gender.value,
         language_choice=language.value
     )
     view = OrderView(
@@ -309,7 +308,7 @@ async def wallet(interaction: discord.Interaction):
     )
     await save_user_id(interaction.user.id)
     main_guild = bot.get_guild(MAIN_GUILD_ID)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     # Check if the user is a member of the guild
     member = main_guild.get_member(interaction.user.id)
     if member:
@@ -346,7 +345,7 @@ async def points(interaction: discord.Interaction):
     )
     await save_user_id(interaction.user.id)
     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
     await interaction.response.send_message(
         translations["points_message"][lang].format(link=link),
@@ -364,7 +363,7 @@ async def boost(interaction: discord.Interaction, username: str):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     view = BoostView(user_name=username, lang=lang)
     await view.initialize()
     if view.no_user:
@@ -388,7 +387,7 @@ async def leaderboard(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id)
+    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
     await interaction.response.send_message(
         embed=discord.Embed(
             color=discord.Colour.orange(),
