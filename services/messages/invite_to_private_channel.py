@@ -1,14 +1,15 @@
 from bot_instance import get_bot
 from services.cache.client import custom_cache
 import discord
+from translate import translations
+from typing import Literal
 
 bot = get_bot()
 
-async def send_invitation(discord_user: discord.User, invite_link: str, channel_name: str, guild_id: int):
+async def send_invitation(discord_user: discord.User, invite_link: str, channel_name: str, guild_id: int, lang: Literal["en", "ru"] = "en"):
     try:
         await discord_user.send(
-            f"Hey! I've created a private channel for you!\n"
-            f"First you need to join the server: {invite_link} \nand then I will send you an invite to the private channel"
+            translations["private_channel_created"][lang].format(invite_link=invite_link)
         )
 
         custom_cache.set_user_invite(

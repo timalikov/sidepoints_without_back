@@ -536,4 +536,18 @@ translations = {
         "en": "Sorry, the private channel has been deleted.",
         "ru": "Приватный канал был удален."
     },
+    "private_channel_created": {
+        "eng": (
+            "Also We've created a private channel for you!\n"
+            "First you need to join the server: {invite_link}\nand then I will send you an invite to the private channel"
+        ),
+        "ru": (
+            "Мы так же создали приватный канал для вас!\n"
+            "Но прежде вы должны вступить в данный сервер: {invite_link}\nи мы тут же пришлем вам приглашение на приватный канал, в котором покупатель уже ожидает вас!"
+        )
+    },
+    "private_channel_invite": {
+        "en": "Here is your invite link to the private channel: {invite_link}",
+        "ru": "А вот и ссылочка на приватный канал с покупателем. Вас уже ждут! {invite_link}"
+    },
 }

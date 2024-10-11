@@ -67,7 +67,8 @@ async def manage_connection_messages(
             discord_user=challenged,
             invite_link=invite_url,
             channel_name=channel_name,
-            guild_id=guild_id
+            guild_id=guild_id,
+            lang=lang
         )
         
         user_message = translations["user_order_accepted_message"][lang].format(
