@@ -5,6 +5,7 @@ import discord
 
 from bot_instance import get_bot
 from config import MAIN_GUILD_ID, TEST_ACCOUNTS
+from services.messages.invite_to_private_channel import send_invitation
 from translate import get_lang_prefix, translations
 
 from message_tasks import start_all_messages
@@ -48,7 +49,36 @@ async def send_connect_message_between_kicker_and_customer(
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
-
+async def manage_connection_messages(
+    guild, challenger, challenged, serviceName, invite_url, channel_name, guild_id, lang
+):
+    challenged_in_guild = guild.get_member(challenged.id) is not None
+    
+    if challenged_in_guild:
+        await send_connect_message_between_kicker_and_customer(
+            challenger=challenger,
+            challenged=challenged,
+            serviceName=serviceName,
+            invite_url=invite_url,
+            lang=lang
+        )
+    else:
+        await send_invitation(
+            discord_user=challenged,
+            invite_link=invite_url,
+            channel_name=channel_name,
+            guild_id=guild_id,
+            lang=lang
+        )
+        
+        user_message = translations["user_order_accepted_message"][lang].format(
+            challenged_id=challenged.id,
+            challenged_name=challenged.name,
+            service_name=serviceName
+        )
+        user_message += f"\n{invite_url}"
+        await challenger.send(user_message)
+        
 async def create_private_discord_channel(
     bot_instance,
     guild_id,
@@ -99,7 +129,7 @@ async def create_private_discord_channel(
 
     channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
 
-    invite = await channel.create_invite(max_age=86400)
+    invite = await channel.create_invite(max_age=86400, max_uses=10)
 
     welcome_message = translations["welcome_message"][lang].format(kicker_username=kicker_username)
     await channel.send(welcome_message)
@@ -112,14 +142,17 @@ async def create_private_discord_channel(
         invite_url=invite.url
     )
 
-    await send_connect_message_between_kicker_and_customer(
-        challenged=challenged,
+    await manage_connection_messages(
+        guild=guild,
         challenger=challenger,
+        challenged=challenged,
         serviceName=serviceName,
         invite_url=invite.url,
-        lang=lang
+        channel_name=channel_name,
+        guild_id=guild_id,
+        lang=lang,
     )
-    
+        
     manager_members = []
 
     if challenged in kicker_members:

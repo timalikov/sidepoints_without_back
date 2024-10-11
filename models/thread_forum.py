@@ -37,6 +37,7 @@ async def start_posting(
     order_type: Literal["DESC", "ASC"] = "DESC"
 ) -> None:
     dto = Services_Database(order_type=order_type)
+
     services = await dto.get_all_services()
     guild_members: list[dict] = []
     not_guild_members: list[dict] = []
