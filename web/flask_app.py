@@ -57,8 +57,16 @@ def reaction_test():
     if success:
         return jsonify({"message": "ok"}), 200
     return jsonify({"error": "Just error"}), 400
-    
 
+
+@app.route("/discord_api/order/choice", methods=['POST'])
+def new_order_choice():
+    future = asyncio.run_coroutine_threadsafe(send_kickers_reaction_test(), bot.loop)
+    success = future.result()
+    if success:
+        return jsonify({"message": "ok"}), 200
+    return jsonify({"error": "Just error"}), 400
+    
 
 @app.route('/discord_api/boost', methods=['POST'])
 async def boost_compleate():

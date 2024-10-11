@@ -1,14 +1,19 @@
 from typing import Coroutine, List, Callable, Any, Literal
+from datetime import datetime
 import uuid
-import discord
 import os
+import discord
+
+from config import (
+    ORDER_CATEGORY_NAME,
+    ORDER_CHANNEL_NAME,
+)
 
 from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
 from services.messages.interaction import send_interaction_message
 from models.guild import is_member_of_main_guild
-from database.dto.sql_profile import log_to_database
-from datetime import datetime
+from models.public_channel import get_or_create_channel_by_category_and_name
 from translate import translations
 
 from bot_instance import get_bot
@@ -29,6 +34,7 @@ class OrderView(discord.ui.View):
         *,
         customer: discord.User,
         guild_id: int,
+        extra_text: str = "",
         lang: Literal["en", "ru"] = "en",
         services_db: Services_Database = None
     ):
@@ -42,6 +48,56 @@ class OrderView(discord.ui.View):
         self.created_at = datetime.now()
         self.guild_id = int(guild_id)
         self.lang = lang
+        self.text_message_order = self._build_text_message_order(extra_text)
+
+    def _build_text_message_order(self, extra_text: str) -> str:
+        service_title = self.services_db.service_title
+        if not service_title:
+            service_title = "All players"
+        sex = self.services_db.sex_choice
+        if not sex:
+            sex = "Male/Female"
+        language = self.services_db.language_choice
+        if not language:
+            language = "Русский" if self.lang == "ru" else "English"
+        return translations["order_new_alert"][self.lang].format(
+            choice=service_title.capitalize(),
+            gender=sex.capitalize(),
+            language=language.capitalize(),
+            extra_text=extra_text
+        )
+
+    async def send_all_messages(self) -> None:
+        await self.send_channel_message()
+        await self.send_kickers_message()
+
+    async def send_channel_message(self) -> None:
+        channel = await get_or_create_channel_by_category_and_name(
+            category_name=ORDER_CATEGORY_NAME,
+            channel_name=ORDER_CHANNEL_NAME,
+            guild=bot.get_guild(self.guild_id)
+        )
+        sent_message = await channel.send(
+            view=self, content=f"@everyone\n{self.text_message_order}",
+        )
+        self.messages.append(sent_message)
+
+    async def send_kickers_message(self) -> None:
+        kicker_ids = await self.services_db.get_kickers_by_service_title()
+        for kicker_id in kicker_ids:
+            try:
+                kicker_id = int(kicker_id)
+            except ValueError:
+                print(f"ID: {kicker_id} is not int")
+                continue
+            kicker = bot.get_user(kicker_id)
+            if not kicker:
+                continue
+            try:
+                sent_message = await kicker.send(view=self, content=self.text_message_order)
+            except discord.DiscordException:
+                continue
+            self.messages.append(sent_message)
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
         for message_instance in self.messages:

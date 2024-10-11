@@ -1,10 +1,11 @@
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from database.core_kicker_list import managers
 
 from serializers.profile_serializer import serialize_profile_data
 from database.fact_list import facts
 from database.dto.base import BasePsqlDTO
+from models.enums import Genders, Languages
 
 
 APP_CHOICES = {
@@ -15,7 +16,8 @@ APP_CHOICES = {
     "MOBILE": "439d8a72-8b8b-4a56-bb32-32c6e5d918ec",
     "Watch Youtube": "d3ae39d2-fd86-41d7-bc38-0b582ce338b5",
     "Play Games": "79bf303a-318b-4815-bd56-7b0b49ae7bff",
-    "Virtual Date": "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"
+    "Virtual Date": "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9",
+    "World Of Tanks": "2e851835-c033-4c90-a920-ffa75318235a"
 }
 
 class Services_Database(BasePsqlDTO):
@@ -24,8 +26,10 @@ class Services_Database(BasePsqlDTO):
 
     def __init__(
         self,
-        app_choice="ALL",
-        user_name=None,
+        app_choice: str = "ALL",
+        sex_choice: Genders = Genders.UNIMPORTANT,
+        language_choice: Languages = Languages.UNIMPORTANT,
+        user_name: str = None,
         order_type: Literal["DESC", "ASC"] = "DESC"
     ) -> None:
         self.order_type = order_type
@@ -33,6 +37,14 @@ class Services_Database(BasePsqlDTO):
         self.current_chunk = []
         self.app_choice = app_choice
         self.user_name = user_name
+        self.sex_choice = sex_choice
+        self.language_choice = language_choice
+        self.service_title: Optional[str] = self._build_service_title()
+
+    def _build_service_title(self) -> Optional[str]:
+        for key, value in APP_CHOICES.items():
+            if value == self.app_choice:
+                return key.capitalize()
 
     async def get_kickers(self) -> List[dict]:
         async with self.get_connection() as conn:
@@ -43,17 +55,28 @@ class Services_Database(BasePsqlDTO):
             [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
         )
     
-    async def get_kickers_by_service_title(self, service_title: str) -> List[dict]:
+    async def get_kickers_by_service_title(self) -> List[dict]:
         async with self.get_connection() as conn:
-            query = \
-                self.BASE_QUERY.replace("*", "discord_id") + " GROUP BY discord_id"
-            query_args: tuple = ()
-            if service_title.lower() != "all players":
-                if "WHERE" in self.BASE_QUERY:
-                    query = query.replace("GROUP", "AND service_title = $1 GROUP")
-                else:
-                    query = query.replace("GROUP", "WHERE service_title = $1 GROUP")
-                query_args = (service_title,)
+            query = self.BASE_QUERY.replace("*", "discord_id")
+            query_args: list = []
+            variable_count: int = 1
+            # TODO: NEED REFACTORING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Code duplicated
+            if self.service_title:
+                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+                query += filter_seq + f" service_title = ${variable_count}"
+                variable_count += 1
+                query_args.append(self.service_title)
+            if self.sex_choice:
+                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+                query += filter_seq + f" profile_gender = ${variable_count}"
+                variable_count += 1
+                query_args.append(self.sex_choice)
+            if self.language_choice:
+                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+                query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
+                variable_count += 1
+                query_args.append(self.language_choice)
+            query += " GROUP BY discord_id"
             kicker_ids = await conn.fetch(query, *query_args)
         return set(
             [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
@@ -108,6 +131,12 @@ class Services_Database(BasePsqlDTO):
                 return []
         result = self.current_chunk.pop(0)
         return serialize_profile_data(result)
+    
+    async def get_all_services(self):
+        async with self.get_connection() as conn:
+            query = self.BASE_QUERY + " ORDER BY profile_score " + self.order_type
+            services = await conn.fetch(query)
+        return services
 
     async def get_services_by_discordId(self, discordId):
         async with self.get_connection() as conn:
