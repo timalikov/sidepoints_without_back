@@ -27,8 +27,8 @@ class Services_Database(BasePsqlDTO):
     def __init__(
         self,
         app_choice: str = "ALL",
-        sex_choice: Genders = Genders.UNIMPORTANT,
-        language_choice: Languages = Languages.UNIMPORTANT,
+        sex_choice: Genders = Genders.UNIMPORTANT.value,
+        language_choice: Languages = Languages.UNIMPORTANT.value,
         user_name: str = None,
         order_type: Literal["DESC", "ASC"] = "DESC"
     ) -> None:

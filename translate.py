@@ -20,7 +20,7 @@ translations = {
     },
     'order_new_alert': {
         'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\n{extra_text}',
-        'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\Gender: **{gender}**.\nLanguage: **{language}**\n{extra_text}',
+        'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\n{extra_text}',
     },
     'profile_not_created': {
         'ru': "Похоже, вы еще не создали профиль! Пожалуйста, перейдите по ссылке, чтобы создать профиль.\n{link}/profile?side_auth=DISCORD",
