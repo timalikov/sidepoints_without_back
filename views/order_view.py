@@ -12,6 +12,7 @@ from config import (
 from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
 from services.messages.interaction import send_interaction_message
+from services.sqs_client import SQSClient
 from models.guild import is_member_of_main_guild
 from models.public_channel import get_or_create_channel_by_category_and_name
 from translate import translations
@@ -34,11 +35,13 @@ class OrderView(discord.ui.View):
         *,
         customer: discord.User,
         guild_id: int,
+        order_id: uuid.UUID = None,
         extra_text: str = "",
         lang: Literal["en", "ru"] = "en",
         services_db: Services_Database = None
     ):
         super().__init__(timeout=15 * 60)
+        self.order_id = order_id
         self.customer: discord.User = customer
         self.pressed_kickers: List[discord.User] = []
         self.is_pressed = False
@@ -66,6 +69,17 @@ class OrderView(discord.ui.View):
             language=language.capitalize(),
             extra_text=extra_text
         )
+    
+    async def send_current_kickers_message(
+        self,
+        services: List[dict],
+        kickers: List[discord.User]
+    ) -> None:
+        for kicker in kickers:
+            sent_message = await kicker.send(
+                self.text_message_order, view=self
+            )
+            self.messages.append(sent_message)
 
     async def send_all_messages(self) -> None:
         await self.send_channel_message()
@@ -108,17 +122,7 @@ class OrderView(discord.ui.View):
         if not self.is_pressed:
             await self.customer.send(content=translations['timeout_message'][self.lang])
 
-    @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
-    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "kicker_go_after_order", 
-            self.guild_id
-        )
-        kicker = interaction.user
-        if kicker in self.pressed_kickers:
-            return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
+    async def _bot_order(self, interaction: discord.Interaction, kicker: discord.User):
         self.pressed_kickers.append(kicker)
         services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
         if not services:
@@ -149,6 +153,27 @@ class OrderView(discord.ui.View):
         )
         await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
 
+    async def _webapp_order(self, interaction: discord.Interaction, kicker: discord.User):
+        services = await self.services_db.get_services_by_discordId(kicker.id)
+        sqs = SQSClient()
+        sqs.send_order_confirm_message(order_id=self.order_id, service_id=services[0]["profile_id"])
+        await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
+
+    @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
+    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
+        await Services_Database().log_to_database(
+            interaction.user.id, 
+            "kicker_go_after_order", 
+            self.guild_id
+        )
+        kicker = interaction.user
+        if kicker in self.pressed_kickers:
+            return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
+        if not self.order_id:
+            await self._bot_order(interaction, kicker)
+        else:
+            await self._webapp_order(interaction, kicker)
 
 class OrderAccessRejectView(discord.ui.View):
     

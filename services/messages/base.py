@@ -1,3 +1,4 @@
+import uuid
 import discord
 
 from bot_instance import get_bot
@@ -8,6 +9,7 @@ from services.messages.customer_support_messenger import send_message_to_custome
 from services.sqs_client import SQSClient
 from views.access_reject import AccessRejectView
 from views.check_reaction import CheckReactionView
+from views.order_view import OrderView
 from database.dto.psql_services import Services_Database
 from models.enums import StatusCodes
 from models.public_channel import find_channel_by_category_and_name
@@ -121,3 +123,32 @@ async def send_confirm_order_message(
 
 async def send_reaction_message() -> StatusCodes:
     ...
+
+
+async def send_order_message(
+    order_id: uuid.UUID,
+    matching_kicker_discord_ids: list[str],
+    matching_service_ids: list[uuid.UUID],
+) -> StatusCodes:
+    kickers: list[discord.User] = []
+    for kicker_id in matching_kicker_discord_ids:
+        try:
+            kicker = await bot.fetch_user(int(kicker_id))
+            kickers.append(kicker)
+        except discord.DiscordException:
+            print(f"Kicker: {kicker_id} not found!")
+        except ValueError:
+            print(f"ID: {kicker_id} is not int!")
+    dto = Services_Database()
+    services = await dto.get_multi_services(matching_service_ids)
+    view = OrderView(
+        customer=None,
+        guild_id=MAIN_GUILD_ID,
+        services_db=dto,
+        order_id=order_id
+    )
+    await view.send_current_kickers_message(
+        services=services,
+        kickers=kickers
+    )
+    return True

@@ -3,6 +3,7 @@ import csv
 import datetime
 import io
 import logging
+import uuid
 
 from flask import Flask, request, jsonify, Response
 import config
@@ -10,7 +11,8 @@ from services.messages.base import (
     send_confirm_order_message,
     send_discord_notification,
     send_boost_message,
-    send_kickers_reaction_test
+    send_kickers_reaction_test,
+    send_order_message
 )
 from models.private_channel import create_private_discord_channel
 from database.dto.sql_challenge import SQLChallengeDatabase
@@ -61,7 +63,14 @@ def reaction_test():
 
 @app.route("/discord_api/order/choice", methods=['POST'])
 def new_order_choice():
-    future = asyncio.run_coroutine_threadsafe(send_kickers_reaction_test(), bot.loop)
+    data: dict = request.json
+    order_id: uuid.UUID = data["orderId"]
+    matching_kicker_discord_ids: list[str] = data["matchingKickerDiscordIds"]
+    matching_service_ids: list[uuid.UUID] = data["matchingServiceIds"]
+    future = asyncio.run_coroutine_threadsafe(
+        send_order_message(order_id, matching_kicker_discord_ids, matching_service_ids),
+        bot.loop
+    )
     success = future.result()
     if success:
         return jsonify({"message": "ok"}), 200

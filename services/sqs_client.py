@@ -1,3 +1,4 @@
+import uuid
 import os
 import boto3
 import json
@@ -13,13 +14,13 @@ class SQSClient:
             aws_secret_access_key="diSyU0WCuXpBtKlQIP0rgyzOGVU2zI6W5Qvdo27Q",
             region_name='eu-central-1'
         )
-        self.queue_router = "sidekick_dev_refund" if TEST else "sidekick_prod_refund"
+        self.queue_router = "sidekick_dev_" if TEST else "sidekick_prod_"
         self.queue_host = f"https://sqs.eu-central-1.amazonaws.com/104037811570/{self.queue_router}"
 
     def send_message(self, purchase_id: int) -> bool:
         try:
             response = self.sqs_client.send_message(
-                QueueUrl=self.queue_host,
+                QueueUrl=self.queue_host + "refund",
                 DelaySeconds=10,
                 MessageBody=json.dumps({'purchaseId': purchase_id})
             )
@@ -27,4 +28,22 @@ class SQSClient:
             return True  
         except Exception as e:
             print(f"Failed to send message to SQS: {str(e)}")
-            return False  
+            return False 
+        
+    def send_order_confirm_message(self, order_id: uuid.UUID, service_id: int) -> bool:
+        try:
+            response = self.sqs_client.send_message(
+                QueueUrl=self.queue_host + "orders_new",
+                DelaySeconds=10,
+                MessageBody=json.dumps(
+                    {
+                        'orderId': order_id,
+                        'serviceId': service_id
+                    }
+                )
+            )
+            print(f"SQS Message sent! ID: {response['MessageId']}")
+            return True  
+        except Exception as e:
+            print(f"Failed to send message to SQS: {str(e)}")
+            return False
