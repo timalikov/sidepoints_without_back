@@ -41,15 +41,14 @@ class OrderView(discord.ui.View):
         services_db: Services_Database = None
     ):
         super().__init__(timeout=15 * 60)
-        self.order_id = order_id
         self.customer: discord.User = customer
         self.pressed_kickers: List[discord.User] = []
         self.is_pressed = False
         self.services_db = services_db
         self.messages = []  # for drop button after timeout
-        self.order_id = str(uuid.uuid4())
+        self.order_id = order_id if order_id else str(uuid.uuid4())
         self.created_at = datetime.now()
-        self.guild_id = int(guild_id)
+        self.guild_id = guild_id
         self.lang = lang
         self.text_message_order = self._build_text_message_order(extra_text)
 

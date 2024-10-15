@@ -57,9 +57,10 @@ class Services_Database(BasePsqlDTO):
     
     async def get_multi_services(self, service_ids: List[str]) -> List[dict]:
         async with self.get_connection() as conn:
-            query: str = self.BASE_QUERY + " AND profile_id IN $1"
+            query: str = self.BASE_QUERY + " AND profile_id = ANY($1)"
             services = await conn.fetch(query, service_ids)
         return services
+
     
     async def get_kickers_by_service_title(self) -> List[dict]:
         async with self.get_connection() as conn:

@@ -132,6 +132,8 @@ async def send_order_message(
 ) -> StatusCodes:
     kickers: list[discord.User] = []
     for kicker_id in matching_kicker_discord_ids:
+        if len(kickers) >= 100:  
+            break
         try:
             kicker = await bot.fetch_user(int(kicker_id))
             kickers.append(kicker)

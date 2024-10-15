@@ -33,12 +33,12 @@ class SQSClient:
     def send_order_confirm_message(self, order_id: uuid.UUID, service_id: int) -> bool:
         try:
             response = self.sqs_client.send_message(
-                QueueUrl=self.queue_host + "orders_new",
+                QueueUrl=self.queue_host + "bot_orders_user_accepts",
                 DelaySeconds=10,
                 MessageBody=json.dumps(
                     {
-                        'orderId': order_id,
-                        'serviceId': service_id
+                        'orderId': str(order_id),
+                        'serviceId': str(service_id)
                     }
                 )
             )
