@@ -76,7 +76,7 @@ def new_order_choice():
     gender_choice: str = Genders[gender].value if gender in Genders.__members__ else Genders.UNIMPORTANT.value
 
     dto = Services_Database(
-        app_choice=app_choice_value if app_choice_value else "ALL",
+        app_choice=app_choice_value,
         language_choice=language if language else Languages.UNIMPORTANT.value,
         sex_choice=gender_choice
     )
@@ -86,8 +86,7 @@ def new_order_choice():
         bot.loop
     )
     matching_kicker_discord_ids = list(future.result())
-    print(matching_kicker_discord_ids)
-    
+
     future = asyncio.run_coroutine_threadsafe(
         send_order_message(order_id, matching_kicker_discord_ids, dto),
         bot.loop

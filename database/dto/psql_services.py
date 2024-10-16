@@ -44,7 +44,7 @@ class Services_Database(BasePsqlDTO):
     def _build_service_title(self) -> Optional[str]:
         for key, value in APP_CHOICES.items():
             if value == self.app_choice:
-                return key
+                return key.capitalize()
 
     async def get_kickers(self) -> List[dict]:
         async with self.get_connection() as conn:
@@ -73,19 +73,16 @@ class Services_Database(BasePsqlDTO):
                 query += filter_seq + f" service_type_id = ${variable_count}"
                 variable_count += 1
                 query_args.append(APP_CHOICES.get(self.service_title))
-                print(APP_CHOICES.get(self.service_title))
             if self.sex_choice:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" profile_gender = ${variable_count}"
                 variable_count += 1
                 query_args.append(self.sex_choice)
-                print(self.sex_choice)
             if self.language_choice:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
                 variable_count += 1
                 query_args.append(self.language_choice)
-                print(self.language_choice)
             query += " GROUP BY discord_id"
             kicker_ids = await conn.fetch(query, *query_args)
         return set(
