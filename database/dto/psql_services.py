@@ -68,7 +68,7 @@ class Services_Database(BasePsqlDTO):
             query_args: list = []
             variable_count: int = 1
             # TODO: NEED REFACTORING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Code duplicated
-            if self.service_title:
+            if self.app_choice and self.app_choice != "ALL":
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" service_type_id = ${variable_count}"
                 variable_count += 1

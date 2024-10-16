@@ -73,7 +73,7 @@ class OrderView(discord.ui.View):
         embed = discord.Embed(
             title=translations["order_alert_title"][self.lang],
             description=translations["order_new_alert_new"][self.lang].format(
-                customer_discord_id=self.customer.id,
+                customer_discord_id=self.customer.id if self.customer else "Unknown",
                 choice=service_title,
                 server_name=guild.name,
                 language=language,
@@ -117,20 +117,25 @@ class OrderView(discord.ui.View):
 
     async def send_kickers_message(self) -> None:
         kicker_ids = await self.services_db.get_kickers_by_service_title()
+        print(kicker_ids)
         for kicker_id in kicker_ids:
             try:
                 kicker_id = int(kicker_id)
             except ValueError:
                 print(f"ID: {kicker_id} is not int")
                 continue
-            kicker = bot.get_user(kicker_id)
+            try:
+                kicker = await bot.fetch_user(kicker_id)
+            except discord.NotFound:
+                print(f"User with ID: {kicker_id} not found")
+                continue
             if not kicker:
                 continue
             try:
-                sent_message = await kicker.send(view=self, content=self.embed_message)
+                sent_message = await kicker.send(view=self, embed=self.embed_message)
+                self.messages.append(sent_message)
             except discord.DiscordException:
                 continue
-            self.messages.append(sent_message)
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
         for message_instance in self.messages:
@@ -142,7 +147,6 @@ class OrderView(discord.ui.View):
             await self.customer.send(content=translations['timeout_message'][self.lang])
 
     async def _bot_order(self, interaction: discord.Interaction, kicker: discord.User):
-        self.pressed_kickers.append(kicker)
         services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
         if not services:
             return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
@@ -181,24 +185,36 @@ class OrderView(discord.ui.View):
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
+
+        kicker = interaction.user
+        if kicker in self.pressed_kickers:
+            return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
+
         await Services_Database().log_to_database(
             interaction.user.id, 
             "kicker_go_after_order", 
             self.guild_id
         )
-        kicker = interaction.user
-        if kicker in self.pressed_kickers:
-            return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
+        self.pressed_kickers.append(kicker)
+
         if not self.webapp_order:
             await self._bot_order(interaction, kicker)
         else:
             await self._webapp_order(interaction, kicker)
-    
+
+        number_of_clicks = len(self.pressed_kickers)
+        for item in self.children:
+            if isinstance(item, discord.ui.Button) and item.label.isdigit():
+                item.label = f"{number_of_clicks}"
+        
+        for message in self.messages:
+            await message.edit(view=self)
+        await interaction.message.edit(view=self)
+
     @discord.ui.button(label="0", style=discord.ButtonStyle.gray, disabled=True)
     async def count_clicks(self, interaction: discord.Interaction, button: discord.ui.Button):
-        number_of_clicks = self.services_db.get_number_of_kickers_responded(self.order_id)
-        button.label = f"{number_of_clicks}"
-        await interaction.response.edit_message(view=self)
+        await interaction.response.defer(ephemeral=True)
+
 
 class OrderAccessRejectView(discord.ui.View):
     

@@ -70,25 +70,13 @@ def new_order_choice():
     tag_name: str = data["tagNames"][0] if data["tagNames"] else None
     language: str = data["languages"][0] if data["languages"] else None
     gender = data.get("gender") 
+    description: str = data.get("description")
 
-    services_db = Services_Database()
-    app_choice_value = services_db.get_service_category_id(tag_name) if tag_name else None
-    gender_choice: str = Genders[gender].value if gender in Genders.__members__ else Genders.UNIMPORTANT.value
-
-    dto = Services_Database(
-        app_choice=app_choice_value,
-        language_choice=language if language else Languages.UNIMPORTANT.value,
-        sex_choice=gender_choice
-    )
+    language = language if language else Languages.UNIMPORTANT.value
+    gender: str = Genders[gender].value if gender in Genders.__members__ else Genders.UNIMPORTANT.value
 
     future = asyncio.run_coroutine_threadsafe(
-        dto.get_kickers_by_service_title(), 
-        bot.loop
-    )
-    matching_kicker_discord_ids = list(future.result())
-
-    future = asyncio.run_coroutine_threadsafe(
-        send_order_message(order_id, matching_kicker_discord_ids, dto),
+        send_order_message(order_id=order_id, tag_name=tag_name, language=language, gender=gender, extra_text=description), 
         bot.loop
     )
     success = future.result()

@@ -128,35 +128,26 @@ async def send_reaction_message() -> StatusCodes:
 
 async def send_order_message(
     order_id: uuid.UUID,
-    matching_kicker_discord_ids: list[int],
-    dto: Services_Database,
+    language: str,
+    gender: str,
+    tag_name: str = "ALL",
+    extra_text: str = ""
 ) -> StatusCodes:
-    kickers: list[discord.User] = []
-    for kicker_id in matching_kicker_discord_ids:
-        try:
-            kicker = await bot.fetch_user(kicker_id)
-            kickers.append(kicker)
-        except discord.DiscordException:
-            print(f"Kicker: {kicker_id} not found!")
-        except ValueError:
-            print(f"ID: {kicker_id} is not int!")
-        except discord.errors.Forbidden:
-            print(f"Cannot send messages to user: {kicker_id}")
-        except discord.errors.HTTPException as e:
-            if e.status == 429:
-                retry_after = e.response.json().get('retry_after', 1)
-                print(f"Rate limited. Retrying in {retry_after} seconds.")
-                await asyncio.sleep(retry_after)
-            else:
-                print(f"HTTP error occurred: {e}")
+    services_db = Services_Database()
+    app_choice_value = services_db.get_service_category_id(tag_name) if tag_name else None
+
+    dto = Services_Database(
+        app_choice=app_choice_value,
+        language_choice=language,
+        sex_choice=gender
+    )
 
     view = OrderView(
         customer=None,
         guild_id=MAIN_GUILD_ID,
         services_db=dto,
-        order_id=order_id
+        order_id=order_id,
+        extra_text=extra_text
     )
-    await view.send_current_kickers_message(
-        kickers=kickers
-    )
+    await view.send_kickers_message()
     return True
