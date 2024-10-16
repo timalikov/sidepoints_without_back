@@ -48,7 +48,7 @@ class OrderView(discord.ui.View):
         self.services_db = services_db
         self.messages = []  # for drop button after timeout
         self.created_at = datetime.now()
-        self.guild_id = int(guild_id)
+        self.guild_id = int(guild_id) if guild_id else None
         self.lang = lang
         self.webapp_order = False
         if order_id:

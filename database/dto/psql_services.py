@@ -10,9 +10,9 @@ from models.enums import Genders, Languages
 
 APP_CHOICES = {
     "ALL": None,
-    "Casual": "57c86488-8935-4a13-bae0-5ca8783e205d",
+    "BUDDY": "57c86488-8935-4a13-bae0-5ca8783e205d",
     "COACHING": "88169d78-85b4-4fa3-8298-3df020f13a6f",
-    "JUST CHATTING": "2974b0e8-69de-4d7c-aa4d-d5aa8e05d360",
+    "JUST_CHATTING": "2974b0e8-69de-4d7c-aa4d-d5aa8e05d360",
     "MOBILE": "439d8a72-8b8b-4a56-bb32-32c6e5d918ec",
     "Watch Youtube": "d3ae39d2-fd86-41d7-bc38-0b582ce338b5",
     "Play Games": "79bf303a-318b-4815-bd56-7b0b49ae7bff",
@@ -40,6 +40,7 @@ class Services_Database(BasePsqlDTO):
         self.sex_choice = sex_choice
         self.language_choice = language_choice
         self.service_title: Optional[str] = self._build_service_title()
+        print(self.app_choice)
 
     def _build_service_title(self) -> Optional[str]:
         for key, value in APP_CHOICES.items():
@@ -72,7 +73,8 @@ class Services_Database(BasePsqlDTO):
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" service_type_id = ${variable_count}"
                 variable_count += 1
-                query_args.append(APP_CHOICES.get(self.service_title))
+                query_args.append(self.app_choice)
+                print(self.app_choice)
             if self.sex_choice:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" profile_gender = ${variable_count}"
