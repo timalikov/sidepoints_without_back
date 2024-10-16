@@ -133,7 +133,6 @@ async def send_order_message(
 ) -> StatusCodes:
     kickers: list[discord.User] = []
     for kicker_id in matching_kicker_discord_ids:
-        # if kicker_id == "930005621728763904" or kicker_id == "836655813048402011" or kicker_id == "1250465098410098810" or kicker_id == "930005621728763904":
         try:
             kicker = await bot.fetch_user(kicker_id)
             kickers.append(kicker)

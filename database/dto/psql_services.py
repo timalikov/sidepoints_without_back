@@ -40,7 +40,6 @@ class Services_Database(BasePsqlDTO):
         self.sex_choice = sex_choice
         self.language_choice = language_choice
         self.service_title: Optional[str] = self._build_service_title()
-        print(self.app_choice)
 
     def _build_service_title(self) -> Optional[str]:
         for key, value in APP_CHOICES.items():
@@ -74,7 +73,6 @@ class Services_Database(BasePsqlDTO):
                 query += filter_seq + f" service_type_id = ${variable_count}"
                 variable_count += 1
                 query_args.append(self.app_choice)
-                print(self.app_choice)
             if self.sex_choice:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" profile_gender = ${variable_count}"
