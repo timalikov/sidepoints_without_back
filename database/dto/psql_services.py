@@ -10,9 +10,9 @@ from models.enums import Genders, Languages
 
 APP_CHOICES = {
     "ALL": None,
-    "BUDDY": "57c86488-8935-4a13-bae0-5ca8783e205d",
+    "Casual": "57c86488-8935-4a13-bae0-5ca8783e205d",
     "COACHING": "88169d78-85b4-4fa3-8298-3df020f13a6f",
-    "JUST_CHATTING": "2974b0e8-69de-4a13-bae0-5ca8783e205d",
+    "JUST CHATTING": "2974b0e8-69de-4d7c-aa4d-d5aa8e05d360",
     "MOBILE": "439d8a72-8b8b-4a56-bb32-32c6e5d918ec",
     "Watch Youtube": "d3ae39d2-fd86-41d7-bc38-0b582ce338b5",
     "Play Games": "79bf303a-318b-4815-bd56-7b0b49ae7bff",
@@ -44,7 +44,7 @@ class Services_Database(BasePsqlDTO):
     def _build_service_title(self) -> Optional[str]:
         for key, value in APP_CHOICES.items():
             if value == self.app_choice:
-                return key.capitalize()
+                return key
 
     async def get_kickers(self) -> List[dict]:
         async with self.get_connection() as conn:
@@ -70,19 +70,22 @@ class Services_Database(BasePsqlDTO):
             # TODO: NEED REFACTORING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Code duplicated
             if self.service_title:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-                query += filter_seq + f" service_title = ${variable_count}"
+                query += filter_seq + f" service_type_id = ${variable_count}"
                 variable_count += 1
-                query_args.append(self.service_title)
+                query_args.append(APP_CHOICES.get(self.service_title))
+                print(APP_CHOICES.get(self.service_title))
             if self.sex_choice:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" profile_gender = ${variable_count}"
                 variable_count += 1
                 query_args.append(self.sex_choice)
+                print(self.sex_choice)
             if self.language_choice:
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
                 query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
                 variable_count += 1
                 query_args.append(self.language_choice)
+                print(self.language_choice)
             query += " GROUP BY discord_id"
             kicker_ids = await conn.fetch(query, *query_args)
         return set(
@@ -169,6 +172,12 @@ class Services_Database(BasePsqlDTO):
             query = "SELECT name FROM discord_service_types WHERE id = $1;"
             service_type = await conn.fetchval(query, service_type_id)
         return service_type if service_type else "Unknown"
+    
+    async def get_service_category_id(self, service_type_name):
+        async with self.get_connection() as conn:
+            query = "SELECT id FROM discord_service_types WHERE name = $1;"
+            service_type = await conn.fetchval(query, service_type_name)
+        return service_type if service_type else None
 
     async def get_channel_ids(self):
         async with self.get_connection() as conn:
@@ -196,15 +205,6 @@ class Services_Database(BasePsqlDTO):
             VALUES ($1, $2, $3, $4, $5, $6, $7);
             """
             await conn.execute(query, timestamp, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
-
-    async def update_order_kicker_selected(self, order_id: str, kicker_discord_id: int):
-        async with self.get_connection() as conn:
-            query = """
-            UPDATE discord_bot.orders
-            SET kicker_selected = TRUE
-            WHERE order_id = $1 AND kicker_discord_id = $2;
-            """
-            await conn.execute(query, order_id, str(kicker_discord_id))
 
     async def get_kicker_ids_and_score(self):
         async with self.get_connection() as conn:

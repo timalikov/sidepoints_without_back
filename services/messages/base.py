@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 import discord
 
@@ -127,22 +128,29 @@ async def send_reaction_message() -> StatusCodes:
 
 async def send_order_message(
     order_id: uuid.UUID,
-    matching_kicker_discord_ids: list[str],
-    matching_service_ids: list[uuid.UUID],
+    matching_kicker_discord_ids: list[int],
+    dto: Services_Database,
 ) -> StatusCodes:
     kickers: list[discord.User] = []
     for kicker_id in matching_kicker_discord_ids:
-        if len(kickers) >= 100:  
-            break
+        # if kicker_id == "930005621728763904" or kicker_id == "836655813048402011" or kicker_id == "1250465098410098810" or kicker_id == "930005621728763904":
         try:
-            kicker = await bot.fetch_user(int(kicker_id))
+            kicker = await bot.fetch_user(kicker_id)
             kickers.append(kicker)
         except discord.DiscordException:
             print(f"Kicker: {kicker_id} not found!")
         except ValueError:
             print(f"ID: {kicker_id} is not int!")
-    dto = Services_Database()
-    services = await dto.get_multi_services(matching_service_ids)
+        except discord.errors.Forbidden:
+            print(f"Cannot send messages to user: {kicker_id}")
+        except discord.errors.HTTPException as e:
+            if e.status == 429:
+                retry_after = e.response.json().get('retry_after', 1)
+                print(f"Rate limited. Retrying in {retry_after} seconds.")
+                await asyncio.sleep(retry_after)
+            else:
+                print(f"HTTP error occurred: {e}")
+
     view = OrderView(
         customer=None,
         guild_id=MAIN_GUILD_ID,
@@ -150,7 +158,6 @@ async def send_order_message(
         order_id=order_id
     )
     await view.send_current_kickers_message(
-        services=services,
         kickers=kickers
     )
     return True

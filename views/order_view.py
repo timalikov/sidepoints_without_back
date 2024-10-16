@@ -1,3 +1,4 @@
+import asyncio
 from typing import Coroutine, List, Callable, Any, Literal
 from datetime import datetime
 import uuid
@@ -46,10 +47,15 @@ class OrderView(discord.ui.View):
         self.is_pressed = False
         self.services_db = services_db
         self.messages = []  # for drop button after timeout
-        self.order_id = order_id if order_id else str(uuid.uuid4())
         self.created_at = datetime.now()
         self.guild_id = guild_id
         self.lang = lang
+        self.webapp_order = False
+        if order_id:
+            self.order_id = order_id
+            self.webapp_order = True
+        else:
+            self.order_id = str(uuid.uuid4())
         self.text_message_order = self._build_text_message_order(extra_text)
 
     def _build_text_message_order(self, extra_text: str) -> str:
@@ -71,7 +77,6 @@ class OrderView(discord.ui.View):
     
     async def send_current_kickers_message(
         self,
-        services: List[dict],
         kickers: List[discord.User]
     ) -> None:
         for kicker in kickers:
@@ -155,7 +160,7 @@ class OrderView(discord.ui.View):
     async def _webapp_order(self, interaction: discord.Interaction, kicker: discord.User):
         services = await self.services_db.get_services_by_discordId(kicker.id)
         sqs = SQSClient()
-        sqs.send_order_confirm_message(order_id=self.order_id, service_id=services[0]["profile_id"])
+        sqs.send_order_confirm_message(order_id=self.order_id, service_id=services[0]["service_id"])
         await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
@@ -169,7 +174,7 @@ class OrderView(discord.ui.View):
         kicker = interaction.user
         if kicker in self.pressed_kickers:
             return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
-        if not self.order_id:
+        if not self.webapp_order:
             await self._bot_order(interaction, kicker)
         else:
             await self._webapp_order(interaction, kicker)

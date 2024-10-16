@@ -32,6 +32,8 @@ class SQSClient:
         
     def send_order_confirm_message(self, order_id: uuid.UUID, service_id: int) -> bool:
         try:
+            print(self.queue_host + "be_orders_kicker_accepts")
+            print("sidekick_dev_be_orders_kicker_accepts")
             response = self.sqs_client.send_message(
                 QueueUrl=self.queue_host + "be_orders_kicker_accepts",
                 DelaySeconds=10,
