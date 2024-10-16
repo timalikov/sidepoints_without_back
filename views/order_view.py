@@ -56,9 +56,9 @@ class OrderView(discord.ui.View):
             self.webapp_order = True
         else:
             self.order_id = str(uuid.uuid4())
-        self.text_message_order = self._build_text_message_order(extra_text)
+        self.embed_message = self._build_embed_message_order(extra_text)
 
-    def _build_text_message_order(self, extra_text: str) -> str:
+    def _build_embed_message_order(self, extra_text: str) -> str:
         service_title = self.services_db.service_title
         if not service_title:
             service_title = "All players"
@@ -68,22 +68,34 @@ class OrderView(discord.ui.View):
         language = self.services_db.language_choice
         if not language:
             language = "Русский" if self.lang == "ru" else "English"
-        return translations["order_new_alert"][self.lang].format(
-            choice=service_title.capitalize(),
-            gender=sex.capitalize(),
-            language=language.capitalize(),
-            extra_text=extra_text
+
+        guild = bot.get_guild(self.guild_id)
+        embed = discord.Embed(
+            title=translations["order_alert_title"][self.lang],
+            description=translations["order_new_alert_new"][self.lang].format(
+                customer_discord_id=self.customer.id,
+                choice=service_title,
+                server_name=guild.name,
+                language=language,
+                gender=sex.capitalize(),
+                extra_text=extra_text
+            ),
+            color=discord.Color.blue()
         )
+        return embed
     
     async def send_current_kickers_message(
         self,
         kickers: List[discord.User]
     ) -> None:
         for kicker in kickers:
-            sent_message = await kicker.send(
-                self.text_message_order, view=self
-            )
-            self.messages.append(sent_message)
+            try:
+                sent_message = await kicker.send(embed=self.embed_message, view=self)
+                self.messages.append(sent_message)
+            except discord.errors.Forbidden:
+                print(f"Cannot send message to user: {kicker.id}")
+            except discord.DiscordException:
+                print(f"Failed to send message to user: {kicker.id}")
 
     async def send_all_messages(self) -> None:
         await self.send_channel_message()
@@ -95,10 +107,13 @@ class OrderView(discord.ui.View):
             channel_name=ORDER_CHANNEL_NAME,
             guild=bot.get_guild(self.guild_id)
         )
-        sent_message = await channel.send(
-            view=self, content=f"@everyone\n{self.text_message_order}",
-        )
-        self.messages.append(sent_message)
+        try:
+            sent_message = await channel.send(content="@everyone", embed=self.embed_message, view=self)
+            self.messages.append(sent_message)
+        except discord.errors.Forbidden:
+            print(f"Cannot send message to channel: {channel.id}")
+        except discord.DiscordException:
+            print(f"Failed to send message to channel: {channel.id}")
 
     async def send_kickers_message(self) -> None:
         kicker_ids = await self.services_db.get_kickers_by_service_title()
@@ -112,7 +127,7 @@ class OrderView(discord.ui.View):
             if not kicker:
                 continue
             try:
-                sent_message = await kicker.send(view=self, content=self.text_message_order)
+                sent_message = await kicker.send(view=self, content=self.embed_message)
             except discord.DiscordException:
                 continue
             self.messages.append(sent_message)
@@ -178,6 +193,12 @@ class OrderView(discord.ui.View):
             await self._bot_order(interaction, kicker)
         else:
             await self._webapp_order(interaction, kicker)
+    
+    @discord.ui.button(label="0", style=discord.ButtonStyle.gray, disabled=True)
+    async def count_clicks(self, interaction: discord.Interaction, button: discord.ui.Button):
+        number_of_clicks = self.services_db.get_number_of_kickers_responded(self.order_id)
+        button.label = f"{number_of_clicks}"
+        await interaction.response.edit_message(view=self)
 
 class OrderAccessRejectView(discord.ui.View):
     

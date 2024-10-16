@@ -203,6 +203,12 @@ class Services_Database(BasePsqlDTO):
             """
             await conn.execute(query, timestamp, order_id, str(user_discord_id), order_category, str(kicker_discord_id), respond_time, service_price)
 
+    async def get_number_of_kickers_responded(self, order_id):
+        async with self.get_connection() as conn:
+            query = "SELECT COALESCE(COUNT(DISTINCT kicker_discord_id), 0) FROM discord_bot.orders WHERE order_id = $1;"
+            count = await conn.fetchval(query, order_id)
+        return count
+
     async def get_kicker_ids_and_score(self):
         async with self.get_connection() as conn:
             query = """

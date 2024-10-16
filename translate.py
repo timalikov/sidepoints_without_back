@@ -22,6 +22,38 @@ translations = {
         'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\nКомментарий юзера: {extra_text}',
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
+    'order_new_alert_new':{
+        'ru': 'Юзер: **{customer_discord_id}**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': 'Customer: **{customer_discord_id}**\nAlert: **{choice}**\nServer: **{server_name}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+    },
+    'order_alert_title': {
+        'ru': 'Новый заказ!',
+        'en': 'New Order!',
+    },
+    'customer': {
+        'ru': 'Юзер',
+        'en': 'Customer'
+    },
+    'alert': {
+        'ru': 'Заказ',
+        'en': 'Alert'
+    },
+    'server': {
+        'ru': 'Сервер',
+        'en': 'Server'
+    },
+    'language': {
+        'ru': 'Язык',
+        'en': 'Language'
+    },
+    'gender': {
+        'ru': 'Пол',
+        'en': 'Gender'
+    },
+    'all_players': {
+        'ru': 'Все игроки',
+        'en': 'All players'
+    },
     'profile_not_created': {
         'ru': "Похоже, вы еще не создали профиль! Пожалуйста, перейдите по ссылке, чтобы создать профиль.\n{link}/profile?side_auth=DISCORD",
         'en': "Looks like you haven't created a profile with us! Please click the link below to create your profile.\n{link}/profile?side_auth=DISCORD"
