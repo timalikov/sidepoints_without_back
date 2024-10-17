@@ -134,7 +134,7 @@ async def send_order_message(
     extra_text: str = ""
 ) -> StatusCodes:
     services_db = Services_Database()
-    app_choice_value = services_db.get_service_category_id(tag_name) if tag_name else None
+    app_choice_value = await services_db.get_service_category_id(tag_name) if tag_name else None
 
     dto = Services_Database(
         app_choice=app_choice_value,

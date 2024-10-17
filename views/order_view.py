@@ -78,7 +78,7 @@ class OrderView(discord.ui.View):
                 server_name=guild.name,
                 language=language,
                 gender=sex.capitalize(),
-                extra_text=extra_text
+                extra_text=extra_text if extra_text else ""
             ),
             color=discord.Color.blue()
         )
@@ -117,7 +117,6 @@ class OrderView(discord.ui.View):
 
     async def send_kickers_message(self) -> None:
         kicker_ids = await self.services_db.get_kickers_by_service_title()
-        print(kicker_ids)
         for kicker_id in kicker_ids:
             try:
                 kicker_id = int(kicker_id)

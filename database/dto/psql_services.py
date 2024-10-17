@@ -1,3 +1,4 @@
+import asyncio
 from typing import List, Literal, Optional
 
 from database.core_kicker_list import managers
