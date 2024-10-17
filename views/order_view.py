@@ -125,15 +125,38 @@ class OrderView(discord.ui.View):
                 continue
             try:
                 kicker = await bot.fetch_user(kicker_id)
-            except discord.NotFound:
-                print(f"User with ID: {kicker_id} not found")
-                continue
+                await asyncio.sleep(0.5)  
+            except discord.HTTPException as e:
+                if e.status == 429:
+                    retry_after = float(e.response.headers.get('Retry-After', 5))
+                    print(f"Rate limited while fetching user. Retrying in {retry_after} seconds.")
+                    await asyncio.sleep(retry_after)
+                    try:
+                        kicker = await bot.fetch_user(kicker_id)  
+                    except discord.DiscordException as e:
+                        print(f"Failed to fetch user {kicker_id} after retry: {e}")
+                        continue
             if not kicker:
                 continue
             try:
                 sent_message = await kicker.send(view=self, embed=self.embed_message)
                 self.messages.append(sent_message)
-            except discord.DiscordException:
+                await asyncio.sleep(1)
+            except discord.HTTPException as e:
+                if e.status == 429:
+                    retry_after = float(e.response.headers.get('Retry-After', 5))
+                    print(f"Rate limited. Retrying in {retry_after} seconds.")
+                    await asyncio.sleep(retry_after)
+                    try:
+                        sent_message = await kicker.send(view=self, embed=self.embed_message)
+                        self.messages.append(sent_message)
+                    except discord.DiscordException as e:
+                        print(f"Failed to send message to {kicker_id}: {e}")
+                else:
+                    print(f"Failed to send message to {kicker_id}: {e}")
+                    continue
+            except discord.DiscordException as e:
+                print(f"General Discord error for user {kicker_id}: {e}")
                 continue
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
