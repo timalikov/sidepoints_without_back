@@ -137,11 +137,11 @@ class OrderView(discord.ui.View):
                 continue
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
         for message_instance in self.messages:
-            try:
-                await message_instance.delete()
-            except Exception as e:
-                print(e)
+            await message_instance.edit(view=self)
         if not self.is_pressed:
             await self.customer.send(content=translations['timeout_message'][self.lang])
 
