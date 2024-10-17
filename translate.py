@@ -586,4 +586,8 @@ translations = {
         "en": "Here is your invite link to the private channel: {invite_link}",
         "ru": "А вот и ссылочка на приватный канал с покупателем. Вас уже ждут! {invite_link}"
     },
+    "order_from_webapp": {
+        "en": "Order from WebApp",
+        "ru": "Ордер с Веб Сайта"
+    },
 }

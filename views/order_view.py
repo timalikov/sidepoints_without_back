@@ -73,7 +73,7 @@ class OrderView(discord.ui.View):
         embed = discord.Embed(
             title=translations["order_alert_title"][self.lang],
             description=translations["order_new_alert_new"][self.lang].format(
-                customer_discord_id=self.customer.id if self.customer else "Unknown",
+                customer_discord_id=self.customer.id if self.customer else translations["order_from_webapp"][self.lang],
                 choice=service_title,
                 server_name=guild.name,
                 language=language,
