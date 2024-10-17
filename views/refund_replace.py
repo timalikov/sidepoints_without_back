@@ -100,7 +100,7 @@ class RefundReplaceView(discord.ui.View):
         await self.refund_handler.process_refund(
             interaction=None,
             success_message=translations['refund_success_customer'][self.lang],
-            kicker_message=f"User <@{self.customer.id}> refunded the payment!",
+            kicker_message=translations['refund_requested'][self.lang],
             customer_message=translations['refund_success_customer'][self.lang],
             channel=self.channel
         )

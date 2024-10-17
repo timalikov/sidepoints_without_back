@@ -1,10 +1,12 @@
 import asyncio
 import csv
 import datetime
+from enum import Enum
 import io
 import logging
 import uuid
 
+from database.dto.psql_services import Services_Database
 from flask import Flask, request, jsonify, Response
 import config
 from services.messages.base import (
@@ -17,7 +19,7 @@ from services.messages.base import (
 from models.private_channel import create_private_discord_channel
 from database.dto.sql_challenge import SQLChallengeDatabase
 from bot_instance import get_bot
-
+from models.enums import Genders, Languages
 import discord
 
 main_guild_id = config.MAIN_GUILD_ID
@@ -65,10 +67,16 @@ def reaction_test():
 def new_order_choice():
     data: dict = request.json
     order_id: uuid.UUID = data["orderId"]
-    matching_kicker_discord_ids: list[str] = data["matchingKickerDiscordIds"]
-    matching_service_ids: list[uuid.UUID] = data["matchingServiceIds"]
+    tag_name: str = data["tagNames"][0] if data["tagNames"] else None
+    language: str = data["languages"][0] if data["languages"] else None
+    gender = data.get("gender") 
+    description: str = data.get("description")
+
+    language = language if language else Languages.UNIMPORTANT.value
+    gender: str = Genders[gender].value if gender in Genders.__members__ else Genders.UNIMPORTANT.value
+
     future = asyncio.run_coroutine_threadsafe(
-        send_order_message(order_id, matching_kicker_discord_ids, matching_service_ids),
+        send_order_message(order_id=order_id, tag_name=tag_name, language=language, gender=gender, extra_text=description), 
         bot.loop
     )
     success = future.result()
