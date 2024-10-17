@@ -6,6 +6,10 @@ def get_lang_prefix(guild_id: int) -> str:
 
 
 translations = {
+    'not_dm': {
+        'en': "I can't use command on direct messages",
+        'ru': "Ты не можешь использовать команду в личных сообщениях!"
+    },
     'not_community': {
         'en': "Discord channel is not community!",
         'ru': "Ваш канал не является социальным"
