@@ -14,8 +14,6 @@ from database.dto.sql_order import Order_Database
 from config import (
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
-    ORDER_CATEGORY_NAME,
-    ORDER_CHANNEL_NAME,
     LINK_LEADERBOARD,
 )
 from views.boost_view import BoostView
@@ -28,7 +26,7 @@ from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import Genders, Languages
 from translate import get_lang_prefix, translations
 
-main_guild_id = MAIN_GUILD_ID
+main_guild_id: int = MAIN_GUILD_ID
 bot = get_bot()
 
 ##### To get list of users who are currently online #####
@@ -58,14 +56,18 @@ async def save_user_id(user_id):
 
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/forum", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     guild: discord.guild.Guild = interaction.guild
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     try:
         forum_channel: discord.channel.ForumChannel = await get_or_create_forum(guild)
     except discord.DiscordException:
@@ -89,6 +91,7 @@ async def forum_command(interaction: discord.Interaction):
 
 @bot.tree.command(name="profile", description="Use this command if you wish to be part of the Sidekick Playmates network.")
 async def profile(interaction: discord.Interaction):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
@@ -96,7 +99,10 @@ async def profile(interaction: discord.Interaction):
         interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     profile_exist = Profile_Exist(discord_id=interaction.user.id, lang=lang)
     await profile_exist.initialize()
     if profile_exist.no_user:
@@ -116,15 +122,19 @@ async def list_all_users_with_online_status(guild):
 
 @bot.tree.command(name="start", description="Use this command and start looking for playmates!")
 async def play(interaction: discord.Interaction):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     view = await PlayView.create(user_choice="ALL")
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/go", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     view = await PlayView.create(user_choice="ALL", lang=lang)
 
     if view.no_user:
@@ -143,15 +153,19 @@ async def play(interaction: discord.Interaction):
 @bot.tree.command(name="find", description="Find a user profile by their username.")
 @app_commands.describe(username="The username to find.")
 async def find(interaction: discord.Interaction, username: str):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     view = await PlayView.create(username=username)
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/find", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     view = await PlayView.create(username=username, lang=lang)
 
     if view.no_user:
@@ -176,8 +190,11 @@ async def get_guild_invite_link(guild_id):
 
 @bot.tree.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
 async def order_all(interaction: discord.Interaction):
-    guild_id = interaction.guild.id if interaction.guild else None
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
@@ -246,13 +263,16 @@ async def order(
     language: app_commands.Choice[str],
     text: str = ""
 ):
-    guild_id = interaction.guild.id if interaction.guild else None
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/order", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
     order_data = {
@@ -284,11 +304,12 @@ async def order(
                                app_commands.Choice(name="Unsubscribe", value=0),
                                ])
 async def subscribe(interaction: discord.Interaction, choices: app_commands.Choice[int]):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/subscribe", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
     if choices.value == 1:
@@ -301,14 +322,18 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
 
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/wallet", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
     main_guild = bot.get_guild(MAIN_GUILD_ID)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     # Check if the user is a member of the guild
     member = main_guild.get_member(interaction.user.id)
     if member:
@@ -338,14 +363,18 @@ async def wallet(interaction: discord.Interaction):
 
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
 async def points(interaction: discord.Interaction):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/tasks", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
     await interaction.response.send_message(
         translations["points_message"][lang].format(link=link),
@@ -356,14 +385,18 @@ async def points(interaction: discord.Interaction):
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
 @app_commands.describe(username="The username to find.")
 async def boost(interaction: discord.Interaction, username: str):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/boost", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     view = BoostView(user_name=username, lang=lang)
     await view.initialize()
     if view.no_user:
@@ -395,13 +428,17 @@ async def boost(interaction: discord.Interaction, username: str):
 
 @bot.tree.command(name="leaderboard", description="Check out the points leaderboard")
 async def leaderboard(interaction: discord.Interaction):
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/leaderboard", 
-        interaction.guild.id if interaction.guild else None
+        guild_id
     )
     await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild.id if interaction.guild else None)
+    lang = get_lang_prefix(guild_id)
+    if not guild_id:
+        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+        return
     await interaction.response.send_message(
         embed=discord.Embed(
             color=discord.Colour.orange(),
