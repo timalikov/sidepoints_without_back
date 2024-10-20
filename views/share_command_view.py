@@ -105,22 +105,7 @@ class ShareCommandView(discord.ui.View):
         
         payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={discord_server_id}&side_auth=DISCORD"
         
-        is_member = await self.is_member_of_main_guild(interaction.user.id)
-        if not is_member:
-            await interaction.followup.send(
-                translations["please_join"][self.lang].format(link="https://discord.gg/sidekick"),
-                ephemeral=True
-            )
-            return
-
         await interaction.followup.send(
             translations["payment_message"][self.lang].format(payment_link=payment_link),
             ephemeral=True
         )
-        
-    async def is_member_of_main_guild(self, user_id):
-        main_guild = self.bot.get_guild(MAIN_GUILD_ID)
-        if main_guild is None:
-            return False
-        member = main_guild.get_member(user_id)
-        return member is not None
