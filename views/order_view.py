@@ -14,7 +14,6 @@ from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
-from models.guild import is_member_of_main_guild
 from models.public_channel import get_or_create_channel_by_category_and_name
 from translate import translations
 
@@ -296,10 +295,6 @@ class OrderAccessRejectView(discord.ui.View):
             self.discord_service_id
         )
         await self.order_view.services_db.update_order_kicker_selected(self.order_view.order_id, self.kicker_id)
-        is_member = await is_member_of_main_guild(self.customer.id)
-        if not is_member:
-            await interaction.followup.send(translations['please_join'][self.lang].format(link="https://discord.gg/sidekick"), ephemeral=True)
-            return
 
         payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{self.service_id}?discordServerId={self.discord_service_id}&side_auth=DISCORD"
         await self.main_interaction.message.edit(content=translations['finished'][self.lang], embed=None, view=None)

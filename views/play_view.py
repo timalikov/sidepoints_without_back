@@ -67,13 +67,6 @@ class PlayView(View):
         self.profile_embed = create_profile_embed(service, lang=self.lang)
         self.no_user = False  
 
-    async def is_member_of_main_guild(self, user_id):
-        main_guild = bot.get_guild(main_guild_id)
-        if main_guild is None:
-            return False
-        member = main_guild.get_member(user_id)
-        return member is not None
-
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True)
@@ -82,13 +75,6 @@ class PlayView(View):
             "play_kicker", 
             interaction.guild.id if interaction.guild else None
         )
-        is_member = await self.is_member_of_main_guild(interaction.user.id)
-        if not is_member:
-            await interaction.followup.send(
-                translations["please_join"][self.lang].format(link="https://discord.gg/sidekick"),
-                ephemeral=True
-            )
-            return
 
         serviceId = self.service['service_id']
         discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
