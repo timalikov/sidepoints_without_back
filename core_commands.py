@@ -21,6 +21,8 @@ from config import (
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
     LINK_LEADERBOARD,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
@@ -442,29 +444,17 @@ async def leaderboard(interaction: discord.Interaction):
         ephemeral=True
     )
 
-# @bot.tree.command(name="wot_tournament", description="Register to WoT tournament")
-# async def wot_tournament(interaction: discord.Interaction):
-#     await Services_Database().log_to_database(
-#         interaction.user.id, 
-#         "/wot_tournament", 
-#         interaction.guild.id if interaction.guild else None
-#     )
-#     services_db = Services_Database()
-#     user_ids = await services_db.get_user_ids_wot_tournament()
-
-#     if interaction.user.id in user_ids:
-#         await interaction.response.send_message("Вы уже зарегистрировались.", ephemeral=True)
-#         return
-#     else:
-#         await services_db.save_user_wot_tournament(interaction.user.id)
-#         await interaction.response.send_message("Спасибо за регистрацию на турнире!", ephemeral=True)
-
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
     message: str = translations["en"]["bot_guild_join_message"]
+    channel = await get_or_create_channel_by_category_and_name(
+        category_name=GUIDE_CATEGORY_NAME,
+        channel_name=GUIDE_CHANNEL_NAME,
+        guild=guild
+    )
     try:
-        await guild.system_channel.send(message)
+        await channel.send(message)
     except discord.DiscordException as e:
         logger.error(str(e))
 
