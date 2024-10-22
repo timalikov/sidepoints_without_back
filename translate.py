@@ -609,7 +609,7 @@ translations = {
     "guide_check_kickers_message": {
         "ru": "Посмотрите игроков на SideKick, которые ждут вас — используйте /go, чтобы начать их призыв и запустить свою собственную сессию прямо сейчас!",
         "en": "Check out the Kickers on Sidekick waiting for you - use /go to start summoning them and have your own session now!"
-    }
+    },
     "order_from_webapp": {
         "en": "Order from WebApp",
         "ru": "Ордер с Веб Сайта"
