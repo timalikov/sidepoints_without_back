@@ -6,6 +6,7 @@ import os
 from logging import getLogger
 
 from services.messages.interaction import send_interaction_message
+from services.storage.bucket import ImageS3Bucket
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import (
@@ -461,14 +462,17 @@ async def leaderboard(interaction: discord.Interaction):
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
-    message: str = translations["en"]["bot_guild_join_message"]
+    message: str = translations["en"]["bot_guild_join_message"].format(server_name=guild.name)
+    image = await ImageS3Bucket.get_image_by_url(
+        "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/initial_server.png"
+    )
     channel = await get_or_create_channel_by_category_and_name(
         category_name=GUIDE_CATEGORY_NAME,
         channel_name=GUIDE_CHANNEL_NAME,
         guild=guild
     )
     try:
-        await channel.send(message)
+        await channel.send(message, file=discord.File(image))
     except discord.DiscordException as e:
         logger.error(str(e))
 
