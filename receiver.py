@@ -130,6 +130,10 @@ def send_boost_notification(message_body):
     print(message_body)
     _ = send_request(url, message_body)
 
+@sqs_receiver.receive(queue="orders_new")
+def send_order(message_body):
+    url = f"{os.getenv('WEB_APP_URL')}/discord_api/order/choice"
+    _ = send_request(url, message_body)
 
 def main():
     sqs_receiver.start()

@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 import discord
 
@@ -127,28 +128,26 @@ async def send_reaction_message() -> StatusCodes:
 
 async def send_order_message(
     order_id: uuid.UUID,
-    matching_kicker_discord_ids: list[str],
-    matching_service_ids: list[uuid.UUID],
+    language: str,
+    gender: str,
+    tag_name: str = "ALL",
+    extra_text: str = ""
 ) -> StatusCodes:
-    kickers: list[discord.User] = []
-    for kicker_id in matching_kicker_discord_ids:
-        try:
-            kicker = await bot.fetch_user(int(kicker_id))
-            kickers.append(kicker)
-        except discord.DiscordException:
-            print(f"Kicker: {kicker_id} not found!")
-        except ValueError:
-            print(f"ID: {kicker_id} is not int!")
-    dto = Services_Database()
-    services = await dto.get_multi_services(matching_service_ids)
+    services_db = Services_Database()
+    app_choice_value = await services_db.get_service_category_id(tag_name) if tag_name else None
+
+    dto = Services_Database(
+        app_choice=app_choice_value,
+        language_choice=language,
+        sex_choice=gender
+    )
+
     view = OrderView(
         customer=None,
         guild_id=MAIN_GUILD_ID,
         services_db=dto,
-        order_id=order_id
+        order_id=order_id,
+        extra_text=extra_text
     )
-    await view.send_current_kickers_message(
-        services=services,
-        kickers=kickers
-    )
+    await view.send_kickers_message()
     return True

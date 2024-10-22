@@ -409,16 +409,30 @@ async def boost(interaction: discord.Interaction, username: str):
     view = BoostView(user_name=username, lang=lang)
     await view.initialize()
     if view.no_user:
-        await interaction.followup.send(
-            content=translations["no_players"][lang],
-            ephemeral=True
-        )
+        if interaction.response.is_done():
+            await interaction.followup.send(
+                content=translations["no_players"][lang],
+                ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                content=translations["no_players"][lang],
+                ephemeral=True
+            )
+
     else:
-        await interaction.followup.send(
-            embed=view.profile_embed,
-            view=view,
-            ephemeral=True
-        )
+        if interaction.response.is_done():
+            await interaction.followup.send(
+                embed=view.profile_embed,
+                view=view,
+                ephemeral=True
+            )
+        else:
+            await interaction.response.send_message(
+                embed=view.profile_embed,
+                view=view,
+                ephemeral=True
+            )
 
 
 @bot.tree.command(name="leaderboard", description="Check out the points leaderboard")

@@ -23,8 +23,40 @@ translations = {
         'en': 'Posts created!',
     },
     'order_new_alert': {
-        'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\n{extra_text}',
+        'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\nКомментарий юзера: {extra_text}',
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
+    },
+    'order_new_alert_new':{
+        'ru': 'Юзер: **{customer_discord_id}**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': 'Customer: **{customer_discord_id}**\nAlert: **{choice}**\nServer: **{server_name}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+    },
+    'order_alert_title': {
+        'ru': 'Новый заказ!',
+        'en': 'New Order!',
+    },
+    'customer': {
+        'ru': 'Юзер',
+        'en': 'Customer'
+    },
+    'alert': {
+        'ru': 'Заказ',
+        'en': 'Alert'
+    },
+    'server': {
+        'ru': 'Сервер',
+        'en': 'Server'
+    },
+    'language': {
+        'ru': 'Язык',
+        'en': 'Language'
+    },
+    'gender': {
+        'ru': 'Пол',
+        'en': 'Gender'
+    },
+    'all_players': {
+        'ru': 'Все игроки',
+        'en': 'All players'
     },
     'profile_not_created': {
         'ru': "Похоже, вы еще не создали профиль! Пожалуйста, перейдите по ссылке, чтобы создать профиль.\n{link}/profile?side_auth=DISCORD",
@@ -578,4 +610,8 @@ translations = {
         "ru": "Посмотрите игроков на SideKick, которые ждут вас — используйте /go, чтобы начать их призыв и запустить свою собственную сессию прямо сейчас!",
         "en": "Check out the Kickers on Sidekick waiting for you - use /go to start summoning them and have your own session now!"
     }
+    "order_from_webapp": {
+        "en": "Order from WebApp",
+        "ru": "Ордер с Веб Сайта"
+    },
 }
