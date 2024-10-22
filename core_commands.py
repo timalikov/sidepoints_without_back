@@ -3,11 +3,17 @@ from discord import app_commands
 import discord.ext
 import discord.ext.commands
 import os
+from logging import getLogger
 
 from services.messages.interaction import send_interaction_message
 from views.play_view import PlayView
 from bot_instance import get_bot
-from background_tasks import delete_old_channels, post_user_profiles, create_leaderboard
+from background_tasks import (
+    delete_old_channels,
+    post_user_profiles,
+    create_leaderboard,
+    send_random_guide_message
+)
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
@@ -28,6 +34,7 @@ from translate import get_lang_prefix, translations
 
 main_guild_id: int = MAIN_GUILD_ID
 bot = get_bot()
+logger = getLogger("")
 
 ##### To get list of users who are currently online #####
 async def list_online_users(guild):
@@ -452,12 +459,23 @@ async def leaderboard(interaction: discord.Interaction):
 #         await services_db.save_user_wot_tournament(interaction.user.id)
 #         await interaction.response.send_message("Спасибо за регистрацию на турнире!", ephemeral=True)
 
+
+@bot.event
+async def on_guild_join(guild: discord.Guild):
+    message: str = translations["en"]["bot_guild_join_message"]
+    try:
+        await guild.system_channel.send(message)
+    except discord.DiscordException as e:
+        logger.error(str(e))
+
+
 @bot.event
 async def on_ready():
     delete_old_channels.start()
     await bot.tree.sync()
     post_user_profiles.start()
     create_leaderboard.start()
+    send_random_guide_message.start()
     print(f'We have logged in as {bot.user}')
 
 def run():

@@ -139,8 +139,25 @@ class Services_Database(BasePsqlDTO):
         return serialize_profile_data(result)
     
     async def get_all_services(self):
+        """
+        Query format:
+
+        SELECT * FROM discord_services 
+        FULL JOIN bot_purchases_over_week 
+        ON bot_purchases_over_week.service_id = discord_services.service_id 
+        WHERE profile_score >= 100
+        ORDER BY count {self.order_type} NULLS LAST, profile_score {self.order_type}
+        """
+
         async with self.get_connection() as conn:
-            query = self.BASE_QUERY + " ORDER BY profile_score " + self.order_type
+            query = self.BASE_QUERY.replace(
+                "WHERE",
+                (
+                    "FULL JOIN bot_purchases_over_week "
+                    "ON bot_purchases_over_week.service_id = discord_services.service_id "
+                    "WHERE"
+                )
+            ) + f" ORDER BY count {self.order_type} NULLS LAST, profile_score {self.order_type}"
             services = await conn.fetch(query)
         return services
 

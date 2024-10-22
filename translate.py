@@ -554,4 +554,28 @@ translations = {
         "en": "Here is your invite link to the private channel: {invite_link}",
         "ru": "А вот и ссылочка на приватный канал с покупателем. Вас уже ждут! {invite_link}"
     },
+    "bot_guild_join_message": {
+        "ru": "@everyone\nХорошие новости! SideKick теперь добавлен на **{server_name}**! \n\nSideKick — это платформа для поиска партнеров по играм, где вы можете найти товарищей для игр или общения. Интересно? Начните с простой команды /go от бота SideKick!",
+        "en": "@everyone\nGood News! SideKick is now added to **{server_name}**! \n\nSideKick is a match to play platform where you can find mates to play games or chat with you. Interested? Start with a simple /go command from SideKick bot!"
+    },
+    "guide_boost_command_message": {
+        "ru": "Используйте команду /boost от SideKick, чтобы продвигать своего любимого игрока среди всех участников сервера.",
+        "en": "Use SideKick /boost command to promote your favourite kicker to all server members."
+    },
+    "guide_go_command_message": {
+        "ru": "Используйте команду /go от SideKick, чтобы начать быстрый матч для ВСЕХ онлайн игроков одним нажатием.",
+        "en": "Use SideKick /go command to start a quick match for ALL online kickers in one click."
+    },
+    "guide_find_command_message": {
+        "ru": "Используйте команду /find от SideKick, чтобы найти конкретного игрока и начать игру прямо сейчас!",
+        "en": "Use SideKick /find command to find a specific kicker to start playing now!"
+    },
+    "guide_order_command_message": {
+        "ru": "Используйте команду /order от SideKick, чтобы найти партнера для игры прямо сейчас!",
+        "en": "Use SideKick /order command to match to play now!"
+    },
+    "guide_check_kickers_message": {
+        "ru": "Посмотрите игроков на SideKick, которые ждут вас — используйте /go, чтобы начать их призыв и запустить свою собственную сессию прямо сейчас!",
+        "en": "Check out the Kickers on Sidekick waiting for you - use /go to start summoning them and have your own session now!"
+    }
 }
