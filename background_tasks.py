@@ -116,30 +116,34 @@ async def delete_all_threads_and_clear_csv():
 @tasks.loop(hours=48)
 async def send_random_guide_message() -> None:
     for guild in bot.guilds:
-        lang: str = get_lang_prefix(guild.id)
-        messages_and_images: Tuple[Tuple[str]] = (
-            (translations["guide_boost_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3Aboost.png"),
-            (translations["guide_go_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AGo.png"),
-            (translations["guide_find_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3Afind.png"),
-            (translations["guide_order_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AOrder.png"),
-            (translations["guide_check_kickers_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"),
-        )
-        random_massage_and_image: Tuple[str] = random.choice(messages_and_images)
-        message: str = random_massage_and_image[0]
-        image_url: str = random_massage_and_image[1]
-        channel: discord.TextChannel = await get_or_create_channel_by_category_and_name(
-            category_name=GUIDE_CATEGORY_NAME,
-            channel_name=GUIDE_CHANNEL_NAME,
-            guild=guild
-        )
-        file = await ImageS3Bucket.get_image_by_url(image_url)
         try:
+            lang: str = get_lang_prefix(guild.id)
+            messages_and_images: Tuple[Tuple[str]] = (
+                (translations["guide_boost_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3Aboost.png"),
+                (translations["guide_go_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AGo.png"),
+                (translations["guide_find_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3Afind.png"),
+                (translations["guide_order_command_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AOrder.png"),
+                (translations["guide_check_kickers_message"][lang], "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"),
+            )
+            random_massage_and_image: Tuple[str] = random.choice(messages_and_images)
+            message: str = random_massage_and_image[0]
+            image_url: str = random_massage_and_image[1]
+            channel: discord.TextChannel = await get_or_create_channel_by_category_and_name(
+                category_name=GUIDE_CATEGORY_NAME,
+                channel_name=GUIDE_CHANNEL_NAME,
+                guild=guild
+            )
+            file = await ImageS3Bucket.get_image_by_url(image_url)
             await channel.send(
                 file=discord.File(file, "testimage.png"),
                 content=message
             )
         except discord.DiscordException as e:
-            logger.error(str(e))
+            logger.error(f"Discord exception: {e}")
+        except Exception as e:
+            logger.error(f"Unknown exception: {e}")
+        finally:
+            continue
 
 
 @tasks.loop(hours=24)
