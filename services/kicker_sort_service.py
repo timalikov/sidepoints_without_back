@@ -54,20 +54,23 @@ class KickerSortingService:
         offline = []
 
         for kicker in all_kickers:
-            user_id = kicker['discord_id']
-            score = kicker['profile_score']
+            try:
+                user_id = kicker['discord_id']
+                score = kicker['profile_score']
 
-            is_online = await self.is_user_online(user_id)
+                is_online = await self.is_user_online(user_id)
 
-            if score >= 100:
-                if is_online:
-                    online_high_score.append(kicker)
+                if score >= 100:
+                    if is_online:
+                        online_high_score.append(kicker)
+                    else:
+                        offline_high_score.append(kicker)
                 else:
-                    offline_high_score.append(kicker)
-            else:
-                if is_online:
-                    online.append(kicker)
-                else:
-                    offline.append(kicker)
+                    if is_online:
+                        online.append(kicker)
+                    else:
+                        offline.append(kicker)
+            except:
+                continue
 
         return online_high_score + offline_high_score + online + offline
