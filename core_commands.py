@@ -29,10 +29,13 @@ from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
+from views.payment_button import PaymentButton
+from views.top_up_view import TopUpView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import Genders, Languages
+from models.payment import get_usdt_balance_by_discord_user
 from translate import get_lang_prefix, translations
 
 main_guild_id: int = MAIN_GUILD_ID
@@ -458,6 +461,21 @@ async def leaderboard(interaction: discord.Interaction):
             url=LINK_LEADERBOARD
         ),
         ephemeral=True
+    )
+
+
+@bot.tree.command(name="top-up", description="Check your usdt")
+@app_commands.describe(amount='Amount usdt')
+async def top_up(interaction: discord.Interaction, amount: float):
+    await interaction.response.defer(ephemeral=True)
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
+    lang = get_lang_prefix(guild_id)
+    view = TopUpView(amount=amount, lang=lang)
+    balance = await get_usdt_balance_by_discord_user(interaction.user)
+    await send_interaction_message(
+        interaction=interaction,
+        message=translations["top_up_message"][lang].format(balance=balance),
+        view=view
     )
 
 
