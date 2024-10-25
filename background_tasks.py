@@ -136,7 +136,7 @@ async def send_random_guide_message() -> None:
             file = await ImageS3Bucket.get_image_by_url(image_url)
             await channel.send(
                 file=discord.File(file, "testimage.png"),
-                content=message
+                content=f"@everyone\n{message}"
             )
         except discord.DiscordException as e:
             logger.error(f"Discord exception: {e}")
@@ -186,7 +186,7 @@ async def create_leaderboard():
             )
         except discord.DiscordException:
             print("No permissions!")
-            return None
+            continue
         for role in guild.roles:
             if role.name != "@everyone":
                 await channel.set_permissions(role, send_messages=False)
