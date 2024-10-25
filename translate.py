@@ -614,4 +614,28 @@ translations = {
         "en": "Order from WebApp",
         "ru": "Ордер с Веб Сайта"
     },
+    "success_payment": {
+        "en": "Thanks for making purchase! We will connect you with kicker in seconds ❤️",
+        "ru": "Спасибо за покупку! Мы соеденим Вас с kicker в считанные секунды ❤️"
+    },
+    "server_error_payment": {
+        "en": "Oops, something went wrong. Please try again...",
+        "ru": "Упс, что-то пошло не так. Попробуйте позже..."
+    },
+    "not_enough_money_payment": {
+        "en": "Ooops, looks like your balance is not enough, choose one of the following options to top up:",
+        "ru": "Упс, не хватает баланса! Чтобы пополнить, выберите один из методов ниже:"
+    },
+    "top_up_message": {
+        "en": "Hey there! Your balance of gems is {balance} USD. To top up your balance, choose one of the following options:",
+        "ru": "Хеллоу! Ваш баланс {balance} USD. Чтобы пополнить баланс выберете один из способов ниже:"
+    },
+    "opbnb_balance_message": {
+        "en": "Here your wallet **{wallet}**. Please top up opBNB USDT to this address.",
+        "ru": "Ваш кошелёк **{wallet}**. Пожалуйста пополните opBNB USDT по этому адресу."
+    },
+    "welcome_message": {
+        "en": "♥️ Welcome to use the SideKick App!\n🔊Introduction:\nSideKick is an order-based social platform where you can find your gaming partners and play, rank up, chat or socialize with girls or professional gamers at a price range of $1-$10. \nYou can choose any game to play with them. Alternatively, register as a Kicker using /profile and earn money through your gaming skills. \nYou can earn 85% commission by playing games or chatting with clients, providing emotional value, and easily make $1000 per month.\n🔔 Services include: Chatting, Valorant, League of Legends, CSGO, Apex Legends, Naraka, PUBG, TFT... Languages include: English, Russian, Arabic, Chinese. Countries include: Europe, UK, Middle East, Russia, and neighboring countries.\n🕹Commands：\n/order：take orders\n/go：search kickers\n/find：find kickers\n/profile：register as a kicker\nIntroduce:  #Introduction\nPlace Order:  /order+requirement in #order-lobby.\nYou can send gifts or complete special order pricing by sending the command /boost+Kicker Name in #boost-a-kicker\nYou can register to earn money as a companion in #Join us or by sending the command /profile\n\n🍧 Thousands of girls are online for chatting and gaming, and professional players are ready to enhance your skills.\n🧸 Register as a Kicker and earn $5-20 per hour by playing games, chatting, and improving skills with users!\n✅Discord Link：https://discord.gg/sidekick\n✅Twitter Link：https://x.com/sidekick_labs",
+        "ru": "♥️ Добро пожаловать в приложение SideKick!\n🔊Введение:\nSideKick — это социальная платформа на основе заказов, где вы можете найти партнеров по играм, играть, повышать ранги, общаться с девушками или профессиональными игроками по цене от 1 до 10 долларов. \nВы можете выбрать любую игру для совместной игры. Или зарегистрируйтесь в качестве Кикера, используя /profile, и зарабатывайте, используя свои игровые навыки. \nВы получаете 85% комиссии, играя в игры или общаясь с клиентами, принося им эмоциональную ценность и легко зарабатывая $1000 в месяц.\n🔔 Услуги включают: общение, Valorant, League of Legends, CSGO, Apex Legends, Naraka, PUBG, TFT... Доступные языки: английский, русский, арабский, китайский. Страны: Европа, Великобритания, Ближний Восток, Россия и соседние страны.\n🕹Команды:\n/order：получить заказы\n/go：найти кикеров\n/find：искать кикеров\n/profile：зарегистрироваться как кикер\nВведение:  #Introduction\nРазместить заказ:  /order+требование в #order-lobby.\nВы можете отправить подарок или оформить заказ, отправив команду /boost+имя кикера в #boost-a-kicker\nВы можете зарегистрироваться, чтобы зарабатывать деньги в качестве компаньона, нажав #Join us или отправив команду /profile\n\n🍧 Тысячи девушек онлайн для общения и игр, и профессиональные игроки готовы помочь вам повысить навыки.\n🧸 Зарегистрируйтесь как Кикер и зарабатывайте $5-20 в час, играя в игры, общаясь и помогая пользователям повышать свои навыки!\n✅Ссылка на Discord: https://discord.gg/sidekick\n✅Ссылка на Twitter: https://x.com/sidekick_labs"
+    }
 }

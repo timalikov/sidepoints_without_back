@@ -392,6 +392,7 @@ async def points(interaction: discord.Interaction):
     )
 
 
+
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
 @app_commands.describe(username="The username to find.")
 async def boost(interaction: discord.Interaction, username: str):
@@ -462,9 +463,9 @@ async def leaderboard(interaction: discord.Interaction):
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
-    message: str = translations["en"]["bot_guild_join_message"].format(server_name=guild.name)
+    message: str = "@everyone\n" + translations["welcome_message"]["en"].format(server_name=guild.name)
     image = await ImageS3Bucket.get_image_by_url(
-        "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/initial_server.png"
+        "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
     )
     channel = await get_or_create_channel_by_category_and_name(
         category_name=GUIDE_CATEGORY_NAME,
@@ -472,7 +473,7 @@ async def on_guild_join(guild: discord.Guild):
         guild=guild
     )
     try:
-        await channel.send(message, file=discord.File(image))
+        await channel.send(message, file=discord.File(image, "guild_join.png"))
     except discord.DiscordException as e:
         logger.error(str(e))
 
