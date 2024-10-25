@@ -13,6 +13,8 @@ from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
 from models.forum import find_forum
+from models.payment import send_payment
+from models.enums import PaymentStatusCodes
 from database.dto.psql_services import Services_Database
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 
@@ -69,20 +71,24 @@ class PlayView(View):
 
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "play_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        serviceId = self.service['service_id']
+        await interaction.response.defer(ephemeral=True, thinking=True)
         discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
-        payment_link = f"{os.getenv('WEB_APP_URL')}/payment/{serviceId}?discordServerId={discordServerId}&side_auth=DISCORD"
-        await interaction.followup.send(
-            translations["payment_message"][self.lang].format(payment_link=payment_link),
-            ephemeral=True
+        payment_status_code = await send_payment(
+            user=interaction.user,
+            target_service=self.service,
+            discord_server_id=discordServerId
         )
+        messages = {
+            PaymentStatusCodes.SUCCESS: translations["success_payment"][self.lang],
+            PaymentStatusCodes.NOT_ENOUGH_MONEY: translations["not_enough_money_payment"][self.lang],
+            PaymentStatusCodes.SERVER_PROBLEM: translations["server_error_payment"][self.lang],
+        }
+        message = messages.get(payment_status_code, translations["server_error_payment"][self.lang])
+        await send_interaction_message(
+            interaction=interaction,
+            message=message
+        )
+        button.disabled = True
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_kicker")
     async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
