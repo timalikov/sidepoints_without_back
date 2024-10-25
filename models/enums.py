@@ -6,6 +6,12 @@ class StatusCodes(enum.Enum):
     BAD = 1
 
 
+class PaymentStatusCodes(enum.Enum):
+    SUCCESS = 0
+    NOT_ENOUGH_MONEY = 1
+    SERVER_PROBLEM = 2
+    OPBNB_PROBLEM = 3
+
 class Genders(enum.Enum):
     MALE = "MALE"
     FEMALE = "FEMALE"
