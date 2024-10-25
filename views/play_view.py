@@ -117,7 +117,11 @@ class PlayView(View):
 
         message: str = ""
         if thread_id:
-            thread = forum.get_thread(int(thread_id))
+            try:
+                thread = forum.get_thread(int(thread_id))
+            except ValueError as e:
+                print("Play View SHARE ERROR: {e}")
+                thread = None
             if not thread:
                 message = translations["profile_not_found"][self.lang]
             else:
@@ -142,7 +146,11 @@ class PlayView(View):
         )
 
         user_id = self.service['discord_id']
-        member = interaction.guild.get_member(int(user_id))
+        try:
+            member = interaction.guild.get_member(int(user_id))
+        except ValueError as e:
+            print(f"CHAT ERROR: {e}")
+            member = None
         if member:
             chat_link = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
             if interaction.response.is_done():

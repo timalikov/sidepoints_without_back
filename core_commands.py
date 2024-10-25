@@ -55,6 +55,7 @@ def is_owner(interaction: discord.Interaction) -> bool:
 def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
 
+
 async def save_user_id(user_id):
     services_db = Services_Database()
     existing_user_ids = await services_db.get_user_ids_wot_tournament()
@@ -190,6 +191,7 @@ async def find(interaction: discord.Interaction, username: str):
             ephemeral=True
         )
 
+
 async def get_guild_invite_link(guild_id):
     guild = bot.get_guild(guild_id)
     if guild:
@@ -309,6 +311,7 @@ async def order(
     )
     await view.send_all_messages()
 
+
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
 @app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),
                                app_commands.Choice(name="Unsubscribe", value=0),
@@ -390,7 +393,6 @@ async def points(interaction: discord.Interaction):
         translations["points_message"][lang].format(link=link),
         ephemeral=True
     )
-
 
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")

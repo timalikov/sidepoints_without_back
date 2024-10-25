@@ -37,7 +37,11 @@ class KickerSortingService:
         main_guild = bot.get_guild(MAIN_GUILD_ID)
         if main_guild is None:
             return False
-        member = main_guild.get_member(int(user_id))
+        try:
+            member = main_guild.get_member(int(user_id))
+        except ValueError as e:
+            print("IS USER ONLINE ERROR: {e}")
+            member = None
         return member is not None and member.status == discord.Status.online
 
     async def sort_kickers(self, all_kickers):
