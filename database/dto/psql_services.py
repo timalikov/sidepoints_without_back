@@ -61,6 +61,23 @@ class Services_Database(BasePsqlDTO):
                 continue
         return set(kickers_ids_int)
     
+    async def get_super_kickers(self) -> List[dict]:
+        async with self.get_connection() as conn:
+            query = (
+                "SELECT discord_id FROM discord_services "
+                "WHERE profile_score >= 200 "
+                "GROUP BY discord_id"
+            )
+            kicker_ids = await conn.fetch(query)
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
+    
     async def get_multi_services(self, service_ids: List[str]) -> List[dict]:
         async with self.get_connection() as conn:
             query: str = self.BASE_QUERY + " AND profile_id = ANY($1)"
