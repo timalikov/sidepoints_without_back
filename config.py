@@ -124,11 +124,11 @@ ORDER_CHANNEL_NAME = "🔔order-dispatch"
 FIRST_LIMIT_CHECK_MINUTES = 5
 SECOND_LIMIT_CHECK_MINUTES = 30
 
-FORUM_NAME = "🔎find-your-kickers"
 FORUM_CATEGORY_NAME = "Sidekick: Match to Play"
+FORUM_NAME = "🔎find-your-kickers"
 
 GUIDE_CATEGORY_NAME = "Sidekick: Match to Play"
-GUIDE_CHANNEL_NAME = "sidekick-welcome"
+GUIDE_CHANNEL_NAME = "📥order-lobby"
 
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
