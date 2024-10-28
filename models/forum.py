@@ -104,5 +104,6 @@ async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
         dto = ForumUserPostDatabase()
         _ = [await thread.delete() for thread in forum_channel.threads]
         await dto.delete_by_forum_id(forum_channel.id)
+        return forum_channel
     forum_channel = await create_base_forum(guild)
     return forum_channel
