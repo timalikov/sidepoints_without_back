@@ -5,7 +5,6 @@ import discord.ext
 import discord.ext.commands
 import os
 
-from services.messages.base import send_confirm_order_message
 from services.messages.interaction import send_interaction_message
 from views.play_view import PlayView
 from bot_instance import get_bot
@@ -495,7 +494,7 @@ async def points(interaction: discord.Interaction):
             await interaction.response.send_message(embed=view.embed_message, view=view)
     else:
         await send_interaction_message(interaction=interaction, message="You have no points yet.")
-           
+
 @bot.event
 async def on_ready():
     delete_old_channels.start()
