@@ -27,7 +27,8 @@ class PointsView(discord.ui.View):
         self.add_item(discord.ui.Button(
             label="Add SideKick to your server",
             url=INVITE_BOT_URL,
-            style=discord.ButtonStyle.link
+            style=discord.ButtonStyle.link,
+            row=0
         ))
 
     def _build_embed_message_points(self):
@@ -42,7 +43,7 @@ class PointsView(discord.ui.View):
         )
         embed.add_field(
             name="Leaderboard ranking",
-            value=self.rank,
+            value=self.rank if self.rank != 0 else "-",
             inline=True
         )
         embed.add_field(
@@ -53,7 +54,7 @@ class PointsView(discord.ui.View):
         embed.set_image(url=LEADERBOARD_IMAGE_URL)
         return embed
     
-    @discord.ui.button(label="Invite user to the SideKick Server", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Invite user to the SideKick Server", style=discord.ButtonStyle.primary, row=1)
     async def invite_user(self, interaction: discord.Interaction, button: discord.ui.Button):
         max_age: int = 86400
         """

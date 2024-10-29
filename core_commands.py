@@ -363,28 +363,6 @@ async def wallet(interaction: discord.Interaction):
             )
             print(e)
 
-
-# @bot.tree.command(name="points", description="Use this command to access your tasks.")
-# async def points(interaction: discord.Interaction):
-#     guild_id: int = interaction.guild_id if interaction.guild_id else None
-#     await Services_Database().log_to_database(
-#         interaction.user.id, 
-#         "/tasks", 
-#         guild_id
-#     )
-#     await save_user_id(interaction.user.id)
-#     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
-#     lang = get_lang_prefix(guild_id)
-#     if not guild_id:
-#         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
-#         return
-#     link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
-#     await interaction.response.send_message(
-#         translations["points_message"][lang].format(link=link),
-#         ephemeral=True
-#     )
-
-
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
 @app_commands.describe(username="The username to find.")
 async def boost(interaction: discord.Interaction, username: str):
@@ -452,48 +430,42 @@ async def leaderboard(interaction: discord.Interaction):
         ephemeral=True
     )
 
-# @bot.tree.command(name="wot_tournament", description="Register to WoT tournament")
-# async def wot_tournament(interaction: discord.Interaction):
-#     await Services_Database().log_to_database(
-#         interaction.user.id, 
-#         "/wot_tournament", 
-#         interaction.guild.id if interaction.guild else None
-#     )
-#     services_db = Services_Database()
-#     user_ids = await services_db.get_user_ids_wot_tournament()
-
-#     if interaction.user.id in user_ids:
-#         await interaction.response.send_message("Вы уже зарегистрировались.", ephemeral=True)
-#         return
-#     else:
-#         await services_db.save_user_wot_tournament(interaction.user.id)
-#         await interaction.response.send_message("Спасибо за регистрацию на турнире!", ephemeral=True)
-
 @bot.tree.command(name="points", description="See your points and tasks")
 async def points(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=False)
-    await Services_Database().log_to_database(
-        interaction.user.id, 
-        "/points", 
-        interaction.guild.id if interaction.guild else None
+    
+    services_db = Services_Database()
+    await services_db.log_to_database(
+        user_id=interaction.user.id, 
+        command="/points", 
+        guild_id=interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
     lang = get_lang_prefix(interaction.guild_id)
+    
+    profile_id = await services_db.get_user_profile_id(discord_id=interaction.user.id)
+    if not profile_id:
+        await interaction.response.send_message(
+            "Profile not found.", ephemeral=True
+        )
+        return
 
     dto = LeaderboardDatabase()
-    # services_db = Services_Database()
-    # profile_id = await services_db.get_user_profile_id(discord_id=interaction.user.id)
-    profile_id = '0a124919-a2e7-4b6b-bbf4-bf2fe03b8555'
-
     user_ranking = await dto.get_user_ranking(profile_id=profile_id)
-    if user_ranking:
-        view = PointsView(current_point=user_ranking['weekly_score'], total_points=user_ranking['total_score'], rank=user_ranking['total_pos'], lang=lang)
-        if interaction.response.is_done():
-            await interaction.followup.send(embed=view.embed_message, view=view)
-        else:
-            await interaction.response.send_message(embed=view.embed_message, view=view)
-    else:
-        await send_interaction_message(interaction=interaction, message="You have no points yet.")
+    
+    current_point = user_ranking.get('weekly_score', 0) if user_ranking else 0
+    total_points = user_ranking.get('total_score', 0) if user_ranking else 0
+    rank = user_ranking.get('total_pos', 0) if user_ranking else 0
+
+    view = PointsView(
+        current_point=current_point, 
+        total_points=total_points, 
+        rank=rank, 
+        lang=lang
+    )
+
+    send_method = interaction.followup.send if interaction.response.is_done() else interaction.response.send_message
+    await send_method(embed=view.embed_message, view=view)
 
 @bot.event
 async def on_ready():

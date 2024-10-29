@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from discord import Embed
 import json
-from config import LOGS_CHANNEL_ID
+from config import INVITE_LOGS_CHANNEL_ID
 
 bot = get_bot()
 
@@ -14,7 +14,7 @@ class InviteTracker(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
-        self.logs_channel = LOGS_CHANNEL_ID
+        self.logs_channel = INVITE_LOGS_CHANNEL_ID
         self.invites = {}
         bot.loop.create_task(self.load_invites())
 
@@ -71,7 +71,7 @@ class InviteTracker(commands.Cog):
         print(f"Joined {guild.name}")
         try:
             self.invites[guild.id] = await guild.invites()
-            logs = bot.get_channel(int(LOGS_CHANNEL_ID))
+            logs = bot.get_channel(int(INVITE_LOGS_CHANNEL_ID))
 
             await asyncio.sleep(5)
             if guild.member_count > 1:
