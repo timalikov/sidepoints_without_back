@@ -7,6 +7,7 @@ from bot_instance import get_bot
 from translate import translations, get_lang_prefix
 from discord.ext import tasks
 from config import (
+    LOGS_CHANNEL_ID,
     MAIN_GUILD_ID,
     LEADERBOARD_CATEGORY_NAME,
     LEADERBOARD_CHANNEL_NAME,

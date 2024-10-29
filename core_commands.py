@@ -1,9 +1,11 @@
+from database.dto.psql_leaderboard import LeaderboardDatabase
 import discord
 from discord import app_commands
 import discord.ext
 import discord.ext.commands
 import os
 
+from services.messages.base import send_confirm_order_message
 from services.messages.interaction import send_interaction_message
 from views.play_view import PlayView
 from bot_instance import get_bot
@@ -12,12 +14,14 @@ from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
 from config import (
+    CLIENT_ID,
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
     LINK_LEADERBOARD,
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
+from views.points_view import PointsView
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from models.forum import get_or_create_forum
@@ -25,6 +29,7 @@ from models.thread_forum import start_posting
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import Genders, Languages
 from translate import get_lang_prefix, translations
+from services.cogs.invite_tracker import InviteTracker  
 
 main_guild_id: int = MAIN_GUILD_ID
 bot = get_bot()
@@ -124,7 +129,6 @@ async def list_all_users_with_online_status(guild):
 async def play(interaction: discord.Interaction):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
-    view = await PlayView.create(user_choice="ALL")
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/go", 
@@ -361,25 +365,25 @@ async def wallet(interaction: discord.Interaction):
             print(e)
 
 
-@bot.tree.command(name="points", description="Use this command to access your tasks.")
-async def points(interaction: discord.Interaction):
-    guild_id: int = interaction.guild_id if interaction.guild_id else None
-    await Services_Database().log_to_database(
-        interaction.user.id, 
-        "/tasks", 
-        guild_id
-    )
-    await save_user_id(interaction.user.id)
-    await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
-    lang = get_lang_prefix(guild_id)
-    if not guild_id:
-        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
-        return
-    link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
-    await interaction.response.send_message(
-        translations["points_message"][lang].format(link=link),
-        ephemeral=True
-    )
+# @bot.tree.command(name="points", description="Use this command to access your tasks.")
+# async def points(interaction: discord.Interaction):
+#     guild_id: int = interaction.guild_id if interaction.guild_id else None
+#     await Services_Database().log_to_database(
+#         interaction.user.id, 
+#         "/tasks", 
+#         guild_id
+#     )
+#     await save_user_id(interaction.user.id)
+#     await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
+#     lang = get_lang_prefix(guild_id)
+#     if not guild_id:
+#         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
+#         return
+#     link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
+#     await interaction.response.send_message(
+#         translations["points_message"][lang].format(link=link),
+#         ephemeral=True
+#     )
 
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
@@ -466,9 +470,36 @@ async def leaderboard(interaction: discord.Interaction):
 #         await services_db.save_user_wot_tournament(interaction.user.id)
 #         await interaction.response.send_message("Спасибо за регистрацию на турнире!", ephemeral=True)
 
+@bot.tree.command(name="points", description="See your points and tasks")
+async def points(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=False)
+    await Services_Database().log_to_database(
+        interaction.user.id, 
+        "/points", 
+        interaction.guild.id if interaction.guild else None
+    )
+    await save_user_id(interaction.user.id)
+    lang = get_lang_prefix(interaction.guild_id)
+
+    dto = LeaderboardDatabase()
+    # services_db = Services_Database()
+    # profile_id = await services_db.get_user_profile_id(discord_id=interaction.user.id)
+    profile_id = '0a124919-a2e7-4b6b-bbf4-bf2fe03b8555'
+
+    user_ranking = await dto.get_user_ranking(profile_id=profile_id)
+    if user_ranking:
+        view = PointsView(current_point=user_ranking['weekly_score'], total_points=user_ranking['total_score'], rank=user_ranking['total_pos'], lang=lang)
+        if interaction.response.is_done():
+            await interaction.followup.send(embed=view.embed_message, view=view)
+        else:
+            await interaction.response.send_message(embed=view.embed_message, view=view)
+    else:
+        await send_interaction_message(interaction=interaction, message="You have no points yet.")
+           
 @bot.event
 async def on_ready():
     delete_old_channels.start()
+    await bot.add_cog(InviteTracker(bot))
     await bot.tree.sync()
     post_user_profiles.start()
     create_leaderboard.start()

@@ -8,6 +8,9 @@ MAIN_GUILD_ID = int(os.getenv('MAIN_GUILD_ID'))
 RU_GUILDS = [773446008053956650]
 GUILDS_FOR_TASKS = [*RU_GUILDS, MAIN_GUILD_ID]
 
+CLIENT_ID = int(os.getenv('CLIENT_ID'))
+INVITE_BOT_URL = f"https://discord.com/oauth2/authorize?client_id={CLIENT_ID}&permissions=8&integration_type=0&scope=bot"
+
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 PORT_ID = int(os.getenv('PORT_ID'))
 FORUM_ID_LIST = [1237300150301360138, 1244598037758738553]
@@ -44,6 +47,7 @@ SUPER_KICKER_IDS = [
     824225621961867336
 ]
 TEAM_CHANNEL_ID = 1283327337777074177
+LOGS_CHANNEL_ID = 1283806784250712136
 
 # link_to_back = f"http://127.0.0.1:8001/discordServices"
 link_to_back = os.getenv('BOTAPI_URL') # f"http://172.31.7.179:8001/discordServices"
@@ -120,6 +124,7 @@ FORUM_CATEGORY_NAME = "Sidekick: Match to Play"
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
 LEADERBOARD_CATEGORY_NAME = "Community 😎"
+LEADERBOARD_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
 
 TEST_ACCOUNTS = [
     944953902015590410,

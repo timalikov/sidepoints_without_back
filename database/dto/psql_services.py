@@ -257,3 +257,8 @@ class Services_Database(BasePsqlDTO):
             
         return result is not None
 
+    async def get_user_profile_id(self, discord_id):
+        async with self.get_connection() as conn:
+            query = "SELECT profile_id FROM discord_services WHERE discord_id = $1"
+            result = await conn.fetchval(query, str(discord_id))
+        return result

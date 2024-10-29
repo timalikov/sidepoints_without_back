@@ -7,6 +7,7 @@ intents.message_content = True
 intents.presences = True
 intents.members = True
 intents.guilds = True
+intents.moderation = True
 
 # Initialize the bot
 bot = commands.Bot(command_prefix='!', intents=intents)

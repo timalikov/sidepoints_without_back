@@ -47,3 +47,20 @@ class SQSClient:
         except Exception as e:
             print(f"Failed to send message to SQS: {str(e)}")
             return False
+        
+    def send_gift_points_message(self, discord_id: int, type: str) -> bool:
+        try:
+            response = self.sqs_client.send_message(
+                QueueUrl=self.queue_host + "be_points",
+                DelaySeconds=10,
+                MessageBody=json.dumps({
+                    'discordId': discord_id,
+                    'type': type
+                    }
+                )
+            )
+            print(f"SQS Message sent! ID: {response['MessageId']}")
+            return True  
+        except Exception as e:
+            print(f"Failed to send message to SQS: {str(e)}")
+            return False

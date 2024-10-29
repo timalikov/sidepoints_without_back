@@ -18,3 +18,9 @@ class LeaderboardDatabase(BasePsqlDTO):
             query = self.BASE_QUERY + "ORDER BY total_pos LIMIT 20;"
             leaders = await conn.fetch(query)
         return leaders
+    
+    async def get_user_ranking(self, profile_id):
+        async with self.get_connection() as conn:
+            query = self.BASE_QUERY + "AND profile_id = $1;"
+            user_ranking = await conn.fetchrow(query, profile_id)
+        return user_ranking
