@@ -23,13 +23,13 @@ from config import (
     DISCORD_BOT_TOKEN,
     LINK_LEADERBOARD,
     GUIDE_CATEGORY_NAME,
-    GUIDE_CHANNEL_NAME
+    GUIDE_CHANNEL_NAME,
+    TEST
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
-from views.payment_button import PaymentButton
 from views.top_up_view import TopUpView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
@@ -503,7 +503,7 @@ async def on_ready():
     post_user_profiles.start()
     create_leaderboard.start()
     send_random_guide_message.start()
-    print(f'We have logged in as {bot.user}')
+    print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
 
 def run():
     bot.run(DISCORD_BOT_TOKEN)

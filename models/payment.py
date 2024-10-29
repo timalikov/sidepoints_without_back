@@ -7,6 +7,7 @@ from config import (
     JWT_AUTH_PASSWORD,
     JWT_AUTH_URL,
     PAYMENT_LINK,
+    SERVER_WALLET_URL
 )
 
 from database.dto.psql_discord_profiles import DiscordProfilesDTO
@@ -17,9 +18,22 @@ from models.enums import PaymentStatusCodes
 logger = CustomLogger
 
 
+async def get_server_wallet_by_discord_id(user_id: int) -> str:
+    response = requests.get(SERVER_WALLET_URL + f"?userId={user_id}")
+    if response.status_code == 404:
+        response = requests.post(SERVER_WALLET_URL, json={
+            "userId": user_id
+        })
+    elif response.status_code == 500:
+        logger.http_error("GET WALLET", response)
+        return
+    print(response.status_code, response.text)
+    data: Dict = response.json()
+    return data["address"]
+
+
 async def get_usdt_balance_by_discord_user(user: discord.User) -> float:
-    dto = DiscordProfilesDTO()
-    user_wallet: str = await dto.get_wallet_by_discord_id(user.id)
+    user_wallet: str = await get_server_wallet_by_discord_id(user.id)
     user_balance: Decimal = get_usdt_balance(user_wallet)
     return user_balance
 

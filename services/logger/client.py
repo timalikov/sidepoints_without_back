@@ -18,7 +18,7 @@ class CustomLogger:
             f"- Place: {place} || Status: {response.status_code}\n"
             f"- Message: {response.text}\n"
             f"- URL: {response.url}\n"
-            f"- Body: {response.request.body.decode()}\n"
+            f"- Body: {response.request.body.decode() if response.request.body else ''}\n"
             "========================="
         )
     
