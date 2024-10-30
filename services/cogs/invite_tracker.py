@@ -18,26 +18,12 @@ class InviteTracker(commands.Cog):
         self.logs_channel = INVITE_LOGS_CHANNEL_ID
         self.invites = {}
         self.manual_invites = {}
-        bot.loop.create_task(self.load_invites())
         self.refresh_invites.start() 
 
-    @tasks.loop(seconds=3)  
+    @tasks.loop(seconds=4)  
     async def refresh_invites(self):
-        for guild in self.bot.guilds:
-            try:
-                self.invites[guild.id] = await guild.invites()
-            except Exception as e:
-                print(f"Failed to refresh invites for {guild.name}: {e}")
-
-    async def load_invites(self):
-        # Wait until the bot is ready
-        await self.bot.wait_until_ready()
-        # Load invites for all guilds the bot is part of
-        for guild in self.bot.guilds:
-            try:
-                self.invites[guild.id] = await guild.invites()
-            except Exception as e:
-                print(f"Failed to load invites for {guild.name}: {e}")
+        guild = bot.get_guild(MAIN_GUILD_ID)
+        self.invites[guild.id] = await guild.invites()
 
     def find_invite_by_code(self, invite_list, code):
         for invite in invite_list:
@@ -60,9 +46,7 @@ class InviteTracker(commands.Cog):
 
         try:
             invites_before = self.invites[member.guild.id]
-            print(invites_before)
             invites_after = await member.guild.invites()
-            print(invites_after)
             self.invites[member.guild.id] = invites_after
 
             used_invite = None

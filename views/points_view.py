@@ -68,12 +68,8 @@ class PointsView(discord.ui.View):
             guild_id = guild.id
             if guild_id not in invite_tracker.invites:
                 invite_tracker.invites[guild_id] = await guild.invites() 
-            
-            print(invite_tracker.invites[guild_id])
 
             invite_tracker.manual_invites[invite.code] = interaction.user
-            print(invite.code)
-            print(invite_tracker.manual_invites[invite.code])
             
             embed_message = discord.Embed(
                 title="Invite Link",
