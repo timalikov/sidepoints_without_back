@@ -436,29 +436,28 @@ async def points(interaction: discord.Interaction):
     
     services_db = Services_Database()
     await services_db.log_to_database(
-        user_id=interaction.user.id, 
-        command="/points", 
-        guild_id=interaction.guild.id if interaction.guild else None
+        interaction.user.id, 
+        "/points", 
+        interaction.guild.id if interaction.guild else None
     )
     await save_user_id(interaction.user.id)
     lang = get_lang_prefix(interaction.guild_id)
+
+    username = interaction.user.name
     
     profile_id = await services_db.get_user_profile_id(discord_id=interaction.user.id)
     if not profile_id:
-        await interaction.response.send_message(
-            "Profile not found.", ephemeral=True
-        )
+        await send_interaction_message(interaction=interaction, message="Profile not found.")
         return
 
     dto = LeaderboardDatabase()
     user_ranking = await dto.get_user_ranking(profile_id=profile_id)
     
-    current_point = user_ranking.get('weekly_score', 0) if user_ranking else 0
     total_points = user_ranking.get('total_score', 0) if user_ranking else 0
     rank = user_ranking.get('total_pos', 0) if user_ranking else 0
 
     view = PointsView(
-        current_point=current_point, 
+        username=username,
         total_points=total_points, 
         rank=rank, 
         lang=lang

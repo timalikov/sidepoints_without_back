@@ -1,6 +1,6 @@
 import os
 from typing import Literal
-from config import INVITE_BOT_URL, LEADERBOARD_IMAGE_URL, LINK_LEADERBOARD, MAIN_GUILD_ID
+from config import INVITE_BOT_URL, POINTS_IMAGE_URL, LINK_LEADERBOARD, MAIN_GUILD_ID
 import discord
 from services.cogs.invite_tracker import InviteTracker
 from bot_instance import get_bot
@@ -12,13 +12,13 @@ class PointsView(discord.ui.View):
     def __init__(
         self, 
         *,
-        current_point: int,
+        username: str,
         total_points: int,
         rank: int,
         lang: Literal["en", "ru"] = "en",
     ):
         super().__init__(timeout=None)
-        self.current_point = current_point
+        self.username = username
         self.total_points = total_points
         self.rank = rank
         self.lang = lang
@@ -28,12 +28,12 @@ class PointsView(discord.ui.View):
             label="Add SideKick to your server",
             url=INVITE_BOT_URL,
             style=discord.ButtonStyle.link,
-            row=0
+            row=1
         ))
 
     def _build_embed_message_points(self):
         embed = discord.Embed(
-            title="Points",
+            title=self.username + " Points",
             color=discord.Color.from_rgb(255,211,14)
         )
         embed.add_field(
@@ -51,31 +51,48 @@ class PointsView(discord.ui.View):
             value=f"{LINK_LEADERBOARD}?side_auth=DISCORD",
             inline=False
         )
-        embed.set_image(url=LEADERBOARD_IMAGE_URL)
+        embed.set_image(url=POINTS_IMAGE_URL)
         return embed
     
-    @discord.ui.button(label="Invite user to the SideKick Server", style=discord.ButtonStyle.primary, row=1)
+    @discord.ui.button(label="Invite user to the SideKick Server", style=discord.ButtonStyle.primary, row=0)
     async def invite_user(self, interaction: discord.Interaction, button: discord.ui.Button):
         max_age: int = 86400
-        """
-        Command to create an invite link using the InviteTracker cog's method.
-        """
+        
         invite_tracker: InviteTracker = bot.get_cog('InviteTracker')
-
         guild = bot.get_guild(MAIN_GUILD_ID)  
 
         if invite_tracker and guild:
-            invite = await guild.system_channel.create_invite(max_age=max_age)  
+            channel = guild.text_channels[0]  
+            invite = await channel.create_invite(max_age=max_age, unique=True)
             
             guild_id = guild.id
             if guild_id not in invite_tracker.invites:
                 invite_tracker.invites[guild_id] = await guild.invites() 
-
-            invite_tracker.invites[guild_id].append(invite)
             
-            message = f"Invite link created: `{invite.url}`"
-            await interaction.response.send_message(message, ephemeral=False)
+            print(invite_tracker.invites[guild_id])
+
+            invite_tracker.manual_invites[invite.code] = interaction.user
+            print(invite.code)
+            print(invite_tracker.manual_invites[invite.code])
+            
+            embed_message = discord.Embed(
+                title="Invite Link",
+                description=(
+                    f"Your invite link has been created: https://discord.gg/{invite.code}\n\n"
+                    "Please share it with your friends. When they join the SideKicker server, you will earn **100 points**!"
+                ),
+                color=discord.Color.blue()
+            )
+            
+            await interaction.response.send_message(embed=embed_message, ephemeral=True)
+            
         else:
             print("InviteTracker cog not loaded or Guild not found")
-            message = "Something went wrong. Please try again later."
-            await interaction.response.send_message(message, ephemeral=False)
+            error_message = discord.Embed(
+                description="Something went wrong. Please try again later.",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=error_message, ephemeral=True)
+
+
+    

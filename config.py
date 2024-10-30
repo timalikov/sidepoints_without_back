@@ -124,7 +124,7 @@ FORUM_CATEGORY_NAME = "Sidekick: Match to Play"
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
 LEADERBOARD_CATEGORY_NAME = "Community 😎"
-LEADERBOARD_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
+POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points.png"
 
 TEST_ACCOUNTS = [
     944953902015590410,
