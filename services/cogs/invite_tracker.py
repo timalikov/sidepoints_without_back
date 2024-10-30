@@ -61,7 +61,7 @@ class InviteTracker(commands.Cog):
                 embed.add_field(
                     name="Used invite",
                     value=f"Inviter: {inviter.mention} (`{inviter}` | `{inviter.id}`)\n"
-                        f"Code: `{used_invite.code}`\nUses: `{used_invite.uses}`",
+                        f"Code: `{used_invite.code}`\nUses: `{used_invite.uses}`\nPoints: 100",
                         inline=False
                 )
                 await inviter.send(
