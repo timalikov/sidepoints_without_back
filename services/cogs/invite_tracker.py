@@ -58,8 +58,6 @@ class InviteTracker(commands.Cog):
 
             if used_invite:
                 inviter = self.manual_invites.get(used_invite.code, used_invite.inviter)
-                print(used_invite.code)
-                print(self.manual_invites.get(used_invite.code))
                 embed.add_field(
                     name="Used invite",
                     value=f"Inviter: {inviter.mention} (`{inviter}` | `{inviter.id}`)\n"

@@ -50,15 +50,6 @@ class SQSClient:
         
     def send_task_records_message(self, discord_id: int, type: str) -> bool:
         try:
-             # Create the message body
-            message_body = {
-                'discordId': discord_id,
-                'type': type
-            }
-
-            # Print the message body as JSON
-            print("Message Body:", json.dumps(message_body, indent=4))
-            
             response = self.sqs_client.send_message(
                 QueueUrl=self.queue_host + "discord_task_records",
                 DelaySeconds=10,
