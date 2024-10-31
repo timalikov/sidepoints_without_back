@@ -3,7 +3,7 @@ from database.dto.base import BasePsqlDTO
 
 class DiscordProfilesDTO(BasePsqlDTO):
     """
-    DiscordProfilesDTO!
+    NOT USED!!!!!!!!!!!!!!
 
     Info: 
         schema: public;
