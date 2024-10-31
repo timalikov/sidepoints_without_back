@@ -170,8 +170,12 @@ async def handle_create_private_channel():
         channel_name = f"private-channel-{channelName}"
         guild_id = main_guild_id
         guild = bot.get_guild(guild_id)
-        challenger = guild.get_member(int(customerId))
-        challenged = guild.get_member(int(kickerId))
+        try:
+            challenger = guild.get_member(int(customerId))
+            challenged = guild.get_member(int(kickerId))
+        except ValueError as e:
+            print(f"Int error: {e}")
+            return
 
         if not all([challenger, challenged]):
             return jsonify({"error": "One or more users could not be found in this guild."}), 400

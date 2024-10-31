@@ -116,7 +116,11 @@ class ShareButton(discord.ui.Button):
 class ChatButton(discord.ui.Button):
     def __init__(self, user_id, lang: Literal["ru", "en"] = "en"):
         super().__init__(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_user")
-        self.user_id = int(user_id)
+        try:
+            self.user_id = int(user_id)
+        except ValueError as e:
+            self.user_id = 0
+            print(f"Int ChatButton: {e}")
         self.lang = lang
     
     async def callback(self, interaction: discord.Interaction):

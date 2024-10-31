@@ -52,9 +52,31 @@ class Services_Database(BasePsqlDTO):
             query = self.BASE_QUERY.replace("*", "discord_id")
             query += " GROUP BY discord_id"
             kicker_ids = await conn.fetch(query)
-        return set(
-            [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
-        )
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
+    
+    async def get_super_kickers(self) -> List[dict]:
+        async with self.get_connection() as conn:
+            query = (
+                "SELECT discord_id FROM discord_services "
+                "WHERE profile_score >= 200 "
+                "GROUP BY discord_id"
+            )
+            kicker_ids = await conn.fetch(query)
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
     
     async def get_multi_services(self, service_ids: List[str]) -> List[dict]:
         async with self.get_connection() as conn:
@@ -86,9 +108,14 @@ class Services_Database(BasePsqlDTO):
                 query_args.append(self.language_choice)
             query += " GROUP BY discord_id"
             kicker_ids = await conn.fetch(query, *query_args)
-        return set(
-            [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
-        )
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
 
     async def fetch_chunk(self):
         async with self.get_connection() as conn:

@@ -85,7 +85,11 @@ class BoostView(View):
 
         message: str = ""
         if thread_id:
-            thread = forum.get_thread(int(thread_id))
+            try:
+                thread = forum.get_thread(int(thread_id))
+            except ValueError as e:
+                print(f"SHARE ERROR: {e}")
+                thread = None
             if not thread:
                 message = translations["profile_not_found"][self.lang]
             else:
