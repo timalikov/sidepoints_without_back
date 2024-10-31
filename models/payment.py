@@ -10,8 +10,8 @@ from config import (
     SERVER_WALLET_URL
 )
 
-from database.dto.psql_discord_profiles import DiscordProfilesDTO
 from services.logger.client import CustomLogger
+from services.common_http import handle_status_code
 from web3_interaction.balance_checker import get_usdt_balance
 from models.enums import PaymentStatusCodes
 
@@ -19,21 +19,23 @@ logger = CustomLogger
 
 
 async def get_server_wallet_by_discord_id(user_id: int) -> str:
-    response = requests.get(SERVER_WALLET_URL + f"?userId={user_id}")
-    if response.status_code == 404:
-        response = requests.post(SERVER_WALLET_URL, json={
-            "userId": user_id
-        })
-    elif response.status_code == 500:
-        logger.http_error("GET WALLET", response)
-        return
-    print(response.status_code, response.text)
+    exists_response = requests.get(SERVER_WALLET_URL + f"/exists?userId={user_id}")
+    is_exists = exists_response.json().get("exists")
+    if is_exists:
+        response = requests.get(SERVER_WALLET_URL + f"/find?userId={user_id}")
+    else:
+        response = requests.post(SERVER_WALLET_URL + "/create", json={"userId": str(user_id)})
+    is_success = await handle_status_code(response=response)
+    if not is_success:
+        return None
     data: Dict = response.json()
     return data["address"]
 
 
 async def get_usdt_balance_by_discord_user(user: discord.User) -> float:
     user_wallet: str = await get_server_wallet_by_discord_id(user.id)
+    if not user_wallet:
+        return 0
     user_balance: Decimal = get_usdt_balance(user_wallet)
     return user_balance
 

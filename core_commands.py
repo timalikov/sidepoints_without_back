@@ -1,8 +1,8 @@
+import os
 import discord
 from discord import app_commands
 import discord.ext
 import discord.ext.commands
-import os
 from logging import getLogger
 
 from services.messages.interaction import send_interaction_message
@@ -28,14 +28,17 @@ from config import (
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
-from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from views.top_up_view import TopUpView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import Genders, Languages
-from models.payment import get_usdt_balance_by_discord_user
+from models.payment import (
+    get_usdt_balance_by_discord_user,
+    get_server_wallet_by_discord_id
+)
+from web3_interaction.balance_checker import get_usdt_balance
 from translate import get_lang_prefix, translations
 
 main_guild_id: int = MAIN_GUILD_ID
@@ -57,6 +60,7 @@ def is_owner(interaction: discord.Interaction) -> bool:
 
 def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
+
 
 async def save_user_id(user_id):
     services_db = Services_Database()
@@ -193,6 +197,7 @@ async def find(interaction: discord.Interaction, username: str):
             ephemeral=True
         )
 
+
 async def get_guild_invite_link(guild_id):
     guild = bot.get_guild(guild_id)
     if guild:
@@ -312,6 +317,7 @@ async def order(
     )
     await view.send_all_messages()
 
+
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
 @app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),
                                app_commands.Choice(name="Unsubscribe", value=0),
@@ -335,43 +341,22 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
 
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
     guild_id: int = interaction.guild_id if interaction.guild_id else None
-    await Services_Database().log_to_database(
-        interaction.user.id, 
-        "/wallet", 
-        guild_id
-    )
-    await save_user_id(interaction.user.id)
-    main_guild = bot.get_guild(MAIN_GUILD_ID)
     lang = get_lang_prefix(guild_id)
-    if not guild_id:
-        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
-        return
-    # Check if the user is a member of the guild
-    member = main_guild.get_member(interaction.user.id)
-    if member:
-        view = Wallet_exist(lang=lang)
-        await interaction.response.send_message(
-            translations["wallet_message"][lang],
-            view=view,
-            ephemeral=True
+    wallet = await get_server_wallet_by_discord_id(user_id=interaction.user.id)
+    balance = get_usdt_balance(wallet) if wallet else 0
+    message = translations["wallet_balance_message"][lang].format(
+        balance=balance, wallet=wallet
+    )
+    await send_interaction_message(
+        interaction=interaction,
+        embed=discord.Embed(
+            description=message,
+            title=translations["wallet_title"][lang],
+            colour=discord.Colour.orange()
         )
-        return
-    else:
-        await interaction.response.defer(ephemeral=True)
-        try:
-            # Create an invite that expires in 24 hours with a maximum of 10 uses
-            invite = await main_guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
-            await interaction.response.send_message(
-                translations["invite_join_guild"][lang].format(invite_url=invite.url),
-                ephemeral=True
-            )
-        except Exception as e:
-            await interaction.response.send_message(
-                translations["failed_invite"][lang],
-                ephemeral=True
-            )
-            print(e)
+    )
 
 
 @bot.tree.command(name="points", description="Use this command to access your tasks.")
@@ -393,7 +378,6 @@ async def points(interaction: discord.Interaction):
         translations["points_message"][lang].format(link=link),
         ephemeral=True
     )
-
 
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
@@ -464,7 +448,7 @@ async def leaderboard(interaction: discord.Interaction):
     )
 
 
-@bot.tree.command(name="top-up", description="Check your usdt")
+@bot.tree.command(name="top-up", description="Check your usdt") 
 @app_commands.describe(amount='Amount usdt')
 async def top_up(interaction: discord.Interaction, amount: float):
     await interaction.response.defer(ephemeral=True)
@@ -474,10 +458,16 @@ async def top_up(interaction: discord.Interaction, amount: float):
     balance = await get_usdt_balance_by_discord_user(interaction.user)
     await send_interaction_message(
         interaction=interaction,
-        message=translations["top_up_message"][lang].format(balance=balance),
-        view=view
+        view=view,
+        embed=discord.Embed(
+            description=translations["top_up_message"][lang].format(balance=balance),
+            title=translations["top_up_balance"][lang]
+        )
     )
 
+
+# ===============================================================
+# EVENTS ========================================================
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
@@ -504,6 +494,7 @@ async def on_ready():
     create_leaderboard.start()
     send_random_guide_message.start()
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
+
 
 def run():
     bot.run(DISCORD_BOT_TOKEN)
