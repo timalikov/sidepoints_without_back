@@ -74,7 +74,10 @@ class InviteTracker(commands.Cog):
             inviter = await self._get_bot_inviter(guild)
 
             if inviter:
-                await self._process_bot_integration_reward(inviter, guild, logs)
+                if guild.member_count >= 100:
+                    await self._process_bot_integration_reward(inviter, guild, logs)
+                else:
+                    await inviter.send("The SideKick bot has been added to your server. You will receive 1000 points only for adding Sidekick to servers where member count reaches 100 members")
             else:
                 print(f"Couldn't find the inviter for {guild.name}")
         except Exception as e:
