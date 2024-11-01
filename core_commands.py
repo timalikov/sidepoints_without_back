@@ -1,3 +1,4 @@
+from database.dto.psql_leaderboard import LeaderboardDatabase
 import os
 import discord
 from discord import app_commands
@@ -19,6 +20,7 @@ from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
 from config import (
+    CLIENT_ID,
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
     LINK_LEADERBOARD,
@@ -28,6 +30,8 @@ from config import (
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
+from views.points_view import PointsView
+from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
 from views.top_up_view import TopUpView
 from models.forum import get_or_create_forum
@@ -40,6 +44,7 @@ from models.payment import (
 )
 from web3_interaction.balance_checker import get_usdt_balance
 from translate import get_lang_prefix, translations
+from services.cogs.invite_tracker import InviteTracker  
 from core_command_choices import (
     servers_autocomplete,
     services_autocomplete,
@@ -147,7 +152,6 @@ async def list_all_users_with_online_status(guild):
 async def play(interaction: discord.Interaction):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
-    view = await PlayView.create(user_choice="ALL")
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/go", 
@@ -346,28 +350,6 @@ async def wallet(interaction: discord.Interaction):
         )
     )
 
-
-@bot.tree.command(name="points", description="Use this command to access your tasks.")
-async def points(interaction: discord.Interaction):
-    guild_id: int = interaction.guild_id if interaction.guild_id else None
-    await Services_Database().log_to_database(
-        interaction.user.id, 
-        "/tasks", 
-        guild_id
-    )
-    await save_user_id(interaction.user.id)
-    await interaction.response.send_message(f"For available tasks press the link below:\n{os.getenv('WEB_APP_URL')}/tasks?side_auth=DISCORD", ephemeral=True)
-    lang = get_lang_prefix(guild_id)
-    if not guild_id:
-        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
-        return
-    link = os.getenv('WEB_APP_URL') + "/tasks?side_auth=DISCORD"
-    await interaction.response.send_message(
-        translations["points_message"][lang].format(link=link),
-        ephemeral=True
-    )
-
-
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
 @app_commands.describe(username="The username to find.")
 async def boost(interaction: discord.Interaction, username: str):
@@ -435,6 +417,42 @@ async def leaderboard(interaction: discord.Interaction):
         ephemeral=True
     )
 
+@bot.tree.command(name="points", description="See your points and tasks")
+async def points(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=False)
+    
+    user_id = interaction.user.id
+    services_db = Services_Database()
+    await services_db.log_to_database(
+        user_id, 
+        "/points", 
+        interaction.guild.id if interaction.guild else None
+    )
+    await save_user_id(user_id)
+    guild_id = interaction.guild_id if interaction.guild_id else None
+    lang = get_lang_prefix(guild_id)
+
+    username = interaction.user.name
+    profile_id = await services_db.get_user_profile_id(discord_id=user_id)
+    if not profile_id:
+        await send_interaction_message(interaction=interaction, message=translations["profile_not_found"][lang])
+        return
+
+    dto = LeaderboardDatabase()
+    user_ranking = await dto.get_user_ranking(profile_id=profile_id)
+    
+    total_points = user_ranking.get('total_score', 0) if user_ranking else 0
+    rank = user_ranking.get('total_pos', 0) if user_ranking else 0
+
+    view = PointsView(
+        username=username,
+        total_points=total_points, 
+        rank=rank, 
+        lang=lang
+    )
+
+    send_method = interaction.followup.send if interaction.response.is_done() else interaction.response.send_message
+    await send_method(embed=view.embed_message, view=view)
 
 @bot.tree.command(name="top-up", description="Check your usdt") 
 @app_commands.describe(amount='Amount usdt')
@@ -453,9 +471,6 @@ async def top_up(interaction: discord.Interaction, amount: float):
         )
     )
 
-
-# ===============================================================
-# EVENTS ========================================================
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
@@ -477,6 +492,7 @@ async def on_guild_join(guild: discord.Guild):
 @bot.event
 async def on_ready():
     delete_old_channels.start()
+    await bot.add_cog(InviteTracker(bot))
     await bot.tree.sync()
     post_user_profiles.start()
     create_leaderboard.start()

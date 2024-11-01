@@ -622,6 +622,34 @@ translations = {
         "en": "Order from WebApp",
         "ru": "Ордер с Веб Сайта"
     },
+    "add_sidekick_to_your_server": {
+        "en": "Add Sidekick to your server",
+        "ru": "Добавьте Sidekick на свой сервер"
+    },
+    "points": {
+        "en": "Points",
+        "ru": "Очки"
+    },
+    "total_points": {
+        "en": "Total Points",
+        "ru": "Всего очков"
+    },
+    "leaderboard_ranking": {
+        "en": "Leaderboard ranking",
+        "ru": "Рейтинг в таблице лидеров"
+    },
+    "check_out_details": {
+        "en": "Check out the details here",
+        "ru": "Узнайте подробности здесь"
+    },
+    "invite_user_to_sidekick": {
+        "en": "Invite user to the SideKick Server",
+        "ru": "Пригласить друга на сервер SideKick"
+    },
+    "already_invited": {
+        "en": "You have already been rewarded for inviting this user",
+        "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
+    },
     "success_payment": {
         "en": "Thank you for making the purchase!\nWe are matching Kickers for you now.\nPlease check your DM for service updates.\nYour balance is deducted {amount} USD for the service, which will be fully refunded if the service is not delivered.\nYour current account balance is {balance} USD.",
         "ru": "Спасибо за покупку!\nМы подбираем для вас Кикеров.\nПожалуйста, проверяйте личные сообщения для получения обновлений по услуге.\nС вашего баланса снято {amount} USD за услугу.\nПолный возврат будет произведен, если услуга не будет оказана.\nВаш текущий баланс составляет {balance} USD."
