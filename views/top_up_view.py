@@ -142,6 +142,7 @@ class TopUpDropdownMenu(discord.ui.Select):
         super().__init__(placeholder="Select amount...", min_values=1, max_values=1, options=options)
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
         view = TopUpView(amount=self.values[0], lang=self.lang)
         balance = await get_usdt_balance_by_discord_user(interaction.user)
         await send_interaction_message(
