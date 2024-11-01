@@ -16,7 +16,8 @@ from background_tasks import (
     delete_old_channels,
     post_user_profiles,
     create_leaderboard,
-    send_random_guide_message
+    send_random_guide_message,
+    check_success_top_up_balance
 )
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
@@ -511,6 +512,7 @@ async def on_ready():
     post_user_profiles.start()
     create_leaderboard.start()
     send_random_guide_message.start()
+    check_success_top_up_balance.start()
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
 
 

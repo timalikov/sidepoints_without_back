@@ -1,10 +1,9 @@
 import asyncio
 import csv
-import random
 from logging import getLogger
 
 from datetime import datetime, timezone, timedelta
-from typing import Any, List, Literal, Tuple
+from typing import Any, List, Literal, Dict
 import discord
 from bot_instance import get_bot
 from translate import translations, get_lang_prefix
@@ -20,11 +19,13 @@ from config import (
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
 from models.thread_forum import start_posting
+from models.payment import get_server_wallet_by_discord_id
 from services.sqs_client import SQSClient
 from services.storage.bucket import ImageS3Bucket
+from services.cache.client import custom_cache
+from web3_interaction.balance_checker import get_usdt_balance
 from views.refund_replace import RefundReplaceView
 from database.dto.psql_leaderboard import LeaderboardDatabase
-from services.cache.client import custom_cache
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -147,6 +148,39 @@ async def post_user_profiles():
             forum_channel=forum_channel, guild=guild, bot=bot, order_type="ASC"
         )
         forum_channel.overwrites[guild.default_role].read_messages = True
+
+
+@tasks.loop(seconds=30)
+async def check_success_top_up_balance():
+    users: Dict[str, Dict[str, int]] = custom_cache.get_all_top_up_users()
+    for user_id, balance_and_attempt in users.items():
+        try:
+            user = bot.get_user(int(user_id))
+        except:
+            continue
+        if not user:
+            continue
+        wallet = await get_server_wallet_by_discord_id(user.id)
+        if not wallet:
+            continue
+        new_balance = get_usdt_balance(wallet)
+        if new_balance > balance_and_attempt["balance"]:
+            message = translations["balance_topped_up_message"]["en"].format(
+                amount=new_balance - balance_and_attempt["balance"],
+                wallet=wallet
+            )
+            try:
+                await user.send(
+                    embed=discord.Embed(
+                        colour=discord.Colour.green(),
+                        description=message,
+                        title="Thanks!"
+                    )
+                )
+            finally:
+                custom_cache.delete_top_up(user_id)
+        else:
+            custom_cache.retry_top_up(user_id)
 
 
 @tasks.loop(hours=24)

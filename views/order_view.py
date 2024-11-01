@@ -323,6 +323,12 @@ class OrderAccessRejectView(discord.ui.View):
             discord_server_id=self.discord_service_id
         )
         balance = await get_usdt_balance_by_discord_user(interaction.user)
+        try:
+            guild: discord.Guild = bot.get_guild(
+                int(self.discord_service_id)
+            )
+        except ValueError:
+            guild: discord.Guild = None
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
@@ -341,6 +347,7 @@ class OrderAccessRejectView(discord.ui.View):
                 ),
                 "view": TopUpView(
                     amount=float(self.service["service_price"]) - float(balance),
+                    guild=guild,
                     lang=self.lang
                 )
             },

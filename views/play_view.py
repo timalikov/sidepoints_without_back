@@ -73,13 +73,19 @@ class PlayView(View):
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
-        discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
+        discord_server_id = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
         payment_status_code = await send_payment(
             user=interaction.user,
             target_service=self.service,
-            discord_server_id=discordServerId
+            discord_server_id=discord_server_id
         )
         balance = await get_usdt_balance_by_discord_user(interaction.user)
+        try:
+            guild: discord.Guild = bot.get_guild(
+                int(discord_server_id)
+            )
+        except ValueError:
+            guild: discord.Guild = None
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
@@ -98,6 +104,7 @@ class PlayView(View):
                 ),
                 "view": TopUpView(
                     amount=float(self.service["service_price"]) - float(balance),
+                    guild=guild,
                     lang=self.lang
                 )
             },

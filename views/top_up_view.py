@@ -4,14 +4,23 @@ import discord
 from discord.ui import View
 import requests
 
-from config import TOP_UP_URL
+from config import (
+    TOP_UP_URL,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME,
+    MAIN_GUILD_ID,
+)
 from translate import translations
+from bot_instance import get_bot
 
 from models.payment import get_server_wallet_by_discord_id, get_usdt_balance_by_discord_user
+from models.public_channel import get_or_create_channel_by_category_and_name
 from services.messages.interaction import send_interaction_message
 from services.logger.client import CustomLogger
+from services.cache.client import custom_cache
 
 logger = CustomLogger
+bot = get_bot()
 
 
 class TopUpView(View):
@@ -19,25 +28,42 @@ class TopUpView(View):
     View special for core command top-up.
     """
 
-    def __init__(self, amount: float, lang: Literal["en", "ru"] = "en"):
+    def __init__(
+        self, 
+        amount: float,
+        guild: discord.Guild = None,
+        lang: Literal["en", "ru"] = "en"
+    ) -> None:
         super().__init__(timeout=180)
         self.amount = amount
+        self.guild = guild if guild else bot.get_guild(int(MAIN_GUILD_ID))
         self.lang = lang
 
     async def _get_top_up_url(self, url: str, user: discord.User) -> str:
         self.wallet = await get_server_wallet_by_discord_id(user.id)
+        channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=GUIDE_CHANNEL_NAME,
+            guild=self.guild
+        )
         request_data = {
             "price": str(self.amount),
             "discord_id": str(user.id),
             "wallet_to_pay": self.wallet,
             "challenge_id": "5234e156-f328-4902-a832-815bc90504d5",
-            "success_url": "https://apptest.sidekick.fans/topup/?topup_status=success",
-            "fail_url": "https://apptest.sidekick.fans/topup/?topup_status=fail"
+            "success_url": channel.jump_url,
+            "fail_url": channel.jump_url
         }
-        response = requests.post(url=url, json=request_data)
+        try:
+            response = requests.post(url=url, json=request_data, timeout=10)
+        except requests.Timeout:
+            logger.error(f"Top Up timeount! {url}")
+            return None
         if response.status_code != 200:
             logger.http_error("TOP UP", response=response)
             return None
+        balance = await get_usdt_balance_by_discord_user(user)
+        custom_cache.set_top_up(user.id, balance)
         return response.text
     
     async def _send_message(
@@ -64,18 +90,6 @@ class TopUpView(View):
             )
         )
 
-
-    @discord.ui.button(label="OpBNB OnChain transfer", style=discord.ButtonStyle.blurple, row=1)
-    async def opbnb(self, interaction: discord.Interaction, button: discord.ui.Button):
-        wallet = await get_server_wallet_by_discord_id(interaction.user.id)
-        await send_interaction_message(
-            interaction=interaction,
-            embed=discord.Embed(
-                description=translations["opbnb_balance_message"][self.lang].format(wallet=wallet),
-                title="OnChain transfer"
-            )
-        )
-
     @discord.ui.button(label="BinancePay", style=discord.ButtonStyle.blurple, row=1)
     async def binance(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
@@ -83,6 +97,15 @@ class TopUpView(View):
             url=TOP_UP_URL + "binance",
             interaction=interaction,
             method="Binance"
+        )
+
+    @discord.ui.button(label="PayPal", style=discord.ButtonStyle.blurple, row=1)
+    async def paypal(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        await self._send_message(
+            url=TOP_UP_URL + "sellix",
+            interaction=interaction,
+            method="Sellix"
         )
 
     @discord.ui.button(label="Visa", style=discord.ButtonStyle.blurple, row=2)
@@ -94,17 +117,8 @@ class TopUpView(View):
             method="Sellix"
         )
 
-    @discord.ui.button(label="Master Card", style=discord.ButtonStyle.blurple, row=2)
+    @discord.ui.button(label="MasterCard", style=discord.ButtonStyle.blurple, row=2)
     async def master_card(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        await self._send_message(
-            url=TOP_UP_URL + "sellix",
-            interaction=interaction,
-            method="Sellix"
-        )
-
-    @discord.ui.button(label="PayPal", style=discord.ButtonStyle.blurple, row=2)
-    async def paypal(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
         await self._send_message(
             url=TOP_UP_URL + "sellix",
@@ -121,7 +135,7 @@ class TopUpView(View):
             method="Sellix"
         )
 
-    @discord.ui.button(label="Freecasa (Mir)", style=discord.ButtonStyle.blurple, row=3)
+    @discord.ui.button(label="MIR", style=discord.ButtonStyle.blurple, row=3)
     async def freecasa(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
         await self._send_message(
@@ -143,7 +157,11 @@ class TopUpDropdownMenu(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
-        view = TopUpView(amount=self.values[0], lang=self.lang)
+        view = TopUpView(
+            amount=self.values[0],
+            guild=interaction.guild,
+            lang=self.lang
+        )
         balance = await get_usdt_balance_by_discord_user(interaction.user)
         await send_interaction_message(
             interaction=interaction,

@@ -651,8 +651,8 @@ translations = {
         "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
     },
     "success_payment": {
-        "en": "Thank you for making the purchase!\nWe are matching Kickers for you now.\nPlease check your DM for service updates.\nYour balance is deducted {amount} USD for the service, which will be fully refunded if the service is not delivered.\nYour current account balance is {balance} USD.",
-        "ru": "Спасибо за покупку!\nМы подбираем для вас Кикеров.\nПожалуйста, проверяйте личные сообщения для получения обновлений по услуге.\nС вашего баланса снято {amount} USD за услугу.\nПолный возврат будет произведен, если услуга не будет оказана.\nВаш текущий баланс составляет {balance} USD."
+        "en": "Thank you for making the purchase!\nYour current balance is {balance} USDT.\nWe are matching Kickers for you now. Please check your DM for service updates.\nYour balance will be deducted by {amount} USDT for the service, which will be fully refunded if the service is not delivered.",
+        "ru": "Спасибо за покупку!\nВаш текущий баланс составляет {balance} USDT.\nМы подбираем для вас Кикеров. Пожалуйста, проверяйте личные сообщения для получения обновлений по услуге.\nС вашего баланса будет списано {amount} USDT за услугу. Полный возврат будет произведен, если услуга не будет оказана."
     },
     "server_error_payment": {
         "en": "Oops, something went wrong. Please try again...",
@@ -681,5 +681,9 @@ translations = {
     "wallet_balance_message": {
         "en": "Your current Discord SideKick balance is **{balance} USD** 💰🤑\n\nopBNB USDT wallet 👝: \n**{wallet}**",
         "ru": "Ваш текущий баланс в Discord SideKick составляет **{balance} USD** 💰🤑\n\nopBNB кошелёк для USDT 👝: \n**{wallet}**"
+    },
+    "balance_topped_up_message": {
+        "en": "Hey! Your balance has been topped up by **{amount} USDT**. Please enjoy using Sidekick! Wallet: **{wallet}**",
+        "ru": "Привет! Ваш баланс пополнен на **{amount} USDT**. Приятного использования Sidekick! Кошелёк: **{wallet}**"
     }
 }
