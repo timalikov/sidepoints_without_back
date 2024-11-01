@@ -4,6 +4,8 @@ from config import INVITE_BOT_URL, POINTS_IMAGE_URL, LINK_LEADERBOARD, MAIN_GUIL
 import discord
 from services.cogs.invite_tracker import InviteTracker
 from bot_instance import get_bot
+from translate import translations
+
 
 bot = get_bot()
 
@@ -25,29 +27,30 @@ class PointsView(discord.ui.View):
 
         self.embed_message = self._build_embed_message_points()
         self.add_item(discord.ui.Button(
-            label="Add SideKick to your server",
+            label="Add Sidekick to your server",
             url=INVITE_BOT_URL,
             style=discord.ButtonStyle.link,
             row=1
-        ))
+            )
+        )
 
     def _build_embed_message_points(self):
         embed = discord.Embed(
-            title=self.username + " Points",
+            title=self.username + " " + translations["points"][self.lang],
             color=discord.Color.from_rgb(255,211,14)
         )
         embed.add_field(
-            name="Total points",
+            name=translations["total_points"][self.lang],
             value=self.total_points,
             inline=True
         )
         embed.add_field(
-            name="Leaderboard ranking",
+            name=translations["leaderboard_ranking"][self.lang],
             value=self.rank if self.rank != 0 else "-",
             inline=True
         )
         embed.add_field(
-            name="Check out details here",
+            name=translations["check_out_details"][self.lang],
             value=f"{LINK_LEADERBOARD}?side_auth=DISCORD",
             inline=False
         )

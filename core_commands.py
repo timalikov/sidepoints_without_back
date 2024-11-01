@@ -434,20 +434,21 @@ async def leaderboard(interaction: discord.Interaction):
 async def points(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=False)
     
+    user_id = interaction.user.id
     services_db = Services_Database()
     await services_db.log_to_database(
-        interaction.user.id, 
+        user_id, 
         "/points", 
         interaction.guild.id if interaction.guild else None
     )
-    await save_user_id(interaction.user.id)
-    lang = get_lang_prefix(interaction.guild_id)
+    await save_user_id(user_id)
+    guild_id = interaction.guild_id if interaction.guild_id else None
+    lang = get_lang_prefix(guild_id)
 
     username = interaction.user.name
-    
-    profile_id = await services_db.get_user_profile_id(discord_id=interaction.user.id)
+    profile_id = await services_db.get_user_profile_id(discord_id=user_id)
     if not profile_id:
-        await send_interaction_message(interaction=interaction, message="Profile not found.")
+        await send_interaction_message(interaction=interaction, message=translations["profile_not_found"][lang])
         return
 
     dto = LeaderboardDatabase()

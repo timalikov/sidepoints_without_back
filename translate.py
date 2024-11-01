@@ -590,4 +590,32 @@ translations = {
         "en": "Order from WebApp",
         "ru": "Ордер с Веб Сайта"
     },
+    "add_sidekick_to_your_server": {
+        "en": "Add Sidekick to your server",
+        "ru": "Добавьте Sidekick на свой сервер"
+    },
+    "points": {
+        "en": "Points",
+        "ru": "Очки"
+    },
+    "total_points": {
+        "en": "Total Points",
+        "ru": "Всего очков"
+    },
+    "leaderboard_ranking": {
+        "en": "Leaderboard ranking",
+        "ru": "Рейтинг в таблице лидеров"
+    },
+    "check_out_details": {
+        "en": "Check out the details here",
+        "ru": "Узнайте подробности здесь"
+    },
+    "invite_user_to_sidekick": {
+        "en": "Invite user to the SideKick Server",
+        "ru": "Пригласить друга на сервер SideKick"
+    },
+    "already_invited": {
+        "en": "You have already been rewarded for inviting this user",
+        "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
+    },
 }
