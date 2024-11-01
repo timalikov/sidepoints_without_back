@@ -481,10 +481,13 @@ def _create_channels_async_to_sync(guild_id: int):
     guild = bot.get_guild(guild_id)
     if not guild:
         return
-    asyncio.run_coroutine_threadsafe(
-        create_all_required_channels(guild=guild),
-        loop=bot.loop
-    )
+    try:
+        asyncio.run_coroutine_threadsafe(
+            create_all_required_channels(guild=guild),
+            loop=bot.loop
+        )
+    except Exception:
+        return
 
 
 async def _create_channels() -> None:
