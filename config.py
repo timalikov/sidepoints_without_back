@@ -7,8 +7,7 @@ load_dotenv()
 MAIN_GUILD_ID = int(os.getenv('MAIN_GUILD_ID'))
 RU_GUILDS = [773446008053956650]
 GUILDS_FOR_TASKS = [*RU_GUILDS, MAIN_GUILD_ID]
-
-CLIENT_ID = int(os.getenv('CLIENT_ID'))
+CLIENT_ID = 1208433940050874429
 INVITE_BOT_URL = f"https://discord.com/oauth2/authorize?client_id={CLIENT_ID}&permissions=8&integration_type=0&scope=bot"
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
