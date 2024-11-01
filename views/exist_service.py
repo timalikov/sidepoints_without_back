@@ -48,7 +48,7 @@ class Profile_Exist(View):
         if self.list_services:
             for index, service in enumerate(self.list_services):
                 service = dict(service)
-                service["service_category_name"] = await self.service_db.get_service_category_name(service["service_type_id"])
+                service["service_category_name"] = service["tag"]
                 self.list_services[index] = service
             self.profile_embed = create_profile_embed(self.list_services[self.index], lang=self.lang)
             self.affiliate_channel_ids = await self.service_db.get_channel_ids()
@@ -83,7 +83,7 @@ class Profile_Exist(View):
 
         for index, service in enumerate(self.list_services):
             service = dict(service)
-            service["service_category_name"] = await self.service_db.get_service_category_name(service["service_type_id"])
+            service["service_category_name"] = service["tag"]
             self.list_services[index] = service
         self.profile_embed = create_profile_embed(self.list_services[self.index], lang=self.lang)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)

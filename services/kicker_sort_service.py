@@ -1,4 +1,4 @@
-from database.dto.psql_services import Services_Database  
+from database.dto.psql_services import Services_Database
 from bot_instance import get_bot
 import discord
 from config import MAIN_GUILD_ID
@@ -29,7 +29,7 @@ class KickerSortingService:
             services = await self.services_db.get_services_by_discordId(kicker['discord_id'])
             if services:
                 service = dict(services[0])  
-                service["service_category_name"] = await self.services_db.get_service_category_name(service["service_type_id"])
+                service["service_category_name"] = service["tag"]
                 return service
         return None
     

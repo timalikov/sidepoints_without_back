@@ -24,7 +24,7 @@ async def find_thread_in_forum(
                 thread = await guild.fetch_channel(int(existing_thread_id))
             except (discord.errors.DiscordException, ValueError):
                 continue
-            if [profile_data["service_type_name"]] == [i.name for i in thread.applied_tags]:
+            if [profile_data["tag"]] == [i.name for i in thread.applied_tags]:
                 break
             thread = False
     return thread

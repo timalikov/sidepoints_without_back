@@ -14,7 +14,7 @@ def create_profile_embed(
     if isinstance(image_url, list):
         image_url = random.choice(image_url)
     if not category_name:
-        category_name = profile_data['service_type_name']
+        category_name = profile_data['tag']
         
     embed = discord.Embed(
         title=profile_data['profile_username'],

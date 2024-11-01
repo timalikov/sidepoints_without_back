@@ -38,7 +38,7 @@ class ShareCommandView(discord.ui.View):
 
         username = self.list_services[self.index]["profile_username"]
         service_description = self.list_services[self.index]["service_description"]
-        category = self.list_services[self.index]["service_type_name"]
+        category = self.list_services[self.index]["tag"]
         price = self.list_services[self.index]["service_price"]
         service_image = self.list_services[self.index].get("service_image", None)  
 

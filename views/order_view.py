@@ -62,7 +62,7 @@ class OrderView(discord.ui.View):
         self.embed_message = self._build_embed_message_order(extra_text)
 
     def _build_embed_message_order(self, extra_text: str) -> str:
-        service_title = self.services_db.service_title
+        service_title = self.services_db.app_choice
         if not service_title:
             service_title = "All players"
         sex = self.services_db.sex_choice
@@ -71,6 +71,9 @@ class OrderView(discord.ui.View):
         language = self.services_db.language_choice
         if not language:
             language = "Русский" if self.lang == "ru" else "English"
+        server = self.services_db.server_choice
+        if not server:
+            server = "Все" if self.lang == "ru" else "All"
 
         guild = bot.get_guild(self.guild_id)
         embed = discord.Embed(
@@ -81,6 +84,7 @@ class OrderView(discord.ui.View):
                 server_name=guild.name,
                 language=language,
                 gender=sex.capitalize(),
+                game_server=server,
                 extra_text=extra_text if extra_text else ""
             ),
             color=discord.Color.blue()
@@ -189,7 +193,7 @@ class OrderView(discord.ui.View):
         )
         view.message = await self.customer.send(embed=embed, view=view)
 
-        service_category = self.services_db.app_choice if self.services_db.app_choice == "ALL" else await self.services_db.get_service_category_name(self.services_db.app_choice)
+        service_category = self.services_db.app_choice if self.services_db.app_choice == "ALL" else self.services_db.app_choice
         await self.services_db.save_order(
             timestamp=self.created_at,
             order_id=self.order_id,

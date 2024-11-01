@@ -40,6 +40,12 @@ from models.payment import (
 )
 from web3_interaction.balance_checker import get_usdt_balance
 from translate import get_lang_prefix, translations
+from core_command_choices import (
+    servers_autocomplete,
+    services_autocomplete,
+    language_options,
+    gender_options
+)
 
 main_guild_id: int = MAIN_GUILD_ID
 bot = get_bot()
@@ -240,43 +246,19 @@ async def order_all(interaction: discord.Interaction):
     await view.send_all_messages()
 
 
-@bot.tree.command(name="order", description="Use this command to post your service request and summon Kickers to take the order.")
-@app_commands.choices(choices=[
-    app_commands.Choice(name="All players", value="ALL"),
-    app_commands.Choice(name="Casual", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
-    app_commands.Choice(name="Coaching", value="88169d78-85b4-4fa3-8298-3df020f13a6f"),
-    app_commands.Choice(name="Just Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
-    app_commands.Choice(name="Watch Youtube", value="d3ae39d2-fd86-41d7-bc38-0b582ce338b5"),
-    app_commands.Choice(name="Play Games", value="79bf303a-318b-4815-bd56-7b0b49ae7bff"),
-    app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"),
-    app_commands.Choice(name="World Of Tanks", value="2e851835-c033-4c90-a920-ffa75318235a")
-])
-@app_commands.choices(gender=[
-    app_commands.Choice(name="Female", value=Genders.FEMALE.value),
-    app_commands.Choice(name="Male", value=Genders.MALE.value),
-    app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
-])
-@app_commands.choices(language=[
-    app_commands.Choice(name="Russian", value=Languages.RU.value),
-    app_commands.Choice(name="English", value=Languages.EN.value),
-    app_commands.Choice(name="Spanish", value=Languages.ES.value),
-    app_commands.Choice(name="French", value=Languages.FR.value),
-    app_commands.Choice(name="German", value=Languages.DE.value),
-    app_commands.Choice(name="Italian", value=Languages.IT.value),
-    app_commands.Choice(name="Portuguese", value=Languages.PT.value),
-    app_commands.Choice(name="Chinese", value=Languages.ZH.value),
-    app_commands.Choice(name="Japanese", value=Languages.JA.value),
-    app_commands.Choice(name="Korean", value=Languages.KO.value),
-    app_commands.Choice(name="Arabic", value=Languages.AR.value),
-    app_commands.Choice(name="Hindi", value=Languages.HI.value),
-    app_commands.Choice(name="Turkish", value=Languages.TR.value),
-    app_commands.Choice(name="Persian", value=Languages.FA.value),
-    app_commands.Choice(name="Unimportant", value=Languages.UNIMPORTANT.value),
-])
+@bot.tree.command(
+    name="order",
+    description="Use this command to post your service request and summon Kickers to take the order."
+)
+@app_commands.autocomplete(choices=services_autocomplete)
+@app_commands.autocomplete(server=servers_autocomplete)
+@app_commands.choices(gender=gender_options)
+@app_commands.choices(language=language_options)
 @app_commands.describe(text='Order description')
 async def order(
     interaction: discord.Interaction,
-    choices: app_commands.Choice[str],
+    choices: str,
+    server: str,
     gender: app_commands.Choice[str],
     language: app_commands.Choice[str],
     text: str = ""
@@ -295,14 +277,20 @@ async def order(
     await save_user_id(interaction.user.id)
     order_data = {
         'user_id': interaction.user.id,
-        'task_id': choices.value
+        'task_id': choices
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(guild_id)
     services_db = Services_Database(
-        app_choice=choices.value,
+        app_choice=choices,
         sex_choice=gender.value,
-        language_choice=language.value
+        language_choice=language.value,
+        server_choice=(
+            server 
+            if server.lower() != "all servers" 
+            and server.lower() != "no available servers"
+            else None
+        )
     )
     view = OrderView(
         customer=interaction.user,
