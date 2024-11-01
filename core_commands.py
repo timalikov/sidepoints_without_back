@@ -20,7 +20,6 @@ from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
 from config import (
-    CLIENT_ID,
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
     LINK_LEADERBOARD,
@@ -31,15 +30,12 @@ from config import (
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.points_view import PointsView
-from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
-from views.top_up_view import TopUpView
+from views.top_up_view import TopUpDropdownMenu
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
 from models.public_channel import get_or_create_channel_by_category_and_name
-from models.enums import Genders, Languages
 from models.payment import (
-    get_usdt_balance_by_discord_user,
     get_server_wallet_by_discord_id
 )
 from web3_interaction.balance_checker import get_usdt_balance
@@ -336,18 +332,22 @@ async def wallet(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
     guild_id: int = interaction.guild_id if interaction.guild_id else None
     lang = get_lang_prefix(guild_id)
-    wallet = await get_server_wallet_by_discord_id(user_id=interaction.user.id)
-    balance = get_usdt_balance(wallet) if wallet else 0
-    message = translations["wallet_balance_message"][lang].format(
+    wallet: str = await get_server_wallet_by_discord_id(user_id=interaction.user.id)
+    balance: int = get_usdt_balance(wallet) if wallet else 0
+    message: str = translations["wallet_balance_message"][lang].format(
         balance=balance, wallet=wallet
     )
+    dropdown = TopUpDropdownMenu(lang=lang)
+    view = discord.ui.View(timeout=None)
+    view.add_item(dropdown)
     await send_interaction_message(
         interaction=interaction,
         embed=discord.Embed(
             description=message,
             title=translations["wallet_title"][lang],
             colour=discord.Colour.orange()
-        )
+        ),
+        view=view
     )
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
@@ -453,23 +453,6 @@ async def points(interaction: discord.Interaction):
 
     send_method = interaction.followup.send if interaction.response.is_done() else interaction.response.send_message
     await send_method(embed=view.embed_message, view=view)
-
-@bot.tree.command(name="top-up", description="Check your usdt") 
-@app_commands.describe(amount='Amount usdt')
-async def top_up(interaction: discord.Interaction, amount: float):
-    await interaction.response.defer(ephemeral=True)
-    guild_id: int = interaction.guild_id if interaction.guild_id else None
-    lang = get_lang_prefix(guild_id)
-    view = TopUpView(amount=amount, lang=lang)
-    balance = await get_usdt_balance_by_discord_user(interaction.user)
-    await send_interaction_message(
-        interaction=interaction,
-        view=view,
-        embed=discord.Embed(
-            description=translations["top_up_message"][lang].format(balance=balance),
-            title=translations["top_up_balance"][lang]
-        )
-    )
 
 
 @bot.event

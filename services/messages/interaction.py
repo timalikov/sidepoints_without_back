@@ -20,5 +20,5 @@ async def send_interaction_message(
             await interaction.followup.send(**kwargs)
         else:
             await interaction.response.send_message(**kwargs)
-    except discord.errors.InteractionResponded:
+    except (discord.errors.InteractionResponded, discord.DiscordException):
         await interaction.followup.send(**kwargs)

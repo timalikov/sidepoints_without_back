@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, List
 
 import discord
 from discord.ui import View
@@ -7,7 +7,7 @@ import requests
 from config import TOP_UP_URL
 from translate import translations
 
-from models.payment import get_server_wallet_by_discord_id
+from models.payment import get_server_wallet_by_discord_id, get_usdt_balance_by_discord_user
 from services.messages.interaction import send_interaction_message
 from services.logger.client import CustomLogger
 
@@ -76,7 +76,7 @@ class TopUpView(View):
             )
         )
 
-    @discord.ui.button(label="BinancePay", style=discord.ButtonStyle.success, row=2)
+    @discord.ui.button(label="BinancePay", style=discord.ButtonStyle.blurple, row=1)
     async def binance(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
         await self._send_message(
@@ -85,8 +85,8 @@ class TopUpView(View):
             method="Binance"
         )
 
-    @discord.ui.button(label="Sellix (Visa/MasterCard/Paypal/GooglePay)", style=discord.ButtonStyle.blurple, row=2)
-    async def sellix(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label="Visa", style=discord.ButtonStyle.blurple, row=2)
+    async def visa(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
         await self._send_message(
             url=TOP_UP_URL + "sellix",
@@ -94,11 +94,61 @@ class TopUpView(View):
             method="Sellix"
         )
 
-    @discord.ui.button(label="Freecasa (Mir)", style=discord.ButtonStyle.success, row=1)
+    @discord.ui.button(label="Master Card", style=discord.ButtonStyle.blurple, row=2)
+    async def master_card(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        await self._send_message(
+            url=TOP_UP_URL + "sellix",
+            interaction=interaction,
+            method="Sellix"
+        )
+
+    @discord.ui.button(label="PayPal", style=discord.ButtonStyle.blurple, row=2)
+    async def paypal(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        await self._send_message(
+            url=TOP_UP_URL + "sellix",
+            interaction=interaction,
+            method="Sellix"
+        )
+
+    @discord.ui.button(label="Google Pay", style=discord.ButtonStyle.blurple, row=3)
+    async def google_pay(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        await self._send_message(
+            url=TOP_UP_URL + "sellix",
+            interaction=interaction,
+            method="Sellix"
+        )
+
+    @discord.ui.button(label="Freecasa (Mir)", style=discord.ButtonStyle.blurple, row=3)
     async def freecasa(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
         await self._send_message(
             url=TOP_UP_URL + "free-kassa",
             interaction=interaction,
             method="Freecasa"
+        )
+
+
+class TopUpDropdownMenu(discord.ui.Select):
+    def __init__(self, *, lang: Literal["en", "ru"] = "en"):
+        _amounts: List[int] = [1, 5, 10, 20, 30, 50, 70, 100]
+        options = [
+            discord.SelectOption(label=str(amount), description=f"Top up {amount} usdt")
+            for amount in _amounts
+        ]
+        self.lang = lang
+        super().__init__(placeholder="Select amount...", min_values=1, max_values=1, options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        view = TopUpView(amount=self.values[0], lang=self.lang)
+        balance = await get_usdt_balance_by_discord_user(interaction.user)
+        await send_interaction_message(
+            interaction=interaction,
+            view=view,
+            embed=discord.Embed(
+                description=translations["top_up_message"][self.lang].format(balance=balance),
+                title=translations["top_up_balance"][self.lang]
+            )
         )
