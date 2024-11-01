@@ -53,13 +53,13 @@ class InviteTracker(commands.Cog):
 
             if used_invite and inviter:
                 await self._process_invite_reward(inviter, member, used_invite, lang, embed)
+                await logs.send(embed=embed)
             else:
                 self._add_unknown_invite_info(embed)
 
         except Exception as e:
             self._add_error_info(embed, f"Error tracking invite on member join: {e}")
 
-        await logs.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -69,7 +69,7 @@ class InviteTracker(commands.Cog):
         try:
             logs = self.bot.get_channel(int(INVITE_LOGS_CHANNEL_ID))
 
-            await asyncio.sleep(5)  # Delay for audit log processing
+            await asyncio.sleep(4)  # Delay for audit log processing
 
             inviter = await self._get_bot_inviter(guild)
 
