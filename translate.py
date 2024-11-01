@@ -27,12 +27,20 @@ translations = {
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
     'order_new_alert_new':{
-        'ru': 'Юзер: **{customer_discord_id}**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
-        'en': 'Customer: **{customer_discord_id}**\nAlert: **{choice}**\nServer: **{server_name}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+        'ru': 'Юзер: **{customer_discord_id}**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': 'Customer: **{customer_discord_id}**\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
     },
     'order_alert_title': {
         'ru': 'Новый заказ!',
         'en': 'New Order!',
+    },
+    'top_up_balance': {
+        'en': 'Top up balance!',
+        'ru': 'Пополнение баланса!',
+    },
+    'wallet_title': {
+        'en': 'Your wallet!!',
+        'ru': 'Ваш кошелёк!',
     },
     'customer': {
         'ru': 'Юзер',
@@ -586,6 +594,30 @@ translations = {
         "en": "Here is your invite link to the private channel: {invite_link}",
         "ru": "А вот и ссылочка на приватный канал с покупателем. Вас уже ждут! {invite_link}"
     },
+    "bot_guild_join_message": {
+        "ru": "@everyone\nХорошие новости! SideKick теперь добавлен на **{server_name}**! \n\nSideKick — это платформа для поиска партнеров по играм, где вы можете найти товарищей для игр или общения. Интересно? Начните с простой команды /go от бота SideKick!",
+        "en": "@everyone\nGood News! SideKick is now added to **{server_name}**! \n\nSideKick is a match to play platform where you can find mates to play games or chat with you. Interested? Start with a simple /go command from SideKick bot!"
+    },
+    "guide_boost_command_message": {
+        "ru": "Используйте команду /boost от SideKick, чтобы продвигать своего любимого игрока среди всех участников сервера.",
+        "en": "Use SideKick /boost command to promote your favourite kicker to all server members."
+    },
+    "guide_go_command_message": {
+        "ru": "Используйте команду /go от SideKick, чтобы начать быстрый матч для ВСЕХ онлайн игроков одним нажатием.",
+        "en": "Use SideKick /go command to start a quick match for ALL online kickers in one click."
+    },
+    "guide_find_command_message": {
+        "ru": "Используйте команду /find от SideKick, чтобы найти конкретного игрока и начать игру прямо сейчас!",
+        "en": "Use SideKick /find command to find a specific kicker to start playing now!"
+    },
+    "guide_order_command_message": {
+        "ru": "Используйте команду /order от SideKick, чтобы найти партнера для игры прямо сейчас!",
+        "en": "Use SideKick /order command to match to play now!"
+    },
+    "guide_check_kickers_message": {
+        "ru": "Посмотрите игроков на SideKick, которые ждут вас — используйте /go, чтобы начать их призыв и запустить свою собственную сессию прямо сейчас!",
+        "en": "Check out the Kickers on Sidekick waiting for you - use /go to start summoning them and have your own session now!"
+    },
     "order_from_webapp": {
         "en": "Order from WebApp",
         "ru": "Ордер с Веб Сайта"
@@ -618,4 +650,36 @@ translations = {
         "en": "You have already been rewarded for inviting this user",
         "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
     },
+    "success_payment": {
+        "en": "Thank you for making the purchase!\nWe are matching Kickers for you now.\nPlease check your DM for service updates.\nYour balance is deducted {amount} USD for the service, which will be fully refunded if the service is not delivered.\nYour current account balance is {balance} USD.",
+        "ru": "Спасибо за покупку!\nМы подбираем для вас Кикеров.\nПожалуйста, проверяйте личные сообщения для получения обновлений по услуге.\nС вашего баланса снято {amount} USD за услугу.\nПолный возврат будет произведен, если услуга не будет оказана.\nВаш текущий баланс составляет {balance} USD."
+    },
+    "server_error_payment": {
+        "en": "Oops, something went wrong. Please try again...",
+        "ru": "Упс, что-то пошло не так. Попробуйте позже..."
+    },
+    "not_enough_money_payment": {
+        "en": "Ooops, looks like your balance is not enough, choose one of the following options to top up:",
+        "ru": "Упс, не хватает баланса! Чтобы пополнить, выберите один из методов ниже:"
+    },
+    "top_up_message": {
+        "en": "Your current Discord SideKick balance is {balance} USD.\nTop up your balance to enjoy services in one click through the following methods:",
+        "ru": "Ваш текущий баланс в Discord SideKick составляет {balance} USD.\nПополните баланс, чтобы наслаждаться услугами в один клик, выбрав один из следующих способов:"
+    },
+    "opbnb_balance_message": {
+        "en": "Here is your wallet **{wallet}**. Please top up opBNB USDT to this address.",
+        "ru": "Ваш кошелёк **{wallet}**. Пожалуйста пополните opBNB USDT по этому адресу."
+    },
+    "welcome_message": {
+        "en": "♥️ Welcome to use the SideKick App!\n🔊Introduction:\nSideKick is an order-based social platform where you can find your gaming partners and play, rank up, chat or socialize with girls or professional gamers at a price range of $1-$10. \nYou can choose any game to play with them. Alternatively, register as a Kicker using /profile and earn money through your gaming skills. \nYou can earn 85% commission by playing games or chatting with clients, providing emotional value, and easily make $1000 per month.\n🔔 Services include: Chatting, Valorant, League of Legends, CSGO, Apex Legends, Naraka, PUBG, TFT... Languages include: English, Russian, Arabic, Chinese. Countries include: Europe, UK, Middle East, Russia, and neighboring countries.\n🕹Commands：\n/order：take orders\n/go：search kickers\n/find：find kickers\n/profile：register as a kicker\nIntroduce:  #Introduction\nPlace Order:  /order+requirement in #order-lobby.\nYou can send gifts or complete special order pricing by sending the command /boost+Kicker Name in #boost-a-kicker\nYou can register to earn money as a companion in #Join us or by sending the command /profile\n\n🍧 Thousands of girls are online for chatting and gaming, and professional players are ready to enhance your skills.\n🧸 Register as a Kicker and earn $5-20 per hour by playing games, chatting, and improving skills with users!\n✅Discord Link：https://discord.gg/sidekick\n✅Twitter Link：https://x.com/sidekick_labs",
+        "ru": "♥️ Добро пожаловать в приложение SideKick!\n🔊Введение:\nSideKick — это социальная платформа на основе заказов, где вы можете найти партнеров по играм, играть, повышать ранги, общаться с девушками или профессиональными игроками по цене от 1 до 10 долларов. \nВы можете выбрать любую игру для совместной игры. Или зарегистрируйтесь в качестве Кикера, используя /profile, и зарабатывайте, используя свои игровые навыки. \nВы получаете 85% комиссии, играя в игры или общаясь с клиентами, принося им эмоциональную ценность и легко зарабатывая $1000 в месяц.\n🔔 Услуги включают: общение, Valorant, League of Legends, CSGO, Apex Legends, Naraka, PUBG, TFT... Доступные языки: английский, русский, арабский, китайский. Страны: Европа, Великобритания, Ближний Восток, Россия и соседние страны.\n🕹Команды:\n/order：получить заказы\n/go：найти кикеров\n/find：искать кикеров\n/profile：зарегистрироваться как кикер\nВведение:  #Introduction\nРазместить заказ:  /order+требование в #order-lobby.\nВы можете отправить подарок или оформить заказ, отправив команду /boost+имя кикера в #boost-a-kicker\nВы можете зарегистрироваться, чтобы зарабатывать деньги в качестве компаньона, нажав #Join us или отправив команду /profile\n\n🍧 Тысячи девушек онлайн для общения и игр, и профессиональные игроки готовы помочь вам повысить навыки.\n🧸 Зарегистрируйтесь как Кикер и зарабатывайте $5-20 в час, играя в игры, общаясь и помогая пользователям повышать свои навыки!\n✅Ссылка на Discord: https://discord.gg/sidekick\n✅Ссылка на Twitter: https://x.com/sidekick_labs"
+    },
+    "top_up_address_message": {
+        "en": "This is your {method} top up address: **{wallet}**. After a successful top up, you can use /topup again to check your updated balance.",
+        "ru": "Это ваш адрес пополнения {method}: **{wallet}**. После успешного пополнения вы можете снова использовать /topup, чтобы проверить обновленный баланс."
+    },
+    "wallet_balance_message": {
+        "en": "Your current Discord SideKick balance is **{balance} USD** 💰🤑\n\nopBNB USDT wallet 👝: \n**{wallet}**",
+        "ru": "Ваш текущий баланс в Discord SideKick составляет **{balance} USD** 💰🤑\n\nopBNB кошелёк для USDT 👝: \n**{wallet}**"
+    }
 }

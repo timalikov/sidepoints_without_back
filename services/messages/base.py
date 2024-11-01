@@ -68,7 +68,7 @@ async def send_confirm_order_message(
     services_db = Services_Database()
     service = await services_db.get_services_by_username(username=kicker_username)
     if service:
-        service["service_category_name"] = await services_db.get_service_category_name(service["service_type_id"])
+        service["service_category_name"] = service["tag"]
 
     cs_team_message = translations["session_purchased"][lang].format(
         customer_name=customer.name,
@@ -133,15 +133,11 @@ async def send_order_message(
     tag_name: str = "ALL",
     extra_text: str = ""
 ) -> StatusCodes:
-    services_db = Services_Database()
-    app_choice_value = await services_db.get_service_category_id(tag_name) if tag_name else None
-
     dto = Services_Database(
-        app_choice=app_choice_value,
+        app_choice=tag_name if tag_name else None,
         language_choice=language,
         sex_choice=gender
     )
-
     view = OrderView(
         customer=None,
         guild_id=MAIN_GUILD_ID,

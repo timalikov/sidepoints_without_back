@@ -1,7 +1,10 @@
 import asyncio
 import csv
+import random
+from logging import getLogger
+
 from datetime import datetime, timezone, timedelta
-from typing import Any, List, Literal
+from typing import Any, List, Literal, Tuple
 import discord
 from bot_instance import get_bot
 from translate import translations, get_lang_prefix
@@ -11,17 +14,21 @@ from config import (
     LEADERBOARD_CATEGORY_NAME,
     LEADERBOARD_CHANNEL_NAME,
     GUILDS_FOR_TASKS,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME
 )
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
 from models.thread_forum import start_posting
 from services.sqs_client import SQSClient
+from services.storage.bucket import ImageS3Bucket
 from views.refund_replace import RefundReplaceView
 from database.dto.psql_leaderboard import LeaderboardDatabase
 from services.cache.client import custom_cache
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
+logger = getLogger("")
 
 
 @tasks.loop(seconds=20, count=4)
@@ -106,6 +113,25 @@ async def delete_all_threads_and_clear_csv():
         writer.writerow([])
 
 
+@tasks.loop(hours=48)
+async def send_random_guide_message() -> None:
+    # TODO: Need refactor. Code duplicated (on_guild_join) 
+    for guild in bot.guilds:
+        message: str = translations["welcome_message"]["en"].format(server_name=guild.name)
+        image = await ImageS3Bucket.get_image_by_url(
+            "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
+        )
+        channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=GUIDE_CHANNEL_NAME,
+            guild=guild
+        )
+        try:
+            await channel.send(message, file=discord.File(image, "guild_join.png"))
+        except discord.DiscordException as e:
+            logger.error(str(e))
+
+
 @tasks.loop(hours=24)
 async def post_user_profiles():
     await asyncio.sleep(360)
@@ -146,7 +172,7 @@ async def create_leaderboard():
             )
         except discord.DiscordException:
             print("No permissions!")
-            return None
+            continue
         for role in guild.roles:
             if role.name != "@everyone":
                 await channel.set_permissions(role, send_messages=False)

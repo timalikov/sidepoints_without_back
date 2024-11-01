@@ -56,7 +56,7 @@ class Post_FORUM:
         self.lang = get_lang_prefix(int(self.guild_id))
 
     async def post_user_profile(self):
-        tag_name: str = self.profile_data["service_type_name"]
+        tag_name: str = self.profile_data["tag"]
         username: str = self.profile_data['profile_username']
         service_id: str = self.profile_data['service_id']
         invite_link: str = f"https://app.sidekick.fans/payment/{service_id}?discordServerId={self.guild_id}"

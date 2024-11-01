@@ -30,6 +30,7 @@ class Services_Database(BasePsqlDTO):
         app_choice: str = "ALL",
         sex_choice: Genders = Genders.UNIMPORTANT.value,
         language_choice: Languages = Languages.UNIMPORTANT.value,
+        server_choice: str = None,
         user_name: str = None,
         order_type: Literal["DESC", "ASC"] = "DESC"
     ) -> None:
@@ -40,6 +41,7 @@ class Services_Database(BasePsqlDTO):
         self.user_name = user_name
         self.sex_choice = sex_choice
         self.language_choice = language_choice
+        self.server_choice = server_choice
         self.service_title: Optional[str] = self._build_service_title()
 
     def _build_service_title(self) -> Optional[str]:
@@ -52,9 +54,31 @@ class Services_Database(BasePsqlDTO):
             query = self.BASE_QUERY.replace("*", "discord_id")
             query += " GROUP BY discord_id"
             kicker_ids = await conn.fetch(query)
-        return set(
-            [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
-        )
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
+    
+    async def get_super_kickers(self) -> List[dict]:
+        async with self.get_connection() as conn:
+            query = (
+                "SELECT discord_id FROM discord_services "
+                "WHERE profile_score >= 200 "
+                "GROUP BY discord_id"
+            )
+            kicker_ids = await conn.fetch(query)
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
     
     async def get_multi_services(self, service_ids: List[str]) -> List[dict]:
         async with self.get_connection() as conn:
@@ -62,16 +86,15 @@ class Services_Database(BasePsqlDTO):
             services = await conn.fetch(query, service_ids)
         return services
 
-    
     async def get_kickers_by_service_title(self) -> List[dict]:
         async with self.get_connection() as conn:
             query = self.BASE_QUERY.replace("*", "discord_id")
             query_args: list = []
             variable_count: int = 1
-            # TODO: NEED REFACTORING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Code duplicated
+            # TODO: NEED REFACTORING. Code duplicated
             if self.app_choice and self.app_choice != "ALL":
                 filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-                query += filter_seq + f" service_type_id = ${variable_count}"
+                query += filter_seq + f" tag = ${variable_count}"
                 variable_count += 1
                 query_args.append(self.app_choice)
             if self.sex_choice:
@@ -84,11 +107,22 @@ class Services_Database(BasePsqlDTO):
                 query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
                 variable_count += 1
                 query_args.append(self.language_choice)
+            if self.server_choice:
+                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+                query += filter_seq + f" server = ${variable_count}"
+                variable_count += 1
+                query_args.append(self.server_choice)
             query += " GROUP BY discord_id"
+            print(query)
             kicker_ids = await conn.fetch(query, *query_args)
-        return set(
-            [int(kicker_id["discord_id"]) for kicker_id in kicker_ids]
-        )
+        kickers_ids_int = []
+        for kicker_id in kicker_ids:
+            try:
+                kickers_ids_int.append(int(kicker_id["discord_id"]))
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return set(kickers_ids_int)
 
     async def fetch_chunk(self):
         async with self.get_connection() as conn:
@@ -141,8 +175,25 @@ class Services_Database(BasePsqlDTO):
         return serialize_profile_data(result)
     
     async def get_all_services(self):
+        """
+        Query format:
+
+        SELECT * FROM discord_services 
+        FULL JOIN bot_purchases_over_week 
+        ON bot_purchases_over_week.service_id = discord_services.service_id 
+        WHERE profile_score >= 100
+        ORDER BY count {self.order_type} NULLS LAST, profile_score {self.order_type}
+        """
+
         async with self.get_connection() as conn:
-            query = self.BASE_QUERY + " ORDER BY profile_score " + self.order_type
+            query = self.BASE_QUERY.replace(
+                "WHERE",
+                (
+                    "FULL JOIN bot_purchases_over_week "
+                    "ON bot_purchases_over_week.service_id = discord_services.service_id "
+                    "WHERE"
+                )
+            ) + f" ORDER BY count {self.order_type} NULLS LAST, profile_score {self.order_type}"
             services = await conn.fetch(query)
         return services
 
@@ -170,12 +221,6 @@ class Services_Database(BasePsqlDTO):
             query = "SELECT name FROM discord_service_types WHERE id = $1;"
             service_type = await conn.fetchval(query, service_type_id)
         return service_type if service_type else "Unknown"
-    
-    async def get_service_category_id(self, service_type_name):
-        async with self.get_connection() as conn:
-            query = "SELECT id FROM discord_service_types WHERE name = $1;"
-            service_type = await conn.fetchval(query, service_type_name)
-        return service_type if service_type else None
 
     async def get_channel_ids(self):
         async with self.get_connection() as conn:
@@ -184,11 +229,10 @@ class Services_Database(BasePsqlDTO):
         return records
 
     async def get_all_active_tags(self):
-        default_query = \
-            self.BASE_QUERY.replace("*", "service_type_name") + " GROUP BY service_type_name"
+        default_query = "SELECT name FROM discord_service_types"
         async with self.get_connection() as conn:
             tags = await conn.fetch(default_query)
-        return [tag["service_type_name"] for tag in tags]
+        return [tag["name"] for tag in tags]
     
     async def get_managers(self):
         return managers

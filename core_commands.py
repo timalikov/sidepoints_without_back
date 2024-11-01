@@ -1,14 +1,21 @@
 from database.dto.psql_leaderboard import LeaderboardDatabase
+import os
 import discord
 from discord import app_commands
 import discord.ext
 import discord.ext.commands
-import os
+from logging import getLogger
 
 from services.messages.interaction import send_interaction_message
+from services.storage.bucket import ImageS3Bucket
 from views.play_view import PlayView
 from bot_instance import get_bot
-from background_tasks import delete_old_channels, post_user_profiles, create_leaderboard
+from background_tasks import (
+    delete_old_channels,
+    post_user_profiles,
+    create_leaderboard,
+    send_random_guide_message
+)
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
 from database.dto.sql_order import Order_Database
@@ -17,21 +24,37 @@ from config import (
     MAIN_GUILD_ID,
     DISCORD_BOT_TOKEN,
     LINK_LEADERBOARD,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME,
+    TEST
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.points_view import PointsView
 from views.wallet_view import Wallet_exist
 from views.order_view import OrderView
+from views.top_up_view import TopUpView
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import Genders, Languages
+from models.payment import (
+    get_usdt_balance_by_discord_user,
+    get_server_wallet_by_discord_id
+)
+from web3_interaction.balance_checker import get_usdt_balance
 from translate import get_lang_prefix, translations
 from services.cogs.invite_tracker import InviteTracker  
+from core_command_choices import (
+    servers_autocomplete,
+    services_autocomplete,
+    language_options,
+    gender_options
+)
 
 main_guild_id: int = MAIN_GUILD_ID
 bot = get_bot()
+logger = getLogger("")
 
 ##### To get list of users who are currently online #####
 async def list_online_users(guild):
@@ -48,6 +71,7 @@ def is_owner(interaction: discord.Interaction) -> bool:
 
 def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
+
 
 async def save_user_id(user_id):
     services_db = Services_Database()
@@ -183,6 +207,7 @@ async def find(interaction: discord.Interaction, username: str):
             ephemeral=True
         )
 
+
 async def get_guild_invite_link(guild_id):
     guild = bot.get_guild(guild_id)
     if guild:
@@ -225,43 +250,19 @@ async def order_all(interaction: discord.Interaction):
     await view.send_all_messages()
 
 
-@bot.tree.command(name="order", description="Use this command to post your service request and summon Kickers to take the order.")
-@app_commands.choices(choices=[
-    app_commands.Choice(name="All players", value="ALL"),
-    app_commands.Choice(name="Casual", value="57c86488-8935-4a13-bae0-5ca8783e205d"),
-    app_commands.Choice(name="Coaching", value="88169d78-85b4-4fa3-8298-3df020f13a6f"),
-    app_commands.Choice(name="Just Chatting", value="2974b0e8-69de-4d7c-aa4d-d5aa8e05d360"),
-    app_commands.Choice(name="Watch Youtube", value="d3ae39d2-fd86-41d7-bc38-0b582ce338b5"),
-    app_commands.Choice(name="Play Games", value="79bf303a-318b-4815-bd56-7b0b49ae7bff"),
-    app_commands.Choice(name="Virtual Date", value="d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"),
-    app_commands.Choice(name="World Of Tanks", value="2e851835-c033-4c90-a920-ffa75318235a")
-])
-@app_commands.choices(gender=[
-    app_commands.Choice(name="Female", value=Genders.FEMALE.value),
-    app_commands.Choice(name="Male", value=Genders.MALE.value),
-    app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
-])
-@app_commands.choices(language=[
-    app_commands.Choice(name="Russian", value=Languages.RU.value),
-    app_commands.Choice(name="English", value=Languages.EN.value),
-    app_commands.Choice(name="Spanish", value=Languages.ES.value),
-    app_commands.Choice(name="French", value=Languages.FR.value),
-    app_commands.Choice(name="German", value=Languages.DE.value),
-    app_commands.Choice(name="Italian", value=Languages.IT.value),
-    app_commands.Choice(name="Portuguese", value=Languages.PT.value),
-    app_commands.Choice(name="Chinese", value=Languages.ZH.value),
-    app_commands.Choice(name="Japanese", value=Languages.JA.value),
-    app_commands.Choice(name="Korean", value=Languages.KO.value),
-    app_commands.Choice(name="Arabic", value=Languages.AR.value),
-    app_commands.Choice(name="Hindi", value=Languages.HI.value),
-    app_commands.Choice(name="Turkish", value=Languages.TR.value),
-    app_commands.Choice(name="Persian", value=Languages.FA.value),
-    app_commands.Choice(name="Unimportant", value=Languages.UNIMPORTANT.value),
-])
+@bot.tree.command(
+    name="order",
+    description="Use this command to post your service request and summon Kickers to take the order."
+)
+@app_commands.autocomplete(choices=services_autocomplete)
+@app_commands.autocomplete(server=servers_autocomplete)
+@app_commands.choices(gender=gender_options)
+@app_commands.choices(language=language_options)
 @app_commands.describe(text='Order description')
 async def order(
     interaction: discord.Interaction,
-    choices: app_commands.Choice[str],
+    choices: str,
+    server: str,
     gender: app_commands.Choice[str],
     language: app_commands.Choice[str],
     text: str = ""
@@ -280,14 +281,20 @@ async def order(
     await save_user_id(interaction.user.id)
     order_data = {
         'user_id': interaction.user.id,
-        'task_id': choices.value
+        'task_id': choices
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(guild_id)
     services_db = Services_Database(
-        app_choice=choices.value,
+        app_choice=choices,
         sex_choice=gender.value,
-        language_choice=language.value
+        language_choice=language.value,
+        server_choice=(
+            server 
+            if server.lower() != "all servers" 
+            and server.lower() != "no available servers"
+            else None
+        )
     )
     view = OrderView(
         customer=interaction.user,
@@ -301,6 +308,7 @@ async def order(
         ephemeral=True
     )
     await view.send_all_messages()
+
 
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
 @app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),
@@ -325,43 +333,22 @@ async def subscribe(interaction: discord.Interaction, choices: app_commands.Choi
 
 @bot.tree.command(name="wallet", description="Use this command to access your wallet.")
 async def wallet(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
     guild_id: int = interaction.guild_id if interaction.guild_id else None
-    await Services_Database().log_to_database(
-        interaction.user.id, 
-        "/wallet", 
-        guild_id
-    )
-    await save_user_id(interaction.user.id)
-    main_guild = bot.get_guild(MAIN_GUILD_ID)
     lang = get_lang_prefix(guild_id)
-    if not guild_id:
-        await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
-        return
-    # Check if the user is a member of the guild
-    member = main_guild.get_member(interaction.user.id)
-    if member:
-        view = Wallet_exist(lang=lang)
-        await interaction.response.send_message(
-            translations["wallet_message"][lang],
-            view=view,
-            ephemeral=True
+    wallet = await get_server_wallet_by_discord_id(user_id=interaction.user.id)
+    balance = get_usdt_balance(wallet) if wallet else 0
+    message = translations["wallet_balance_message"][lang].format(
+        balance=balance, wallet=wallet
+    )
+    await send_interaction_message(
+        interaction=interaction,
+        embed=discord.Embed(
+            description=message,
+            title=translations["wallet_title"][lang],
+            colour=discord.Colour.orange()
         )
-        return
-    else:
-        await interaction.response.defer(ephemeral=True)
-        try:
-            # Create an invite that expires in 24 hours with a maximum of 10 uses
-            invite = await main_guild.text_channels[0].create_invite(max_age=86400, max_uses=10, unique=True)
-            await interaction.response.send_message(
-                translations["invite_join_guild"][lang].format(invite_url=invite.url),
-                ephemeral=True
-            )
-        except Exception as e:
-            await interaction.response.send_message(
-                translations["failed_invite"][lang],
-                ephemeral=True
-            )
-            print(e)
+    )
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
 @app_commands.describe(username="The username to find.")
@@ -467,6 +454,41 @@ async def points(interaction: discord.Interaction):
     send_method = interaction.followup.send if interaction.response.is_done() else interaction.response.send_message
     await send_method(embed=view.embed_message, view=view)
 
+@bot.tree.command(name="top-up", description="Check your usdt") 
+@app_commands.describe(amount='Amount usdt')
+async def top_up(interaction: discord.Interaction, amount: float):
+    await interaction.response.defer(ephemeral=True)
+    guild_id: int = interaction.guild_id if interaction.guild_id else None
+    lang = get_lang_prefix(guild_id)
+    view = TopUpView(amount=amount, lang=lang)
+    balance = await get_usdt_balance_by_discord_user(interaction.user)
+    await send_interaction_message(
+        interaction=interaction,
+        view=view,
+        embed=discord.Embed(
+            description=translations["top_up_message"][lang].format(balance=balance),
+            title=translations["top_up_balance"][lang]
+        )
+    )
+
+
+@bot.event
+async def on_guild_join(guild: discord.Guild):
+    message: str = "@everyone\n" + translations["welcome_message"]["en"].format(server_name=guild.name)
+    image = await ImageS3Bucket.get_image_by_url(
+        "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
+    )
+    channel = await get_or_create_channel_by_category_and_name(
+        category_name=GUIDE_CATEGORY_NAME,
+        channel_name=GUIDE_CHANNEL_NAME,
+        guild=guild
+    )
+    try:
+        await channel.send(message, file=discord.File(image, "guild_join.png"))
+    except discord.DiscordException as e:
+        logger.error(str(e))
+
+
 @bot.event
 async def on_ready():
     delete_old_channels.start()
@@ -474,7 +496,9 @@ async def on_ready():
     await bot.tree.sync()
     post_user_profiles.start()
     create_leaderboard.start()
-    print(f'We have logged in as {bot.user}')
+    send_random_guide_message.start()
+    print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
+
 
 def run():
     bot.run(DISCORD_BOT_TOKEN)

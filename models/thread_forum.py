@@ -22,9 +22,9 @@ async def find_thread_in_forum(
         for existing_thread_id in existing_thread_ids:
             try:
                 thread = await guild.fetch_channel(int(existing_thread_id))
-            except discord.errors.DiscordException:
+            except (discord.errors.DiscordException, ValueError):
                 continue
-            if [profile_data["service_type_name"]] == [i.name for i in thread.applied_tags]:
+            if [profile_data["tag"]] == [i.name for i in thread.applied_tags]:
                 break
             thread = False
     return thread
@@ -42,9 +42,12 @@ async def start_posting(
     guild_members: list[dict] = []
     not_guild_members: list[dict] = []
     for service in services:
-        if guild.get_member(
-            int(service["discord_id"])
-        ):
+        try:
+            kicker_int_id = int(service["discord_id"])
+        except ValueError as e:
+            print(f"START POSTING ERROR: {e}")
+            continue
+        if guild.get_member(kicker_int_id):
             guild_members.append(service)
         else:
             not_guild_members.append(service)

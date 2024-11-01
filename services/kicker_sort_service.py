@@ -1,4 +1,4 @@
-from database.dto.psql_services import Services_Database  
+from database.dto.psql_services import Services_Database
 from bot_instance import get_bot
 import discord
 from config import MAIN_GUILD_ID
@@ -29,7 +29,7 @@ class KickerSortingService:
             services = await self.services_db.get_services_by_discordId(kicker['discord_id'])
             if services:
                 service = dict(services[0])  
-                service["service_category_name"] = await self.services_db.get_service_category_name(service["service_type_id"])
+                service["service_category_name"] = service["tag"]
                 return service
         return None
     
@@ -37,7 +37,11 @@ class KickerSortingService:
         main_guild = bot.get_guild(MAIN_GUILD_ID)
         if main_guild is None:
             return False
-        member = main_guild.get_member(int(user_id))
+        try:
+            member = main_guild.get_member(int(user_id))
+        except ValueError as e:
+            print("IS USER ONLINE ERROR: {e}")
+            member = None
         return member is not None and member.status == discord.Status.online
 
     async def sort_kickers(self, all_kickers):
@@ -54,20 +58,23 @@ class KickerSortingService:
         offline = []
 
         for kicker in all_kickers:
-            user_id = kicker['discord_id']
-            score = kicker['profile_score']
+            try:
+                user_id = kicker['discord_id']
+                score = kicker['profile_score']
 
-            is_online = await self.is_user_online(user_id)
+                is_online = await self.is_user_online(user_id)
 
-            if score >= 100:
-                if is_online:
-                    online_high_score.append(kicker)
+                if score >= 100:
+                    if is_online:
+                        online_high_score.append(kicker)
+                    else:
+                        offline_high_score.append(kicker)
                 else:
-                    offline_high_score.append(kicker)
-            else:
-                if is_online:
-                    online.append(kicker)
-                else:
-                    offline.append(kicker)
+                    if is_online:
+                        online.append(kicker)
+                    else:
+                        offline.append(kicker)
+            except:
+                continue
 
         return online_high_score + offline_high_score + online + offline
