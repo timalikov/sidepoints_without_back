@@ -5,6 +5,16 @@ from models.category import (
     get_category_by_name
 )
 from database.dto.psql_guild_channels import DiscordGuildChannelsDTO
+from config import (
+    ORDER_CATEGORY_NAME,
+    ORDER_CHANNEL_NAME,
+    ANNOUNCEMENTS_CATEGORY_NAME,
+    ANNOUNCEMENTS_CHANNEL_NAME,
+    LEADERBOARD_CATEGORY_NAME,
+    LEADERBOARD_CHANNEL_NAME,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME
+)
 
 
 async def _get_or_delete_channel_by_id(
@@ -91,3 +101,19 @@ async def get_or_create_channel_by_category_and_name(
         dto = DiscordGuildChannelsDTO()
         await dto.create(guild.id, channel_name, channel.id)
     return channel
+
+
+async def create_all_required_channels(guild: discord.Guild) -> None:
+    channels = [
+        (ORDER_CATEGORY_NAME, ORDER_CHANNEL_NAME),
+        (ANNOUNCEMENTS_CATEGORY_NAME, ANNOUNCEMENTS_CHANNEL_NAME),
+        (GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME),
+        (LEADERBOARD_CATEGORY_NAME, LEADERBOARD_CHANNEL_NAME),
+    ]
+    for category_name, channel_name in channels:
+        _ = await get_or_create_channel_by_category_and_name(
+            category_name=category_name,
+            channel_name=channel_name,
+            guild=guild
+        )
+    print(f"Channels created in {guild.name}")

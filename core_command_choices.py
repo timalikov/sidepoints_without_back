@@ -37,11 +37,7 @@ async def servers_autocomplete(
         "fortnite": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
         "teamfight Tactic": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
         "dota2": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
-        "world of tanks": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
-        "just chatting": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
-        "virtual date": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
-        "watch youtube": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
-        "steam": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"]
+        "world of tanks": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"]
     }
     selected_service = interaction.namespace.choices
     available_servers = server_choices.get(
