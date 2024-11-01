@@ -5,6 +5,8 @@ from discord import app_commands
 import discord.ext
 import discord.ext.commands
 from logging import getLogger
+import threading
+import asyncio
 
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
@@ -34,7 +36,10 @@ from views.order_view import OrderView
 from views.top_up_view import TopUpDropdownMenu
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
-from models.public_channel import get_or_create_channel_by_category_and_name
+from models.public_channel import (
+    get_or_create_channel_by_category_and_name,
+    create_all_required_channels
+)
 from models.payment import (
     get_server_wallet_by_discord_id
 )
@@ -472,11 +477,34 @@ async def on_guild_join(guild: discord.Guild):
         logger.error(str(e))
 
 
+def _create_channels_async_to_sync(guild_id: int):
+    guild = bot.get_guild(guild_id)
+    if not guild:
+        return
+    asyncio.run_coroutine_threadsafe(
+        create_all_required_channels(guild=guild),
+        loop=bot.loop
+    )
+
+
+async def _create_channels() -> None:
+    threads: list[threading.Thread] = []
+    for guild in bot.guilds:
+        thread = threading.Thread(
+            target=_create_channels_async_to_sync,
+            args=(guild.id,)
+        )
+        threads.append(thread)
+        thread.start()
+    [thread.join() for thread in threads]
+
+
 @bot.event
 async def on_ready():
     delete_old_channels.start()
     await bot.add_cog(InviteTracker(bot))
     await bot.tree.sync()
+    await _create_channels()
     post_user_profiles.start()
     create_leaderboard.start()
     send_random_guide_message.start()

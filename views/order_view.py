@@ -8,6 +8,8 @@ import discord
 from config import (
     ORDER_CATEGORY_NAME,
     ORDER_CHANNEL_NAME,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME
 )
 
 from database.dto.psql_services import Services_Database
@@ -106,7 +108,24 @@ class OrderView(discord.ui.View):
 
     async def send_all_messages(self) -> None:
         await self.send_channel_message()
+        await self.send_public_channel_message()
         await self.send_kickers_message()
+
+    async def send_public_channel_message(self) -> None:
+        """
+        Without @everyone and buttons.
+        """
+        channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=GUIDE_CHANNEL_NAME,
+            guild=bot.get_guild(self.guild_id)
+        )
+        try:
+            await channel.send(embed=self.embed_message)
+        except discord.errors.Forbidden:
+            print(f"Cannot send message to channel: {channel.id}")
+        except discord.DiscordException:
+            print(f"Failed to send message to channel: {channel.id}")
 
     async def send_channel_message(self) -> None:
         channel = await get_or_create_channel_by_category_and_name(
