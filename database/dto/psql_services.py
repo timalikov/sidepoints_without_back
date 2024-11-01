@@ -263,45 +263,24 @@ class Services_Database(BasePsqlDTO):
             result = await conn.fetchval(query, str(discord_id))
         return result
     
-    def crop_id_to_int4(self, snowflake_id: int) -> int:
-        # Crop the ID to fit within the int4 range for testing
-        return snowflake_id % 2147483647
-    
     async def save_user_reward(self, discord_id: int, reward_type: str, invited_discord_id: int, server_id: int):
-        # discord_id = self.crop_id_to_int4(discord_id)
-        # invited_discord_id = self.crop_id_to_int4(invited_discord_id)
-        # server_id = self.crop_id_to_int4(server_id)
-
-
-
         async with self.get_connection() as conn:
             query = "INSERT INTO discord_bot.rewards (inviter_discord_id, reward_type, invited_discord_id, server_id) VALUES ($1, $2, $3, $4);"
             await conn.execute(query, discord_id, reward_type, invited_discord_id, server_id)
     
     async def check_if_user_rewarded(self, discord_id: int, reward_type: str, server_id: int, invited_discord_id: int):
-        # discord_id = self.crop_id_to_int4(discord_id)
-        # invited_discord_id = self.crop_id_to_int4(invited_discord_id)
-        # server_id = self.crop_id_to_int4(server_id)
-
-
         async with self.get_connection() as conn:
             query = "SELECT 1 FROM discord_bot.rewards WHERE inviter_discord_id = $1 AND reward_type = $2 AND server_id = $3 AND invited_discord_id = $4;"
             result = await conn.fetchrow(query, discord_id, reward_type, server_id, invited_discord_id)
         return result is not None
     
     async def check_if_user_already_been_invited(self, invited_discord_id: int):
-        # invited_discord_id = self.crop_id_to_int4(invited_discord_id)
-
-
         async with self.get_connection() as conn:
             query = "SELECT 1 FROM discord_bot.rewards WHERE invited_discord_id = $1;"
             result = await conn.fetchrow(query, invited_discord_id)
         return result is not None
     
     async def check_if_bot_already_added(self, server_id: int):
-        # server_id = self.crop_id_to_int4(server_id)
-
-
         async with self.get_connection() as conn:
             query = "SELECT 1 FROM discord_bot.rewards WHERE server_id = $1;"
             result = await conn.fetchrow(query, server_id)
