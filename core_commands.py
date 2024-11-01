@@ -479,7 +479,7 @@ async def on_ready():
     await bot.tree.sync()
     post_user_profiles.start()
     create_leaderboard.start()
-    send_random_guide_message.start()
+    # send_random_guide_message.start()
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
 
 
