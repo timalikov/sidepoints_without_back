@@ -32,18 +32,25 @@ async def send_connect_message_between_kicker_and_customer(
         challenger_name=challenger.name,
         service_name=serviceName
     )
-    user_message = translations["user_order_accepted_message"][lang].format(
-        challenged_id=challenged.id,
-        challenged_name=challenged.name,
-        service_name=serviceName
+    user_message_embed = discord.Embed(
+        title=translations["order_confirmed"][lang],
+        description=translations["user_order_accepted_message"][lang].format(
+            challenged_id=challenged.id,
+            challenged_name=challenged.name,
+            service_name=serviceName
+        ),
+        color=discord.Color.red()
     )
     
     if invite_url:
         kicker_message += f"\n{invite_url}"
-        user_message += f"\n{invite_url}"
+        user_message_embed.add_field(
+            name="Invite link",
+            value=invite_url
+        )
 
     try:
-        await challenger.send(user_message)
+        await challenger.send(embed=user_message_embed)
         if challenged.id != 1208433940050874429:
             await challenged.send(kicker_message)
     except discord.HTTPException:
@@ -71,13 +78,20 @@ async def manage_connection_messages(
             lang=lang
         )
         
-        user_message = translations["user_order_accepted_message"][lang].format(
-            challenged_id=challenged.id,
-            challenged_name=challenged.name,
-            service_name=serviceName
+        user_message_embed = discord.Embed(
+            title=translations["order_confirmed"][lang],
+            description=translations["user_order_accepted_message"][lang].format(
+                challenged_id=challenged.id,
+                challenged_name=challenged.name,
+                service_name=serviceName
+            ),
+            color=discord.Color.red()
         )
-        user_message += f"\n{invite_url}"
-        await challenger.send(user_message)
+        user_message_embed.add_field(
+            name="Invite link",
+            value=invite_url
+        )
+        await challenger.send(embed=user_message_embed)
         
 async def create_private_discord_channel(
     bot_instance,

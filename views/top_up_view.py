@@ -76,16 +76,19 @@ class TopUpView(View):
         top_up_response_url = await self._get_top_up_url(
             url=url, user=interaction.user
         )
-        message = translations["top_up_address_message"][self.lang].format(
-            method=method,
-            wallet=self.wallet
+        message_embed = discord.Embed(
+            title=f"🔴 {method} Top up",
+            description=translations["top_up_address_message"][self.lang].format(
+                method=method,
+                wallet=self.wallet
+            )
         )
         error_message = translations["server_error_payment"][self.lang]
         await send_interaction_message(
             interaction=interaction,
             message=top_up_response_url,
             embed=discord.Embed(
-                description=message if top_up_response_url else error_message,
+                description=message_embed if top_up_response_url else error_message,
                 title=method
             )
         )

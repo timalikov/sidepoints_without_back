@@ -27,7 +27,7 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 app_choices = APP_CHOICES
 
-class PlayView(View):
+class FindView(View):
     @classmethod
     async def create(cls, user_choice="ALL", username=None, lang: Literal["ru", "en"] = "en"):
         services_db = Services_Database(app_choice=user_choice)
@@ -73,19 +73,13 @@ class PlayView(View):
     @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
     async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
-        discord_server_id = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
+        discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
         payment_status_code = await send_payment(
             user=interaction.user,
             target_service=self.service,
-            discord_server_id=discord_server_id
+            discord_server_id=discordServerId
         )
         balance = await get_usdt_balance_by_discord_user(interaction.user)
-        try:
-            guild: discord.Guild = bot.get_guild(
-                int(discord_server_id)
-            )
-        except ValueError:
-            guild: discord.Guild = None
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
@@ -104,7 +98,6 @@ class PlayView(View):
                 ),
                 "view": TopUpView(
                     amount=float(self.service["service_price"]) - float(balance),
-                    guild=guild,
                     lang=self.lang
                 )
             },
@@ -121,58 +114,6 @@ class PlayView(View):
             **message_kwargs
         )
         button.disabled = True
-
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_kicker")
-    async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "next_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-        next_service = await self.kicker_sorting_service.get_next_valid_service()
-        if next_service:
-            self.set_service(next_service)
-            await interaction.edit_original_response(embed=self.profile_embed, view=self)
-        else:
-            await interaction.followup.send(
-                translations["no_valid_players"][self.lang],
-                ephemeral=True
-            )
-
-    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_kicker")
-    async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "share_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        user_id = self.service['discord_id']
-        forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
-        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, interaction.guild.id)
-
-        message: str = ""
-        if thread_id:
-            try:
-                thread = forum.get_thread(int(thread_id))
-            except ValueError as e:
-                print("Play View SHARE ERROR: {e}")
-                thread = None
-            if not thread:
-                message = translations["profile_not_found"][self.lang]
-            else:
-                message = (
-                    translations["share_profile_account"][self.lang]
-                    .format(profile_link=thread.jump_url)
-                )
-        else:
-            message = translations["sidekicker_account_not_posted"][self.lang]
-        if interaction.response.is_done():
-            await interaction.followup.send(message, ephemeral=True)
-        else:
-            await interaction.response.send_message(message, ephemeral=True)
 
     @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_kicker")
     async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):

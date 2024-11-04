@@ -10,6 +10,7 @@ import asyncio
 
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
+from views.find_view import FindView
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import (
@@ -184,7 +185,6 @@ async def play(interaction: discord.Interaction):
 async def find(interaction: discord.Interaction, username: str):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
-    view = await PlayView.create(username=username)
     await Services_Database().log_to_database(
         interaction.user.id, 
         "/find", 
@@ -195,7 +195,7 @@ async def find(interaction: discord.Interaction, username: str):
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    view = await PlayView.create(username=username, lang=lang)
+    view = await FindView.create(username=username, lang=lang)
 
     if view.no_user:
         await interaction.followup.send(

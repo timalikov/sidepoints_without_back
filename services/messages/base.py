@@ -80,8 +80,13 @@ async def send_confirm_order_message(
     if kicker.id not in TEST_ACCOUNTS and customer.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, cs_team_message)
 
+    customer_message_embed = discord.Embed(
+        colour=discord.Colour.dark_blue(),
+        title=translations["order_in_process"][lang],
+        description=translations["order_sent"][lang].format(kicker_name=kicker.name)
+    )
     await customer.send(
-        translations["order_sent"][lang].format(kicker_name=kicker.name)
+        embed=customer_message_embed
     )
 
     message_embend = discord.Embed(
