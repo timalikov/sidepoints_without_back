@@ -173,7 +173,12 @@ class OrderView(discord.ui.View):
         for message_instance in self.messages:
             await message_instance.edit(view=self)
         if not self.is_pressed:
-            await self.customer.send(content=translations['timeout_message'][self.lang])
+            timeout_message_embed = discord.Embed(
+                title=translations['order_terminated'][self.lang],
+                description=translations['timeout_message'][self.lang],
+                color=discord.Color.red()
+            )
+            await self.customer.send(embed=timeout_message_embed, view=None)
 
     async def _bot_order(self, interaction: discord.Interaction, kicker: discord.User):
         services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
@@ -310,14 +315,14 @@ class OrderAccessRejectView(discord.ui.View):
                     description=translations["success_payment"][self.lang].format(
                         amount=self.service["service_price"], balance=balance
                     ),
-                    title="Success",
+                    title="✅ Payment Success",
                     colour=discord.Colour.green()
                 )
             },
             PaymentStatusCodes.NOT_ENOUGH_MONEY: {
                 "embed": discord.Embed(
                     description=translations["not_enough_money_payment"][self.lang],
-                    title="Not enough money",
+                    title="🔴 Not enough balance",
                     colour=discord.Colour.gold()
                 ),
                 "view": TopUpView(

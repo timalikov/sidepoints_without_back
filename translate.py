@@ -39,8 +39,8 @@ translations = {
         'ru': 'Пополнение баланса!',
     },
     'wallet_title': {
-        'en': 'Your wallet!!',
-        'ru': 'Ваш кошелёк!',
+        'en': '💰 My Wallet',
+        'ru': '💰 Мой кошелек',
     },
     'customer': {
         'ru': 'Юзер',
@@ -98,6 +98,10 @@ translations = {
         'ru': 'Ваш заказ обрабатывается. Как только исполнители примут заказ, их профили будут отправлены вам в личные сообщения.\n{link}',
         'en': 'Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{link}'
     },
+    'order_in_process': {
+        'en': '🔴 Order in Process',
+        'ru': '🔴 Заказ в процессе'
+    },
     'points_message': {
         'ru': "Для доступных задач нажмите ссылку ниже:\n{link}",
         'en': "For available tasks press the link below:\n{link}"
@@ -122,9 +126,13 @@ translations = {
         'ru': "Новый заказ: {task_desc}.\nУ вас новый заказ на {task_desc}.\nПримите, чтобы отправить ваш профиль пользователю.\nПожалуйста, присоединитесь к нашему серверу, используя ссылку ниже: {main_link}",
         'en': "New Order Summon Alert: {task_desc}.\nYou have a new order summon for a {task_desc}.\nAccept to send your profile to the user.\nPlease ensure to join our server using the link below: {main_link}"
     },
-        'timeout_message': {
-        'ru': "Извините, время ожидания истекло, и ваш заказ не был выполнен успешно.",
-        'en': "Sorry, the dispatching countdown has ended and your order has not been completed successfully."
+    'timeout_message': {
+        'en': "🔔 Sorry, the dispatching countdown has ended.\n🔔 Your order cannot be completed.",
+        'ru': "🔔 Извините, время обработки заказа истекло.\n🔔 Ваш заказ не может быть завершен."
+    },
+    'order_terminated': {
+        'en': "🔴 Order Terminated",
+        'ru': "🔴 Заказ завершен"
     },
     'already_pressed': {
         'ru': "Уже нажато",
@@ -371,8 +379,12 @@ translations = {
         )
     },
     "order_sent": {
-        "en": "Your order has been sent to kicker {kicker_name}.\nIf there is no response within 1 minute, you will be able to replace the kicker, or refund the money.",
-        "ru": "Ваш заказ отправлен кикеру {kicker_name}.\nЕсли не будет ответа в течение 1 минуты, вы сможете заменить кикера или вернуть деньги."
+        "en": "🔔 Your order has been sent to Kicker {kicker_name} for confirmation.\n📥  If there is no response within 1 minute, you will not be charged your balance and will be able to replace the Kicker.",
+        "eu": "🔔 Ваш заказ отправлен кикеру {kicker_name} для подтверждения.\n📥  Если в течение 1 минуты не будет ответа, ваш баланс не будет списан, и вы сможете заменить кикера."
+    },
+    "order_confirmed": {
+        "en": "✅ Order Confirmed",
+        "ru": "✅ Заказ подтвержден"
     },
     "service_purchased_title": {
         "en": "Your service has been purchased:",
@@ -412,20 +424,18 @@ translations = {
     },
     "user_order_accepted_message": {
         "en": (
-            "Kicker has accepted your order:\n"
-            "Kicker: <@{challenged_id}>\n"
-            "Kicker username: {challenged_name}\n"
-            "Kicker discord id: {challenged_id}\n"
-            "Service: {service_name}\n"
-            "Connect via Direct message:<@{challenged_id}>\n"
+            "🔔 Kicker has accepted your order and now starts the service. 🎉\n"
+            "📍 Kicker username: {challenged_name}\n"
+            "📍 Kicker Discord ID: {challenged_id}\n"
+            "📍 Service: XXX {service_name}\n"
+            "📍 Connect via direct message :<@{challenged_id}>\n"
         ),
         "ru": (
-            "Кикер принял ваш заказ:\n"
-            "Кикер: <@{challenged_id}>\n"
-            "Имя кикера: {challenged_name}\n"
-            "Discord ID кикера: {challenged_id}\n"
-            "Услуга: {service_name}\n"
-            "Подключитесь через Личное сообщение:<@{challenged_id}>\n"
+            "🔔 Кикер принял ваш заказ и теперь начинает обслуживание. 🎉\n"
+            "📍 Имя пользователя кикера: {challenged_name}\n"
+            "📍 Discord ID кикера: {challenged_id}\n"
+            "📍 Услуга: XXX {service_name}\n"
+            "📍 Свяжитесь через личное сообщение:<@{challenged_id}>\n"
         )
     },
     "welcome_message": {
@@ -651,16 +661,16 @@ translations = {
         "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
     },
     "success_payment": {
-        "en": "Thank you for making the purchase!\nWe are matching Kickers for you now.\nPlease check your DM for service updates.\nYour balance is deducted {amount} USD for the service, which will be fully refunded if the service is not delivered.\nYour current account balance is {balance} USD.",
-        "ru": "Спасибо за покупку!\nМы подбираем для вас Кикеров.\nПожалуйста, проверяйте личные сообщения для получения обновлений по услуге.\nС вашего баланса снято {amount} USD за услугу.\nПолный возврат будет произведен, если услуга не будет оказана.\nВаш текущий баланс составляет {balance} USD."
+        "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🔔Thank you for making the order!\n🔉Matching Kickers for you now. Please check your DM for service updates.",
+        "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🔔Спасибо за покупку!\n🔉Подбираем кикеров для вас. Пожалуйста, проверьте личные сообщения для обновлений по услуге."
     },
     "server_error_payment": {
         "en": "Oops, something went wrong. Please try again...",
         "ru": "Упс, что-то пошло не так. Попробуйте позже..."
     },
     "not_enough_money_payment": {
-        "en": "Ooops, looks like your balance is not enough, choose one of the following options to top up:",
-        "ru": "Упс, не хватает баланса! Чтобы пополнить, выберите один из методов ниже:"
+        "en": "❗️Oops, you don’t have enough balance to complete this payment.\n💶 Top up via below methods to proceed with the purchase.",
+        "ru": "❗️Упс, у вас недостаточно средств для завершения платежа.\n💶 Пополните баланс через нижеуказанные методы, чтобы продолжить покупку."
     },
     "top_up_message": {
         "en": "Your current Discord SideKick balance is {balance} USD.\nTop up your balance to enjoy services in one click through the following methods:",
@@ -675,11 +685,11 @@ translations = {
         "ru": "♥️ Добро пожаловать в приложение SideKick!\n🔊Введение:\nSideKick — это социальная платформа на основе заказов, где вы можете найти партнеров по играм, играть, повышать ранги, общаться с девушками или профессиональными игроками по цене от 1 до 10 долларов. \nВы можете выбрать любую игру для совместной игры. Или зарегистрируйтесь в качестве Кикера, используя /profile, и зарабатывайте, используя свои игровые навыки. \nВы получаете 85% комиссии, играя в игры или общаясь с клиентами, принося им эмоциональную ценность и легко зарабатывая $1000 в месяц.\n🔔 Услуги включают: общение, Valorant, League of Legends, CSGO, Apex Legends, Naraka, PUBG, TFT... Доступные языки: английский, русский, арабский, китайский. Страны: Европа, Великобритания, Ближний Восток, Россия и соседние страны.\n🕹Команды:\n/order：получить заказы\n/go：найти кикеров\n/find：искать кикеров\n/profile：зарегистрироваться как кикер\nВведение:  #Introduction\nРазместить заказ:  /order+требование в #order-lobby.\nВы можете отправить подарок или оформить заказ, отправив команду /boost+имя кикера в #boost-a-kicker\nВы можете зарегистрироваться, чтобы зарабатывать деньги в качестве компаньона, нажав #Join us или отправив команду /profile\n\n🍧 Тысячи девушек онлайн для общения и игр, и профессиональные игроки готовы помочь вам повысить навыки.\n🧸 Зарегистрируйтесь как Кикер и зарабатывайте $5-20 в час, играя в игры, общаясь и помогая пользователям повышать свои навыки!\n✅Ссылка на Discord: https://discord.gg/sidekick\n✅Ссылка на Twitter: https://x.com/sidekick_labs"
     },
     "top_up_address_message": {
-        "en": "This is your {method} top up address: **{wallet}**. After a successful top up, you can use /topup again to check your updated balance.",
-        "ru": "Это ваш адрес пополнения {method}: **{wallet}**. После успешного пополнения вы можете снова использовать /topup, чтобы проверить обновленный баланс."
+        "en": "📥 This is your {method} top up address: **{wallet}**.\n🔔 After a successful top up, you will receive a DM confirmation.\n📍 You can also use /wallet again to check your updated balance.",
+        "ru": "📥 Это ваш адрес для пополнения {method}: **{wallet}**.\n🔔 После успешного пополнения вы получите подтверждение в ЛС.\n📍 Вы также можете использовать /wallet снова, чтобы проверить ваш обновленный баланс."
     },
     "wallet_balance_message": {
-        "en": "Your current Discord SideKick balance is **{balance} USD** 💰🤑\n\nopBNB USDT wallet 👝: \n**{wallet}**",
-        "ru": "Ваш текущий баланс в Discord SideKick составляет **{balance} USD** 💰🤑\n\nopBNB кошелёк для USDT 👝: \n**{wallet}**"
+        "en": "💶 Wallet Balance: **{balance} USD** \n📍 Wallet Address (opBNB / USDT)  🗃: {wallet}",
+        "ru": "💶 Баланс кошелька: **{balance} USD** \n📍 Адрес кошелька (opBNB / USDT)  🗃: {wallet}"
     }
 }
