@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Tuple
 
 from database.core_kicker_list import managers
 
@@ -85,35 +85,38 @@ class Services_Database(BasePsqlDTO):
             query: str = self.BASE_QUERY + " AND profile_id = ANY($1)"
             services = await conn.fetch(query, service_ids)
         return services
+    
+    async def _build_order_query(self, query: str) -> Tuple[str, List, int]:
+        query_args: list = []
+        variable_count: int = 1
+        # TODO: NEED REFACTORING. Code duplicated
+        if self.app_choice and self.app_choice != "ALL":
+            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+            query += filter_seq + f" tag = ${variable_count}"
+            variable_count += 1
+            query_args.append(self.app_choice)
+        if self.sex_choice:
+            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+            query += filter_seq + f" profile_gender = ${variable_count}"
+            variable_count += 1
+            query_args.append(self.sex_choice)
+        if self.language_choice:
+            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+            query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
+            variable_count += 1
+            query_args.append(self.language_choice)
+        if self.server_choice:
+            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+            query += filter_seq + f" server = ${variable_count}"
+            variable_count += 1
+            query_args.append(self.server_choice)
+        return query, query_args, variable_count
 
     async def get_kickers_by_service_title(self) -> List[dict]:
+        query = self.BASE_QUERY.replace("*", "discord_id")
         async with self.get_connection() as conn:
-            query = self.BASE_QUERY.replace("*", "discord_id")
-            query_args: list = []
-            variable_count: int = 1
-            # TODO: NEED REFACTORING. Code duplicated
-            if self.app_choice and self.app_choice != "ALL":
-                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-                query += filter_seq + f" tag = ${variable_count}"
-                variable_count += 1
-                query_args.append(self.app_choice)
-            if self.sex_choice:
-                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-                query += filter_seq + f" profile_gender = ${variable_count}"
-                variable_count += 1
-                query_args.append(self.sex_choice)
-            if self.language_choice:
-                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-                query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
-                variable_count += 1
-                query_args.append(self.language_choice)
-            if self.server_choice:
-                filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-                query += filter_seq + f" server = ${variable_count}"
-                variable_count += 1
-                query_args.append(self.server_choice)
+            query, query_args, _ = await self._build_order_query(query)
             query += " GROUP BY discord_id"
-            print(query)
             kicker_ids = await conn.fetch(query, *query_args)
         kickers_ids_int = []
         for kicker_id in kicker_ids:
@@ -123,6 +126,16 @@ class Services_Database(BasePsqlDTO):
                 print(f"GET KICKERS ERROR: {e}")
                 continue
         return set(kickers_ids_int)
+    
+    async def get_kicker_order_service(self, discord_id: int) -> List[dict]:
+        async with self.get_connection() as conn:
+            query, query_args, var_count = await self._build_order_query(self.BASE_QUERY)
+            filter_seq = " AND" if "WHERE" in query else " WHERE"
+            query += filter_seq + f" discord_id = ${var_count}"
+            query_args.append(str(discord_id))
+            print(query)
+            services = await conn.fetch(query, *query_args)
+        return services
 
     async def fetch_chunk(self):
         async with self.get_connection() as conn:

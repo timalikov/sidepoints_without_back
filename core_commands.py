@@ -478,29 +478,12 @@ async def on_guild_join(guild: discord.Guild):
         logger.error(str(e))
 
 
-def _create_channels_async_to_sync(guild_id: int):
-    guild = bot.get_guild(guild_id)
-    if not guild:
-        return
-    try:
-        asyncio.run_coroutine_threadsafe(
-            create_all_required_channels(guild=guild),
-            loop=bot.loop
-        )
-    except Exception:
-        return
-
-
 async def _create_channels() -> None:
-    threads: list[threading.Thread] = []
     for guild in bot.guilds:
-        thread = threading.Thread(
-            target=_create_channels_async_to_sync,
-            args=(guild.id,)
-        )
-        threads.append(thread)
-        thread.start()
-    [thread.join() for thread in threads]
+        try:
+            await create_all_required_channels(guild=guild),
+        except Exception:
+            continue
 
 
 @bot.event
