@@ -97,6 +97,7 @@ class OrderView(discord.ui.View):
         self,
         kickers: List[discord.User]
     ) -> None:
+
         for kicker in kickers:
             try:
                 sent_message = await kicker.send(embed=self.embed_message, view=self)
@@ -198,6 +199,9 @@ class OrderView(discord.ui.View):
         services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
         if not services:
             return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
+        suitable_services = await self.services_db.get_kicker_order_service(kicker.id)
+        if not suitable_services:
+            return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
         service = services[0]
         embed = create_profile_embed(profile_data=service, lang=self.lang)
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")

@@ -685,5 +685,9 @@ translations = {
     "balance_topped_up_message": {
         "en": "Hey! Your balance has been topped up by **{amount} USDT**. Please enjoy using Sidekick! Wallet: **{wallet}**",
         "ru": "Привет! Ваш баланс пополнен на **{amount} USDT**. Приятного использования Sidekick! Кошелёк: **{wallet}**"
+    },
+    "not_suitable_message": {
+        "en": "You don't have suitable services!",
+        "ru": "У тебя нет подходящего серивса!"
     }
 }

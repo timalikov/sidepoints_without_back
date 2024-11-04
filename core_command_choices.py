@@ -12,10 +12,12 @@ async def services_autocomplete(
 ) -> List[app_commands.Choice]:
     dto = Services_Database()
     tags = await dto.get_all_active_tags()
-    return [
+    response = [
         app_commands.Choice(name=tag, value=tag)
         for tag in tags if current.lower() in tag.lower()
     ]
+    response.append(app_commands.Choice(name="All", value="ALL"))
+    return response
 
 
 async def servers_autocomplete(
