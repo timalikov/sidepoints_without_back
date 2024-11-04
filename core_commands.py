@@ -5,6 +5,8 @@ from discord import app_commands
 import discord.ext
 import discord.ext.commands
 from logging import getLogger
+import threading
+import asyncio
 
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
@@ -15,7 +17,8 @@ from background_tasks import (
     delete_old_channels,
     post_user_profiles,
     create_leaderboard,
-    send_random_guide_message
+    send_random_guide_message,
+    check_success_top_up_balance
 )
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
@@ -35,7 +38,10 @@ from views.order_view import OrderView
 from views.top_up_view import TopUpDropdownMenu
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
-from models.public_channel import get_or_create_channel_by_category_and_name
+from models.public_channel import (
+    get_or_create_channel_by_category_and_name,
+    create_all_required_channels
+)
 from models.payment import (
     get_server_wallet_by_discord_id
 )
@@ -472,14 +478,24 @@ async def on_guild_join(guild: discord.Guild):
         logger.error(str(e))
 
 
+async def _create_channels() -> None:
+    for guild in bot.guilds:
+        try:
+            await create_all_required_channels(guild=guild),
+        except Exception:
+            continue
+
+
 @bot.event
 async def on_ready():
     delete_old_channels.start()
     await bot.add_cog(InviteTracker(bot))
     await bot.tree.sync()
+    await _create_channels()
     post_user_profiles.start()
     create_leaderboard.start()
     send_random_guide_message.start()
+    check_success_top_up_balance.start()
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
 
 

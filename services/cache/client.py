@@ -1,4 +1,5 @@
-from typing import Dict, Optional, Any
+import re
+from typing import Dict, Optional, Any, Dict
 import time
 import threading
 
@@ -47,6 +48,55 @@ class _CustomCache:
         user_id: int,
     ) -> Optional[Dict[str, str]]:
         return self.get_value(key=f"{user_id}")
+    
+    def set_top_up(
+        self,
+        user_id: int,
+        balance: float
+    ) -> None:
+        self.set_value(
+            key=f"top_up_{user_id}",
+            value={"balance": balance, "attempt": 0}
+        )
+
+    def get_top_up(
+        self,
+        user_id: int
+    ) -> Optional[Dict[str, int]]:
+        return self.get_value(key=f"top_up_{user_id}")
+
+    def get_all_top_up_users(self) -> Optional[Dict[str, int]]:
+        pattern = r"^top_up_"
+        all_keys = self._stage.keys()
+        users: Dict[str, Dict[str, int]] = {}
+        key: str
+        for key in all_keys:
+            if re.match(pattern, key):
+                users[key.removeprefix("top_up_")] = self.get_value(key)
+        return users
+    
+    def delete_top_up(self, user_id: int) -> None:
+        try:
+            del self._stage[f"top_up_{user_id}"]
+        except KeyError:
+            return
+
+    def retry_top_up(
+        self,
+        user_id: int
+    ) -> Optional[Dict[str, int]]:
+        key = f"top_up_{user_id}"
+        value = self.get_top_up(user_id)
+        try:
+            attempt = int(value["attempt"])
+        except (ValueError, TypeError):
+            return
+        if attempt > 20:
+            self.delete_top_up(user_id)
+        else:
+            attempt += 1
+            value["attempt"] = attempt
+            self.set_value(key=key, value=value)
     
 
 custom_cache = _CustomCache()

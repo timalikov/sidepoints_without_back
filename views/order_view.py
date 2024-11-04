@@ -8,6 +8,8 @@ import discord
 from config import (
     ORDER_CATEGORY_NAME,
     ORDER_CHANNEL_NAME,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME
 )
 
 from database.dto.psql_services import Services_Database
@@ -95,6 +97,7 @@ class OrderView(discord.ui.View):
         self,
         kickers: List[discord.User]
     ) -> None:
+
         for kicker in kickers:
             try:
                 sent_message = await kicker.send(embed=self.embed_message, view=self)
@@ -106,7 +109,24 @@ class OrderView(discord.ui.View):
 
     async def send_all_messages(self) -> None:
         await self.send_channel_message()
+        await self.send_public_channel_message()
         await self.send_kickers_message()
+
+    async def send_public_channel_message(self) -> None:
+        """
+        Without @everyone and buttons.
+        """
+        channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=GUIDE_CHANNEL_NAME,
+            guild=bot.get_guild(self.guild_id)
+        )
+        try:
+            await channel.send(embed=self.embed_message)
+        except discord.errors.Forbidden:
+            print(f"Cannot send message to channel: {channel.id}")
+        except discord.DiscordException:
+            print(f"Failed to send message to channel: {channel.id}")
 
     async def send_channel_message(self) -> None:
         channel = await get_or_create_channel_by_category_and_name(
@@ -184,6 +204,9 @@ class OrderView(discord.ui.View):
         services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
         if not services:
             return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
+        suitable_services = await self.services_db.get_kicker_order_service(kicker.id)
+        if not suitable_services:
+            return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
         service = services[0]
         embed = create_profile_embed(profile_data=service, lang=self.lang)
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
@@ -309,6 +332,12 @@ class OrderAccessRejectView(discord.ui.View):
             discord_server_id=self.discord_service_id
         )
         balance = await get_usdt_balance_by_discord_user(interaction.user)
+        try:
+            guild: discord.Guild = bot.get_guild(
+                int(self.discord_service_id)
+            )
+        except ValueError:
+            guild: discord.Guild = None
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
@@ -327,6 +356,7 @@ class OrderAccessRejectView(discord.ui.View):
                 ),
                 "view": TopUpView(
                     amount=float(self.service["service_price"]) - float(balance),
+                    guild=guild,
                     lang=self.lang
                 )
             },

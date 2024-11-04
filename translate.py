@@ -691,5 +691,13 @@ translations = {
     "wallet_balance_message": {
         "en": "💶 Wallet Balance: **{balance} USD** \n📍 Wallet Address (opBNB / USDT)  🗃: {wallet}",
         "ru": "💶 Баланс кошелька: **{balance} USD** \n📍 Адрес кошелька (opBNB / USDT)  🗃: {wallet}"
+    },
+    "balance_topped_up_message": {
+        "en": "Hey! Your balance has been topped up by **{amount} USDT**. Please enjoy using Sidekick! Wallet: **{wallet}**",
+        "ru": "Привет! Ваш баланс пополнен на **{amount} USDT**. Приятного использования Sidekick! Кошелёк: **{wallet}**"
+    },
+    "not_suitable_message": {
+        "en": "You don't have suitable services!",
+        "ru": "У тебя нет подходящего серивса!"
     }
 }

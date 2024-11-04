@@ -134,6 +134,9 @@ FORUM_NAME = "🔎find-your-kickers"
 GUIDE_CATEGORY_NAME = "Sidekick: Match to Play"
 GUIDE_CHANNEL_NAME = "📥order-lobby"
 
+ANNOUNCEMENTS_CATEGORY_NAME = "Sidekick: Match to Play"
+ANNOUNCEMENTS_CHANNEL_NAME = "sidekick-announcement"
+
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
 LEADERBOARD_CATEGORY_NAME = "Community 😎"
