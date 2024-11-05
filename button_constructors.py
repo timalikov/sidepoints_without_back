@@ -163,7 +163,7 @@ class StopButton(discord.ui.View):
         self.stop_callback = stop_callback
         self.lang = lang
 
-    @discord.ui.button(label="Inform Kicker", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Stop notifications", style=discord.ButtonStyle.danger)
     async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         if await self.stop_callback():
             message = translations["stopped_notifications"][self.lang]
