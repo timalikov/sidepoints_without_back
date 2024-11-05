@@ -3,7 +3,7 @@ import uuid
 import discord
 
 from bot_instance import get_bot
-from config import BOOST_CHANNEL_ID, MAIN_GUILD_ID, TEST_ACCOUNTS
+from config import BOOST_CHANNEL_ID, GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME, MAIN_GUILD_ID, TEST_ACCOUNTS
 from translate import translations, get_lang_prefix
 
 from services.messages.customer_support_messenger import send_message_to_customer_support
@@ -13,7 +13,7 @@ from views.check_reaction import CheckReactionView
 from views.order_view import OrderView
 from database.dto.psql_services import Services_Database
 from models.enums import StatusCodes
-from models.public_channel import find_channel_by_category_and_name
+from models.public_channel import find_channel_by_category_and_name, get_or_create_channel_by_category_and_name
 
 bot = get_bot()
 
@@ -79,6 +79,21 @@ async def send_confirm_order_message(
     
     if kicker.id not in TEST_ACCOUNTS and customer.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, cs_team_message)
+
+    order_successful_message_embed = discord.Embed(
+        title=translations["order_successful"][lang],
+        description=translations["order_successful_description"][lang].format(
+            customer=customer.name,
+            kicker=kicker.name,
+        ),
+        colour=discord.Colour.green()
+    )
+    channel = await get_or_create_channel_by_category_and_name(
+        guild=bot.get_guild(discord_server_id),
+        category_name=GUIDE_CATEGORY_NAME,
+        channel_name=GUIDE_CHANNEL_NAME
+    )
+    channel.send(embed=order_successful_message_embed)
 
     customer_message_embed = discord.Embed(
         colour=discord.Colour.dark_blue(),
