@@ -102,6 +102,14 @@ translations = {
         'en': '🔴 Order in Process',
         'ru': '🔴 Заказ в процессе'
     },
+    'order_successful': {
+        'en': '🟢 Order Successful',
+        'ru': '🟢 Заказ успешен'
+    },
+    'order_successful_description': {
+        'en': '@{customer} Customer has successfully ordered @{kicker} Kicker',
+        'ru': '@{customer} Пользователь успешно заказал @{kicker} Кикер'
+    },
     'points_message': {
         'ru': "Для доступных задач нажмите ссылку ниже:\n{link}",
         'en': "For available tasks press the link below:\n{link}"
@@ -689,8 +697,8 @@ translations = {
         "ru": "📥 Это ваш адрес для пополнения {method}: **{wallet}**.\n🔔 После успешного пополнения вы получите подтверждение в ЛС.\n📍 Вы также можете использовать /wallet снова, чтобы проверить ваш обновленный баланс."
     },
     "wallet_balance_message": {
-        "en": "💶 Wallet Balance: **{balance} USD** \n📍 Wallet Address (opBNB / USDT)  🗃: {wallet}",
-        "ru": "💶 Баланс кошелька: **{balance} USD** \n📍 Адрес кошелька (opBNB / USDT)  🗃: {wallet}"
+        "en": "💶 Wallet Balance: **{balance} USD** \n📍 Wallet Address (opBNB / USDT)  🗃: {wallet}\n⬇️ Select the amount to top up:",
+        "ru": "💶 Баланс кошелька: **{balance} USD** \n📍 Адрес кошелька (opBNB / USDT)  🗃: {wallet}\n⬇️ Выберите количество средств для пополнения баланса:"
     },
     "balance_topped_up_message": {
         "en": "Hey! Your balance has been topped up by **{amount} USDT**. Please enjoy using Sidekick! Wallet: **{wallet}**",
