@@ -8,6 +8,7 @@ from config import (
     LINK_LEADERBOARD,
     MAIN_GUILD_ID,
     CHECK_IN_URL,
+    YELLOW_LOGO_COLOR,
 )
 from models.payment import get_jwt_token
 from services.cogs.invite_tracker import InviteTracker
@@ -47,7 +48,7 @@ class PointsView(discord.ui.View):
     def _build_embed_message_points(self):
         embed = discord.Embed(
             title=self.username + " " + translations["points"][self.lang],
-            color=discord.Color.from_rgb(255,211,14)
+            color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
         )
         embed.add_field(
             name=translations["total_points"][self.lang],

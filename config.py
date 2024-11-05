@@ -143,6 +143,8 @@ LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
 LEADERBOARD_CATEGORY_NAME = "Community 😎"
 POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points.png"
 
+YELLOW_LOGO_COLOR = [255, 211, 14]
+
 TEST_ACCOUNTS = [
     944953902015590410,
     958598106197405736,
