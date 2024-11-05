@@ -148,7 +148,7 @@ translations = {
     },
     'not_kicker': {
         'ru': "Вы не кикер!",
-        'en': "You are not kicker!"
+        'en': "You are not a kicker!"
     },
     'request_received': {
         'ru': "Заказчик получил ваш запрос!",
