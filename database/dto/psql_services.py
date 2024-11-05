@@ -277,6 +277,12 @@ class Services_Database(BasePsqlDTO):
             services = await conn.fetch(query)
         return services
     
+    async def get_kicker_score(self, discord_id):
+        async with self.get_connection() as conn:
+            query = "SELECT profile_score FROM discord_services WHERE discord_id = $1;"
+            score = await conn.fetchval(query, str(discord_id))
+        return score
+    
     async def log_to_database(self, discord_id, command_type, server_id):
         async with self.get_connection() as conn:
             if server_id is None:
