@@ -151,7 +151,6 @@ class Services_Database(BasePsqlDTO):
             filter_seq = " AND" if "WHERE" in query else " WHERE"
             query += filter_seq + f" discord_id = ${var_count}"
             query_args.append(str(discord_id))
-            print(query)
             services = await conn.fetch(query, *query_args)
         return services
 

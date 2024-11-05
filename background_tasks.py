@@ -118,7 +118,7 @@ async def delete_all_threads_and_clear_csv():
 guide_message_count: int = 0
 
 
-@tasks.loop(seconds=3)
+@tasks.loop(hours=12)
 async def send_random_guide_message() -> None:
     messages = [
         translations["guide_message_1"],
