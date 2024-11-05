@@ -26,6 +26,7 @@ from services.cache.client import custom_cache
 from web3_interaction.balance_checker import get_usdt_balance
 from views.refund_replace import RefundReplaceView
 from database.dto.psql_leaderboard import LeaderboardDatabase
+from database.dto.psql_services import Services_Database
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -114,11 +115,21 @@ async def delete_all_threads_and_clear_csv():
         writer.writerow([])
 
 
-@tasks.loop(hours=48)
+guide_message_count: int = 0
+
+
+@tasks.loop(seconds=3)
 async def send_random_guide_message() -> None:
-    # TODO: Need refactor. Code duplicated (on_guild_join) 
+    messages = [
+        translations["guide_message_1"],
+        translations["guide_message_2"],
+        translations["guide_message_3"],
+    ]
+    global guide_message_count
+    guide_message_count = (guide_message_count + 1) % 3
     for guild in bot.guilds:
-        message: str = translations["welcome_message"]["en"].format(server_name=guild.name)
+        lang = get_lang_prefix(guild.id)
+        message = messages[guide_message_count][lang]
         image = await ImageS3Bucket.get_image_by_url(
             "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
         )
@@ -148,6 +159,34 @@ async def post_user_profiles():
             forum_channel=forum_channel, guild=guild, bot=bot, order_type="ASC"
         )
         forum_channel.overwrites[guild.default_role].read_messages = True
+
+
+@tasks.loop(hours=24)
+async def rename_kickers():
+    guild = bot.get_guild(int(MAIN_GUILD_ID))
+    if not guild:
+        return
+    dto = Services_Database()
+    kickers = await dto.get_id_and_gender_kickers()
+    names: Dict[str, str] = {
+        "MALE": "『Kicker🎮{username}』",
+        "FEMALE": "『Kicker🍧{username}』"
+    }
+    for kicker in kickers:
+        try:
+            _id = int(kicker["discord_id"])
+        except (ValueError, TypeError):
+            continue
+        member = guild.get_member(_id)
+        if not member:
+            continue
+        prefix = names.get(kicker["profile_gender"])
+        if not prefix:
+            continue
+        if not member.nick:
+            await member.edit(nick=prefix.format(username=member.name))
+        elif not "kicker" in member.nick.lower():
+            await member.edit(nick=prefix.format(username=member.nick))
 
 
 @tasks.loop(seconds=30)

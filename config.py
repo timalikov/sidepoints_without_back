@@ -20,6 +20,7 @@ USDT_ADDRESS = os.getenv('USDT_ADDRESS')
 ABI_FILE_PATH = os.getenv('ABI_FILE_PATH')
 TOP_UP_URL = os.getenv('TOP_UP_URL')
 SERVER_WALLET_URL = os.getenv('SERVER_WALLET_URL')
+CHECK_IN_URL = os.getenv('CHECK_IN_URL')
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 PORT_ID = int(os.getenv('PORT_ID'))

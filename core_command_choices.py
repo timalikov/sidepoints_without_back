@@ -16,7 +16,7 @@ async def services_autocomplete(
         app_commands.Choice(name=tag, value=tag)
         for tag in tags if current.lower() in tag.lower()
     ]
-    response.append(app_commands.Choice(name="All", value="ALL"))
+    response.insert(0, app_commands.Choice(name="All", value="ALL"))
     return response
 
 
@@ -51,32 +51,14 @@ async def servers_autocomplete(
         for server in available_servers if current.lower() in server.lower()
     ]
 
-
-services_options = [
-    app_commands.Choice(name="League of Legends", value="League of Legends"),
-    app_commands.Choice(name="Naraka: Bladepoint", value="Naraka: Bladepoint"),
-    app_commands.Choice(name="CS:GO", value="CS:GO"),
-    app_commands.Choice(name="Apex Legends", value="Apex Legends"),
-    app_commands.Choice(name="Valorant", value="Valorant"),
-    app_commands.Choice(name="Overwatch2", value="Overwatch2"),
-    app_commands.Choice(name="PUBG", value="PUBG"),
-    app_commands.Choice(name="Fortnite", value="Fortnite"),
-    app_commands.Choice(name="Teamfight Tactic", value="Teamfight Tactic"),
-    app_commands.Choice(name="DOTA2", value="DOTA2"),
-    app_commands.Choice(name="World of Tanks", value="World of Tanks"),
-    app_commands.Choice(name="Just Chatting", value="Just Chatting"),
-    app_commands.Choice(name="Virtual Date", value="Virtual Date"),
-    app_commands.Choice(name="Watch Youtube", value="Watch Youtube"),
-    app_commands.Choice(name="Steam", value="Steam")
-]
-
 gender_options = [
+    app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
     app_commands.Choice(name="Female", value=Genders.FEMALE.value),
     app_commands.Choice(name="Male", value=Genders.MALE.value),
-    app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
 ]
 
 language_options = [
+    app_commands.Choice(name="Unimportant", value=Languages.UNIMPORTANT.value),
     app_commands.Choice(name="Russian", value=Languages.RU.value),
     app_commands.Choice(name="English", value=Languages.EN.value),
     app_commands.Choice(name="Spanish", value=Languages.ES.value),
@@ -91,5 +73,4 @@ language_options = [
     app_commands.Choice(name="Hindi", value=Languages.HI.value),
     app_commands.Choice(name="Turkish", value=Languages.TR.value),
     app_commands.Choice(name="Persian", value=Languages.FA.value),
-    app_commands.Choice(name="Unimportant", value=Languages.UNIMPORTANT.value),
 ]

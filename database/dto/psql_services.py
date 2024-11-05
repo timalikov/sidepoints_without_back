@@ -63,6 +63,24 @@ class Services_Database(BasePsqlDTO):
                 continue
         return set(kickers_ids_int)
     
+    async def get_id_and_gender_kickers(self) -> List[dict]:
+        query = self.BASE_QUERY.replace("*", "discord_id, profile_gender") + " GROUP BY discord_id, profile_gender;"
+        async with self.get_connection() as conn:
+            kickers = await conn.fetch(query)
+        kickers_ids_int = []
+        for kicker_id in kickers:
+            try:
+                kickers_ids_int.append(
+                    {
+                        "discord_id": int(kicker_id["discord_id"]),
+                        "profile_gender": kicker_id["profile_gender"]
+                    }
+                )
+            except ValueError as e:
+                print(f"GET KICKERS ERROR: {e}")
+                continue
+        return kickers_ids_int
+    
     async def get_super_kickers(self) -> List[dict]:
         async with self.get_connection() as conn:
             query = (

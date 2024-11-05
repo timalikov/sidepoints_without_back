@@ -18,7 +18,8 @@ from background_tasks import (
     post_user_profiles,
     create_leaderboard,
     send_random_guide_message,
-    check_success_top_up_balance
+    check_success_top_up_balance,
+    rename_kickers,
 )
 from database.dto.sql_subscriber import Subscribers_Database
 from database.dto.psql_services import Services_Database
@@ -492,6 +493,7 @@ async def on_ready():
     await bot.add_cog(InviteTracker(bot))
     await bot.tree.sync()
     await _create_channels()
+    rename_kickers.start()
     post_user_profiles.start()
     create_leaderboard.start()
     send_random_guide_message.start()
