@@ -202,11 +202,6 @@ class OrderView(discord.ui.View):
 
     async def _bot_order(self, interaction: discord.Interaction, kicker: discord.User):
         services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
-        if not services:
-            return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
-        suitable_services = await self.services_db.get_kicker_order_service(kicker.id)
-        if not suitable_services:
-            return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
         service = services[0]
         embed = create_profile_embed(profile_data=service, lang=self.lang)
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
@@ -247,6 +242,14 @@ class OrderView(discord.ui.View):
         if kicker in self.pressed_kickers:
             return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
 
+        services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
+        kicker_score: int = await self.services_db.get_kicker_score(kicker.id)
+        if not services or kicker_score < 100:
+            return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
+        suitable_services = await self.services_db.get_kicker_order_service(kicker.id)
+        if not suitable_services:
+            return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
+        
         await Services_Database().log_to_database(
             interaction.user.id, 
             "kicker_go_after_order", 
