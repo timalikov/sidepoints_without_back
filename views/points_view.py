@@ -1,4 +1,3 @@
-import requests
 from typing import Literal
 import discord
 
@@ -10,10 +9,9 @@ from config import (
     CHECK_IN_URL,
     YELLOW_LOGO_COLOR,
 )
-from models.payment import get_jwt_token
+from views.check_in_button import CheckInButton
 from services.cogs.invite_tracker import InviteTracker
 from services.logger.client import CustomLogger
-from services.messages.interaction import send_interaction_message
 from bot_instance import get_bot
 from translate import translations
 
@@ -25,6 +23,7 @@ class PointsView(discord.ui.View):
     def __init__(
         self, 
         *,
+        user: discord.User,
         username: str,
         total_points: int,
         rank: int,
@@ -44,6 +43,9 @@ class PointsView(discord.ui.View):
             row=1
             )
         )
+        # self.add_item(
+        #     CheckInButton(user=user, total_points=total_points, lang=lang)
+        # )
 
     def _build_embed_message_points(self):
         embed = discord.Embed(
@@ -103,22 +105,3 @@ class PointsView(discord.ui.View):
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=error_message, ephemeral=True)
-
-    # @discord.ui.button(label="Daily check in", style=discord.ButtonStyle.blurple, row=0)
-    # async def daily_check_in(self, interaction: discord.Interaction, button: discord.ui.Button):
-    #     await interaction.response.defer(ephemeral=True)
-    #     token = await get_jwt_token(user=interaction.user)
-    #     headers = {"Authorization": f"Bearer {token}"}
-    #     response = requests.post(
-    #         url=CHECK_IN_URL,
-    #         json={
-    #             "discordId": str(interaction.user.id)
-    #         },
-    #         headers=headers
-    #     )
-    #     if response.status_code != 200:
-    #         logger.http_warning("Daily CHECK IN", response)
-    #     await send_interaction_message(
-    #         interaction=interaction,
-    #         embed=discord.Embed(description="Good!")
-    #     )

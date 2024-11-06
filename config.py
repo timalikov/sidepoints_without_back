@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+BACKEND_DOMAIN = os.getenv("BACKEND_DOMAIN")
 MAIN_GUILD_ID = int(os.getenv('MAIN_GUILD_ID'))
 RU_GUILDS = [773446008053956650]
 GUILDS_FOR_TASKS = [*RU_GUILDS, MAIN_GUILD_ID]
@@ -13,14 +14,15 @@ INVITE_BOT_URL = f"https://discord.com/oauth2/authorize?client_id={CLIENT_ID}&pe
 JWT_AUTH_URL = os.getenv('JWT_AUTH_URL')
 JWT_AUTH_PASSWORD = os.getenv('JWT_AUTH_PASSWORD')
 
-PAYMENT_LINK = os.getenv('PAYMENT_LINK')
+PAYMENT_LINK = BACKEND_DOMAIN + "/api/purchase"
 
 OPBNB_URL = os.getenv('OPBNB_URL')
 USDT_ADDRESS = os.getenv('USDT_ADDRESS')
 ABI_FILE_PATH = os.getenv('ABI_FILE_PATH')
 TOP_UP_URL = os.getenv('TOP_UP_URL')
 SERVER_WALLET_URL = os.getenv('SERVER_WALLET_URL')
-CHECK_IN_URL = os.getenv('CHECK_IN_URL')
+CHECK_IN_URL = BACKEND_DOMAIN + "/api/wallets/check-in"
+CHECK_IN_AVAILABLE = BACKEND_DOMAIN + "/api/task-records/check-in-available"
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 PORT_ID = int(os.getenv('PORT_ID'))

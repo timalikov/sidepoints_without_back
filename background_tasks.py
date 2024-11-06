@@ -133,12 +133,12 @@ async def send_random_guide_message() -> None:
         image = await ImageS3Bucket.get_image_by_url(
             "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
         )
-        channel = await get_or_create_channel_by_category_and_name(
-            category_name=GUIDE_CATEGORY_NAME,
-            channel_name=GUIDE_CHANNEL_NAME,
-            guild=guild
-        )
         try:
+            channel = await get_or_create_channel_by_category_and_name(
+                category_name=GUIDE_CATEGORY_NAME,
+                channel_name=GUIDE_CHANNEL_NAME,
+                guild=guild
+            )
             await channel.send(message, file=discord.File(image, "guild_join.png"))
         except discord.DiscordException as e:
             logger.error(str(e))

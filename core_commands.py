@@ -453,6 +453,7 @@ async def points(interaction: discord.Interaction):
 
     view = PointsView(
         username=username,
+        user=interaction.user,
         total_points=total_points, 
         rank=rank, 
         lang=lang
