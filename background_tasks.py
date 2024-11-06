@@ -122,7 +122,6 @@ guide_message_count: int = 0
 
 @tasks.loop(hours=24)
 async def assign_roles_to_kickers() -> None:
-    print("ASSIGN ROLES TO KICKERS")
     guild: discord.Guild = bot.get_guild(int(MAIN_GUILD_ID))
     if not guild:
         logger.error("Guild not found. Check if the MAIN_GUILD_ID is correct.")
@@ -143,7 +142,7 @@ async def assign_roles_to_kickers() -> None:
             continue
 
         try:
-            services: List[Dict[str, str]] = await dto.get_services_by_discordId(super_kicker["discord_id"])
+            services: List[Dict[str, str]] = await dto.get_services_by_discordId(super_kicker_id)
         except Exception as e:
             logger.exception(f"Failed to fetch services for discord ID {super_kicker_id}.")
             continue
