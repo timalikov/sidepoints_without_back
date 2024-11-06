@@ -83,8 +83,8 @@ async def send_confirm_order_message(
     order_successful_message_embed = discord.Embed(
         title=translations["order_successful"][lang],
         description=translations["order_successful_description"][lang].format(
-            customer=customer.name,
-            kicker=kicker.name,
+            customer=customer.mention,
+            kicker=kicker.mention,
         ),
         colour=discord.Colour.from_rgb(*YELLOW_LOGO_COLOR)
     )

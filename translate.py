@@ -103,12 +103,12 @@ translations = {
         'ru': '🔴 Заказ в процессе'
     },
     'order_successful': {
-        'en': '🟡 Order Successful',
-        'ru': '🟡 Заказ успешен'
+        'en': '✅ Order Successful',
+        'ru': '✅ Заказ успешен'
     },
     'order_successful_description': {
-        'en': '@{customer} Customer has successfully ordered @{kicker} Kicker',
-        'ru': '@{customer} Пользователь успешно заказал @{kicker} Кикер'
+        'en': '{customer} Customer has successfully ordered {kicker} Kicker',
+        'ru': '{customer} Пользователь успешно заказал {kicker} Кикер'
     },
     'points_message': {
         'ru': "Для доступных задач нажмите ссылку ниже:\n{link}",
