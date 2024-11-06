@@ -8,6 +8,7 @@ from logging import getLogger
 import threading
 import asyncio
 
+from services.messages.base import send_confirm_order_message
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
 from views.find_view import FindView
