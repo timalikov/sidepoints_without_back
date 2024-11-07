@@ -3,7 +3,8 @@ import csv
 from logging import getLogger
 
 from datetime import datetime, timezone, timedelta
-from typing import Any, List, Literal, Dict
+from typing import Any, List, Literal, Dict, Optional, Set
+from database.dto.psql_roles import RolesDTO
 import discord
 from bot_instance import get_bot
 from translate import translations, get_lang_prefix
@@ -116,6 +117,88 @@ async def delete_all_threads_and_clear_csv():
 
 
 guide_message_count: int = 0
+
+
+@tasks.loop(hours=24)
+async def assign_roles_to_kickers() -> None:
+    guild: discord.Guild = bot.get_guild(int(MAIN_GUILD_ID))
+    if not guild:
+        logger.error("Guild not found. Check if the MAIN_GUILD_ID is correct.")
+        return
+
+    dto = Services_Database()
+    
+    try:
+        super_kicker_ids: Set[int] = await dto.get_super_kickers()
+    except Exception as e:
+        logger.exception("Failed to fetch super kickers from database.")
+        return
+
+    for super_kicker_id in super_kicker_ids:
+        member: Optional[discord.Member] = guild.get_member(super_kicker_id)
+        if not member:
+            logger.warning(f"Member with ID {super_kicker_id} not found in guild.")
+            continue
+
+        try:
+            services: List[Dict[str, str]] = await dto.get_services_by_discordId(super_kicker_id)
+        except Exception as e:
+            logger.exception(f"Failed to fetch services for discord ID {super_kicker_id}.")
+            continue
+        
+        if not services:
+            logger.info(f"No services found for member {member.display_name} ({member.id}).")
+            continue
+        
+        kicker_role = await get_or_create_role(guild, 'Kickers')
+        await assign_role(member, kicker_role)
+        for service in services:
+            service_tag = service.get("tag")
+            if service_tag:
+                role = await get_or_create_role(guild, service_tag)
+                await assign_role(member, role)
+
+            service_lang = service.get("profile_languages", [])
+            for lang in service_lang:
+                role = await get_or_create_role(guild, lang)
+                await assign_role(member, role)
+
+async def get_or_create_role(guild: discord.Guild, tag: str) -> Optional[discord.Role]:
+    dto = RolesDTO()
+    role_id: int = await dto.get_role_id_by_tag(tag, guild.id)
+    if role_id:
+        role: Optional[discord.Role] = discord.utils.get(guild.roles, id=role_id)
+        if role:
+            print(f"Role '{tag}' already exists in guild '{guild.name}'.")
+            return role
+
+    try:
+        role = await guild.create_role(name=tag)
+        logger.info(f"Created role '{tag}' in guild '{guild.name}'.")
+        await dto.save_role_id_by_tag(tag, guild.id, role.id)
+        return role
+    except discord.Forbidden:
+        logger.error(f"Missing permissions to create role '{tag}' in guild '{guild.name}'.")
+    except discord.HTTPException as e:
+        logger.exception(f"Failed to create role '{tag}' in guild '{guild.name}': {e}")
+    return None
+
+async def assign_role(member: discord.Member, role: Optional[discord.Role]) -> None:
+    if not role:
+        logger.warning(f"Role not found or could not be created for ")
+        return
+
+    if role in member.roles:
+        logger.info(f"Member {member.display_name} ({member.id}) already has the role '{role.name}'.")
+        return
+
+    try:
+        await member.add_roles(role)
+        logger.info(f"Added role '{role.name}' to member {member.display_name} ({member.id}) for ")
+    except discord.Forbidden:
+        logger.error(f"Missing permissions to add role '{role.name}' to member {member.display_name} ({member.id}).")
+    except discord.HTTPException as e:
+        logger.exception(f"Failed to add role '{role.name}' to member {member.display_name} ({member.id}): {e}")
 
 
 @tasks.loop(hours=12)

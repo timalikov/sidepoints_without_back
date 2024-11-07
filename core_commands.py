@@ -14,6 +14,7 @@ from views.find_view import FindView
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import (
+    assign_roles_to_kickers,
     delete_old_channels,
     post_user_profiles,
     create_leaderboard,
@@ -499,6 +500,7 @@ async def on_ready():
     create_leaderboard.start()
     send_random_guide_message.start()
     check_success_top_up_balance.start()
+    assign_roles_to_kickers.start()
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
 
 
