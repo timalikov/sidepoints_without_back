@@ -4,13 +4,12 @@ from logging import getLogger
 
 from datetime import datetime, timezone, timedelta
 from typing import Any, List, Literal, Dict, Optional, Set
+from database.dto.psql_roles import RolesDTO
 import discord
 from bot_instance import get_bot
 from translate import translations, get_lang_prefix
 from discord.ext import tasks
 from config import (
-    GAME_ROLES,
-    LANGUAGE_ROLES,
     MAIN_GUILD_ID,
     LEADERBOARD_CATEGORY_NAME,
     LEADERBOARD_CHANNEL_NAME,
@@ -150,38 +149,43 @@ async def assign_roles_to_kickers() -> None:
         if not services:
             logger.info(f"No services found for member {member.display_name} ({member.id}).")
             continue
-
+        
+        kicker_role = await get_or_create_role(guild, 'Kickers')
+        await assign_role(member, kicker_role)
         for service in services:
             service_tag = service.get("tag")
             if service_tag:
-                role = await get_or_create_role(guild, GAME_ROLES.get(service_tag, 0), service_tag)
-                await assign_role(member, role, f"Service tag '{service_tag}'")
+                role = await get_or_create_role(guild, service_tag)
+                await assign_role(member, role)
 
             service_lang = service.get("profile_languages", [])
             for lang in service_lang:
-                role = await get_or_create_role(guild, LANGUAGE_ROLES.get(lang, 0), lang)
-                await assign_role(member, role, f"Language '{lang}'")
+                role = await get_or_create_role(guild, lang)
+                await assign_role(member, role)
 
-async def get_or_create_role(guild: discord.Guild, role_id: int, role_name: str) -> Optional[discord.Role]:
-    """Gets a role by ID or creates it if it doesn't exist."""
-    role: Optional[discord.Role] = discord.utils.get(guild.roles, id=role_id)
-    if role:
-        return role
+async def get_or_create_role(guild: discord.Guild, tag: str) -> Optional[discord.Role]:
+    dto = RolesDTO()
+    role_id: int = await dto.get_role_id_by_tag(tag, guild.id)
+    if role_id:
+        role: Optional[discord.Role] = discord.utils.get(guild.roles, id=role_id)
+        if role:
+            print(f"Role '{tag}' already exists in guild '{guild.name}'.")
+            return role
 
     try:
-        role = await guild.create_role(name=role_name)
-        logger.info(f"Created role '{role_name}' in guild '{guild.name}'.")
+        role = await guild.create_role(name=tag)
+        logger.info(f"Created role '{tag}' in guild '{guild.name}'.")
+        await dto.save_role_id_by_tag(tag, guild.id, role.id)
         return role
     except discord.Forbidden:
-        logger.error(f"Missing permissions to create role '{role_name}' in guild '{guild.name}'.")
+        logger.error(f"Missing permissions to create role '{tag}' in guild '{guild.name}'.")
     except discord.HTTPException as e:
-        logger.exception(f"Failed to create role '{role_name}' in guild '{guild.name}': {e}")
+        logger.exception(f"Failed to create role '{tag}' in guild '{guild.name}': {e}")
     return None
 
-async def assign_role(member: discord.Member, role: Optional[discord.Role], context: str) -> None:
-    """Assigns a role to a member and logs any errors."""
+async def assign_role(member: discord.Member, role: Optional[discord.Role]) -> None:
     if not role:
-        logger.warning(f"Role not found or could not be created for {context}.")
+        logger.warning(f"Role not found or could not be created for ")
         return
 
     if role in member.roles:
@@ -190,7 +194,7 @@ async def assign_role(member: discord.Member, role: Optional[discord.Role], cont
 
     try:
         await member.add_roles(role)
-        logger.info(f"Added role '{role.name}' to member {member.display_name} ({member.id}) for {context}.")
+        logger.info(f"Added role '{role.name}' to member {member.display_name} ({member.id}) for ")
     except discord.Forbidden:
         logger.error(f"Missing permissions to add role '{role.name}' to member {member.display_name} ({member.id}).")
     except discord.HTTPException as e:
