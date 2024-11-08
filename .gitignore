@@ -4,5 +4,6 @@ __pycache__/
 sessionmanager-bundle/
 db-port-forward-prod.sh
 .gitignore
-
+env/
+lenv/
 

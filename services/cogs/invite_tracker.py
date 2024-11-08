@@ -1,5 +1,4 @@
 import asyncio
-from gettext import translation
 from bot_instance import get_bot
 from database.dto.psql_services import Services_Database
 import discord
@@ -8,7 +7,7 @@ from discord import Embed
 import json
 from config import INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
 from services.sqs_client import SQSClient
-from translate import get_lang_prefix
+from translate import get_lang_prefix, translations
 
 bot = get_bot()
 
@@ -41,9 +40,10 @@ class InviteTracker(commands.Cog):
             return
         
         lang = get_lang_prefix(member.guild.id)
-        
+     
+
         logs = self.bot.get_channel(int(self.logs_channel))
-        embed = Embed(description="Just joined the server", color=0x03d692)
+        embed = Embed(description=translations["first_join"][lang], color=0x03d692)
         embed.set_author(name=str(member), icon_url=member.display_avatar.url)
         embed.set_footer(text="ID: " + str(member.id))
         embed.timestamp = member.joined_at
@@ -67,14 +67,19 @@ class InviteTracker(commands.Cog):
 
                 if_user_already_invited = await self.services_db.check_if_user_already_been_invited(invited_discord_id=member.id)
                 if if_user_already_invited:
-                    await inviter.send(f"{member.name} User already invited.")
+                    await inviter.send(translations["already_invited"][lang].format(member_name=member.name))
                     return
                 
                 embed.add_field(
-                    name="Used invite",
-                    value=f"Inviter: {inviter.mention} (`{inviter}` | `{inviter.id}`)\n"
-                        f"Code: `{used_invite.code}`\nUses: `{used_invite.uses}`\nPoints: 100",
-                        inline=False
+                    name=translations["used_invited"][lang],
+                    value=translations["invited_user_point"][lang].format(
+                        inviter_mention=inviter.mention,
+                        inviter=inviter,
+                        inviter_id=inviter.id,
+                        code=used_invite.code,
+                        uses=used_invite.uses
+                    ),
+                    inline=False
                 )
                 
                 sqs = SQSClient()
@@ -82,13 +87,10 @@ class InviteTracker(commands.Cog):
 
                 is_user_rewarded = await self.services_db.check_if_user_rewarded(discord_id=inviter.id, reward_type="DISCORD_INVITE", server_id=0, invited_discord_id=member.id)
                 if is_user_rewarded:
-                    await inviter.send(translation["invite_already_rewarded"][lang])
+                    await inviter.send(translations["invite_already_rewarded"][lang])
                     return
                 else:
-                    await inviter.send(
-                        f"{member.name} has been invited to the SideKick server with your invite link: https://discord.gg/{used_invite.code} and you've gained 100 points.\n"
-                        "Check out https://app.sidekick.fans/tasks or use the /points command."
-                    )
+                    await inviter.send(translations["link_invite_message"][lang].format(member_name=member.name,used_invite_code=used_invite.code))
                     await self.services_db.save_user_reward(discord_id=inviter.id, reward_type="DISCORD_INVITE", server_id=0, invited_discord_id=member.id)
                 
                 await logs.send(embed=embed)
@@ -96,23 +98,23 @@ class InviteTracker(commands.Cog):
                 
             else:
                 embed.add_field(
-                    name="Used invite",
-                    value="Invite details could not be retrieved. Please check manually.",
+                    name=translations["task_records_name"][lang],
+                    value=translations["task_records_value"][lang],
                     inline=False
                 )
 
         except Exception as e:
             print(f"Error tracking invite on member join: {e}")
             embed.add_field(
-                name="Error",
-                value="Failed to track invite usage.",
+                name=translations["task_records_error_name"][lang],
+                value=translations ["task_records_error_value"][lang],
                 inline=False
             )
 
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        
+        lang = get_lang_prefix(guild.id)
         try:
             logs = bot.get_channel(int(INVITE_LOGS_CHANNEL_ID))
 
@@ -124,28 +126,33 @@ class InviteTracker(commands.Cog):
 
             if inviter:
                 if guild.member_count < 100:
-                    await inviter.send("You can receive points when the SideKick bot added to servers with 100 or more members.")
+                    await inviter.send(translations["guild_join_inviter"][lang])
                     return
                 if_bot_already_added = await self.services_db.check_if_bot_already_added(server_id=guild.id)
                 if if_bot_already_added:
-                    await inviter.send("The SideKick bot has already been added to this server.")
+                    await inviter.send(translations["guild_bot_is_added"][lang])
                     return
                 is_user_rewarded = await self.services_db.check_if_user_rewarded(discord_id=inviter.id, reward_type="DISCORD_BOT_INTEGRATION", server_id=guild.id, invited_discord_id=0)
                 if is_user_rewarded:
-                    await inviter.send("You have already been rewarded for adding the SideKick bot to this server.")
+                    await inviter.send(translations["guild_reward_adding"][lang])
                     return
                 else:
                     embed = discord.Embed(
-                        title="Bot Added to Server",
-                        description=f"The SideKick App has just been added to the server {guild.name} successfully and you’ve gained 1000 points.\nCheck out https://app.sidekick.fans/tasks or with the /points command.",
+                        title=translations["guild_bot_added_title"][lang],
+                        description=translations["guild_sidekick_app_added"][lang].format(guild_name=guild.name),
                         color=discord.Color.blue()
                     )
 
                     await inviter.send(embed=embed)
 
                     logs_embed = discord.Embed(
-                        title="Bot Added to Server",
-                        description=f"The SideKick App has just been added to the server {guild.name}.\nInviter: {inviter.mention} (`{inviter}` | `{inviter.id}`)\nPoints: 1000",
+                        title=translations["guild_sidekick_app_added_full_title"][lang],
+                        description=translations["guild_sidekick_app_added_full"][lang].format(
+                            guild_name=guild.name,
+                            inviter_mention=inviter.mention,
+                            inviter=inviter,
+                            inviter_id=inviter.id
+                        ),
                         color=discord.Color.blue()
                     )
                     
@@ -166,4 +173,3 @@ class InviteTracker(commands.Cog):
             self.invites.pop(guild.id)
         except KeyError:
             pass
-
