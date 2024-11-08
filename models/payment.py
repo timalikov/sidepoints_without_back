@@ -7,7 +7,8 @@ from config import (
     JWT_AUTH_PASSWORD,
     JWT_AUTH_URL,
     PAYMENT_LINK,
-    SERVER_WALLET_URL
+    SERVER_WALLET_URL,
+    BOOST_URL
 )
 
 from services.logger.client import CustomLogger
@@ -40,16 +41,20 @@ async def get_usdt_balance_by_discord_user(user: discord.User) -> float:
     return user_balance
 
 
-async def check_user_wallet(user: discord.User, target_service: Dict) -> PaymentStatusCodes:
+async def check_user_wallet(user: discord.User, amount: float) -> PaymentStatusCodes:
     user_balance: Decimal = await get_usdt_balance_by_discord_user(user)
     if isinstance(user_balance, str):
         return PaymentStatusCodes.OPBNB_PROBLEM
-    if user_balance < target_service["service_price"]:
+    if user_balance < amount:
         return PaymentStatusCodes.NOT_ENOUGH_MONEY
     return PaymentStatusCodes.SUCCESS
 
 
-async def get_jwt_token(user: discord.User) -> str:
+async def check_user_wallet_payment(user: discord.User, target_service: Dict) -> PaymentStatusCodes:
+    return await check_user_wallet(user=user, amount=target_service["service_price"])
+
+
+def get_jwt_token(user: discord.User) -> str:
     request_json = {
         "userId": str(user.id),
         "password": JWT_AUTH_PASSWORD
@@ -66,11 +71,11 @@ async def get_jwt_token(user: discord.User) -> str:
 
 
 async def send_payment(user: discord.User, target_service: Dict, discord_server_id: int) -> PaymentStatusCodes:
-    status_check = await check_user_wallet(user, target_service)
+    status_check = await check_user_wallet_payment(user, target_service)
     if status_check != PaymentStatusCodes.SUCCESS:
         logger.error(f"User id: {user.id} || Message: {status_check.name}")
         return status_check
-    token: str = await get_jwt_token(user)
+    token: str = get_jwt_token(user)
     headers: Dict = {"Authorization": f"Bearer {token}"}
     payment_json = {
         "discordServerId": str(discord_server_id),
@@ -89,3 +94,24 @@ async def send_payment(user: discord.User, target_service: Dict, discord_server_
         return PaymentStatusCodes.SERVER_PROBLEM
     logger.warning(payment_response.text)
     return PaymentStatusCodes.SUCCESS
+
+
+async def send_boost(user: discord.User, target_service: Dict, amount: int) -> PaymentStatusCodes:
+    status_check = await check_user_wallet(user, amount)
+    if status_check != PaymentStatusCodes.SUCCESS:
+        logger.error(f"User id: {user.id} || Message: {status_check.name}")
+        return status_check
+    token: str = get_jwt_token(user)
+    headers: Dict = {"Authorization": f"Bearer {token}"}
+    response = requests.post(
+        BOOST_URL,
+        headers=headers,
+        json={
+            "boostedId": str(target_service["profile_id"]),
+            "amount": amount
+        }
+    )
+    success = await handle_status_code(response)
+    if success:
+        return PaymentStatusCodes.SUCCESS
+    return PaymentStatusCodes.SERVER_PROBLEM

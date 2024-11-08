@@ -13,9 +13,10 @@ from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
 from models.forum import find_forum
-from models.payment import send_payment, get_usdt_balance_by_discord_user
+from models.payment import send_payment, get_usdt_balance_by_discord_user, send_boost
 from models.enums import PaymentStatusCodes
 from views.top_up_view import TopUpView
+from views.boost_view import BoostDropdownMenu
 from database.dto.psql_services import Services_Database
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 
@@ -204,7 +205,7 @@ class PlayView(View):
 
     @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_kicker")
     async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True, thinking=True)
         await Services_Database().log_to_database(
             interaction.user.id, 
             "boost_kicker", 
@@ -212,10 +213,12 @@ class PlayView(View):
         )
 
         if self.service:
-            payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{self.service['profile_id']}?side_auth=DISCORD"
+            dropdown = BoostDropdownMenu(target_service=self.service, lang=self.lang)
+            view = discord.ui.View(timeout=None)
+            view.add_item(dropdown)
             await send_interaction_message(
                 interaction=interaction,
-                message=translations["boost_profile_link"][self.lang].format(boost_link=payment_link)
+                view=view
             )
         else:
             await send_interaction_message(

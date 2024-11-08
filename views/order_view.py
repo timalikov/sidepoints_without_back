@@ -2,7 +2,6 @@ import asyncio
 from typing import Coroutine, List, Callable, Any, Literal
 from datetime import datetime
 import uuid
-import os
 import discord
 
 from config import (
@@ -19,7 +18,7 @@ from services.sqs_client import SQSClient
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.payment import get_usdt_balance_by_discord_user, send_payment
 from models.enums import PaymentStatusCodes
-from views.payment_button import PaymentButton
+from views.boost_view import BoostDropdownMenu
 from views.top_up_view import TopUpView
 from translate import translations
 
@@ -411,19 +410,20 @@ class OrderAccessRejectView(discord.ui.View):
 
     @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_kicker")
     async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True, thinking=True)
         await Services_Database().log_to_database(
             interaction.user.id, 
             "boost_kicker", 
             interaction.guild.id if interaction.guild else None
         )
-        services: list[dict] = await self.order_view.services_db.get_services_by_discordId(discordId=self.kicker_id)
-        if services:
-            service = services[0]
-            payment_link = f"{os.getenv('WEB_APP_URL')}/boost/{service['profile_id']}?side_auth=DISCORD"
+
+        if self.service:
+            dropdown = BoostDropdownMenu(target_service=self.service, lang=self.lang)
+            view = discord.ui.View(timeout=None)
+            view.add_item(dropdown)
             await send_interaction_message(
                 interaction=interaction,
-                message=translations["boost_profile_link"][self.lang].format(boost_link=payment_link)
+                view=view
             )
         else:
             await send_interaction_message(

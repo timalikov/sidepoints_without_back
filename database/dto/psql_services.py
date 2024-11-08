@@ -160,10 +160,15 @@ class Services_Database(BasePsqlDTO):
                 # Fetch user-specific services first
                 query_user = """
                 SELECT * FROM discord_services
-                WHERE LOWER(profile_username) = LOWER($1)
+                WHERE LOWER(profile_username) ILIKE $1
                 LIMIT $2 OFFSET $3;
                 """
-                user_chunk = await conn.fetch(query_user, self.user_name, self.CHUNK_SIZE, self.current_offset)
+                user_chunk = await conn.fetch(
+                    query_user,
+                    f"%{self.user_name.lower()}%",
+                    self.CHUNK_SIZE,
+                    self.current_offset
+                )
                 self.current_chunk.extend(user_chunk)
 
             # Fetch remaining services if user-specific services are less than CHUNK_SIZE
@@ -239,14 +244,13 @@ class Services_Database(BasePsqlDTO):
                 query = (
                     "SELECT * FROM discord_services "
                     "WHERE profile_username ILIKE $1 "
-                    "OR discord_username ILIKE $1 "
                     "LIMIT 1;"
                 )
                 query_args = [f"%{username}%"]
             else:
                 query = (
                     "SELECT * FROM discord_services "
-                    "WHERE (profile_username ILIKE $1 OR discord_username ILIKE $1) "
+                    "WHERE (profile_username ILIKE $1) "
                     "AND service_type_id = $2 "
                     "LIMIT 1;"
                 )

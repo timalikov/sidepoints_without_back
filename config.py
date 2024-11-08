@@ -23,6 +23,7 @@ TOP_UP_URL = os.getenv('TOP_UP_URL')
 SERVER_WALLET_URL = os.getenv('SERVER_WALLET_URL')
 CHECK_IN_URL = BACKEND_DOMAIN + "/api/wallets/check-in"
 CHECK_IN_AVAILABLE = BACKEND_DOMAIN + "/api/task-records/check-in-available"
+BOOST_URL = BACKEND_DOMAIN + "/api/boosts/custom"
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 PORT_ID = int(os.getenv('PORT_ID'))

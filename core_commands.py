@@ -5,8 +5,6 @@ from discord import app_commands
 import discord.ext
 import discord.ext.commands
 from logging import getLogger
-import threading
-import asyncio
 
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
@@ -360,7 +358,14 @@ async def wallet(interaction: discord.Interaction):
 
 @bot.tree.command(name="boost", description="Use this command to boost kickers!")
 @app_commands.describe(username="The username to find.")
-async def boost(interaction: discord.Interaction, username: str):
+@app_commands.describe(amount='Amount USDT')
+async def boost(interaction: discord.Interaction, username: str, amount: float):
+    if amount <= 0:
+        await send_interaction_message(
+            interaction=interaction,
+            message="Amount less 1!"
+        )
+        return
     guild_id: int = interaction.guild_id if interaction.guild_id else None
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
@@ -373,7 +378,7 @@ async def boost(interaction: discord.Interaction, username: str):
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    view = BoostView(user_name=username, lang=lang)
+    view = BoostView(user_name=username, lang=lang, amount=amount)
     await view.initialize()
     if view.no_user:
         if interaction.response.is_done():

@@ -43,9 +43,9 @@ class PointsView(discord.ui.View):
             row=1
             )
         )
-        # self.add_item(
-        #     CheckInButton(user=user, total_points=total_points, lang=lang)
-        # )
+        self.add_item(
+            CheckInButton(user=user, total_points=total_points, lang=lang, row=3)
+        )
 
     def _build_embed_message_points(self):
         embed = discord.Embed(
