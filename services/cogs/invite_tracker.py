@@ -106,8 +106,8 @@ class InviteTracker(commands.Cog):
         except Exception as e:
             print(f"Error tracking invite on member join: {e}")
             embed.add_field(
-                name=translations["task_records_errorName"][lang],
-                value=translations ["task_records_errorValue"][lang],
+                name=translations["task_records_error_name"][lang],
+                value=translations ["task_records_error_value"][lang],
                 inline=False
             )
 
@@ -130,7 +130,7 @@ class InviteTracker(commands.Cog):
                     return
                 if_bot_already_added = await self.services_db.check_if_bot_already_added(server_id=guild.id)
                 if if_bot_already_added:
-                    await inviter.send(translations["guild_bot_isAdded"][lang])
+                    await inviter.send(translations["guild_bot_is_added"][lang])
                     return
                 is_user_rewarded = await self.services_db.check_if_user_rewarded(discord_id=inviter.id, reward_type="DISCORD_BOT_INTEGRATION", server_id=guild.id, invited_discord_id=0)
                 if is_user_rewarded:
@@ -146,8 +146,8 @@ class InviteTracker(commands.Cog):
                     await inviter.send(embed=embed)
 
                     logs_embed = discord.Embed(
-                        title=translations["guild_sidekick_app_addedFull_title"][lang],
-                        description=translations["guild_sidekick_app_addedFull"][lang]
+                        title=translations["guild_sidekick_app_added_full_title"][lang],
+                        description=translations["guild_sidekick_app_added_full"][lang]
                         .format(guild_name=guild.name,inviter_mention=inviter.mention,inviter=inviter,inviter_id=inviter.id),
                         color=discord.Color.blue()
                     )
