@@ -727,5 +727,73 @@ translations = {
     "already_checked_in_message": {
         "en": "Oops! You have already checked in today. Please try again tomorrow!",
         "ru": "Упс! Вы уже отметились сегодня. Пожалуйста, попробуйте снова завтра!"
+    },
+    "first_join": {
+        "en": "Just joined the server",
+        "ru": "Присоединился к серверу"
+    },
+    "already_invited": {
+        "en": "{member_name} User already invited.",
+        "ru": "{member_name} Уже приглашен."
+    },
+    "invited_user_point": {
+        "en": "Inviter: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nCode: `{code}`\nUses: `{uses}`\nPoints: 100",
+        "ru": "Приглашающий : {inviter_mention} (`{inviter}` | `{inviter_id}`)\nКод: `{code}`\nИспользует: `{uses}`\nОчки: 100"
+    },
+    "used_invite": {
+        "en": "Used invite",
+        "ru": "Был приглашен"
+    },
+    "link_invite_message": {
+        "en": "{member_name} has been invited to the SideKick server with your invite link: https://discord.gg/{used_invite_code} and you've gained 100 points.\nCheck out https://app.sidekick.fans/tasks or use the /points command.",
+        "ru": "{member_name} был приглашен на сервер SideKick по вашему приглашению : https://discord.gg/{used_invite_code} за это вы получаете 100 очков.\nПереходите по ссылке https://app.sidekick.fans/tasks или используйте комманду /points."
+    },
+    "task_records_name": {
+        "en": "Used invite",
+        "ru": "Был приглашен"
+    },
+    "task_records_value": {
+        "en": "Invite details could not be retrieved. Please check manually.",
+        "ru": "Не удалось получить данные приглашения. Пожалуйста, проверьте вручную."
+    },
+    "task_records_error": {
+       "en": "Error tracking invite on member join: {e}",
+       "ru":"Ошибка отслеживания приглашения при присоединении участника: {e}"
+    },
+    "task_records_errorName": {
+       "en": "Error",
+       "ru": "Ошибка"
+    },
+   "task_records_errorValue": {
+       "en": "Failed to track invite usage.",
+       "ru": "Не удалось отследить использование приглашения."
+    },
+    "guild_join_inviter": {
+       "en": "You can receive points when the SideKick bot added to servers with 100 or more members.",
+       "ru": "Вы можете получить очки когда SideKick бот добавит вас на сервер, где есть как минимум 100 участников."
+    },
+    "guild_bot_isAdded" : {
+        "en": "The SideKick bot has already been added to this server.",
+        "ru": "SideKick бот уже добавлен на сервер."
+    },
+    "guild_reward_adding" : {
+        "en": "You have already been rewarded for adding the SideKick bot to this server.",
+        "ru": "Вы уже получили награду за добавление SideKick бота на этот сервер. "
+    },
+    "guild_bot_added_title" : {
+        "en" : "Bot added to server",
+        "ru" : "Бот добавлен на сервер"
+    },
+    "guild_sidekick_app_added" : {
+        "en": "The SideKick App has just been added to the server {guild_name} successfully and you’ve gained 1000 points.\nCheck out https://app.sidekick.fans/tasks or with the /points command.",
+        "ru": "Приложение Sidekick было успешно добавлено на сервер {guild_name} получено 1000 очков\nПереходите по ссылке https://app.sidekick.fans/tasks или используйте команду /points command."
+    },
+    "guild_sidekick_app_addedFull_title" : {
+        "en": "Bot added to the server",
+        "ru": "Бот добавлен на"
+    },
+    "guild_sidekick_app_addedFull" : {
+        "en":"The SideKick App has just been added to the server {guild_name}.\nInviter: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nPoints: 1000",
+        "ru":"Приложение Sidekick только что было добавлено на сервер {guild_name}.\nПригласил: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nОчки: 1000"
     }
 }
