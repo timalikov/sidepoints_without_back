@@ -147,8 +147,12 @@ class InviteTracker(commands.Cog):
 
                     logs_embed = discord.Embed(
                         title=translations["guild_sidekick_app_added_full_title"][lang],
-                        description=translations["guild_sidekick_app_added_full"][lang]
-                        .format(guild_name=guild.name,inviter_mention=inviter.mention,inviter=inviter,inviter_id=inviter.id),
+                        description=translations["guild_sidekick_app_added_full"][lang].format(
+                            guild_name=guild.name,
+                            inviter_mention=inviter.mention,
+                            inviter=inviter,
+                            inviter_id=inviter.id
+                        ),
                         color=discord.Color.blue()
                     )
                     
