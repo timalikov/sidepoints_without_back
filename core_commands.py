@@ -43,7 +43,7 @@ from models.public_channel import (
     create_all_required_channels
 )
 from models.payment import (
-    get_server_wallet_by_discord_id
+    get_server_wallet_by_discord_id,
 )
 from web3_interaction.balance_checker import get_usdt_balance
 from translate import get_lang_prefix, translations
@@ -448,11 +448,11 @@ async def points(interaction: discord.Interaction):
     username = interaction.user.name
     profile_id = await services_db.get_user_profile_id(discord_id=user_id)
     if not profile_id:
-        await send_interaction_message(interaction=interaction, message=translations["profile_not_found"][lang])
-        return
-
-    dto = LeaderboardDatabase()
-    user_ranking = await dto.get_user_ranking(profile_id=profile_id)
+        await get_server_wallet_by_discord_id(user_id)
+        user_ranking = {"total_score": 0, "total_pos": 0}
+    else:
+        dto = LeaderboardDatabase()
+        user_ranking = await dto.get_user_ranking(profile_id=profile_id)
     
     total_points = user_ranking.get('total_score', 0) if user_ranking else 0
     rank = user_ranking.get('total_pos', 0) if user_ranking else 0
