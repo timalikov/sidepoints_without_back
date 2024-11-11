@@ -8,6 +8,7 @@ from logging import getLogger
 
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
+from services.utils import hide_half_string
 from views.find_view import FindView
 from views.play_view import PlayView
 from bot_instance import get_bot
@@ -84,7 +85,14 @@ async def save_user_id(user_id):
     else:
         await services_db.save_user_wot_tournament(user_id)
 
-
+@bot.tree.command(name="cell", description="cell test")
+async def test(interaction: discord.Interaction):
+    await send_interaction_message(
+        interaction=interaction,
+        message=hide_half_string("5343423426")
+    )
+    
+    
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
     guild_id: int = interaction.guild_id if interaction.guild_id else None

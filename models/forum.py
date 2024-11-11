@@ -3,7 +3,6 @@ from typing import Optional
 import discord
 from discord import ForumTag
 
-from database.dto.sql_forum_server import ForumsOfServerDatabase
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 from database.dto.psql_services import Services_Database
 from config import FORUM_NAME, FORUM_CATEGORY_NAME
@@ -87,7 +86,6 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
         overwrites={guild.default_role: permissions},
         default_layout=discord.ForumLayoutType.gallery_view
     )
-    await ForumsOfServerDatabase.add_forum(str(guild.id), str(new_forum_channel.id))
     return new_forum_channel
 
 
