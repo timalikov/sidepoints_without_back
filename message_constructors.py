@@ -68,3 +68,22 @@ def create_profile_embed_2(
     )
     
     return embed
+
+
+def create_boost_embed(
+    profile_data: Dict,
+    amount: float,
+    lang: Literal["ru", "en"] = "en"
+):
+    image_url = profile_data['service_image']  
+    if isinstance(image_url, list):
+        image_url = random.choice(image_url)       
+    embed = discord.Embed(
+        title=profile_data['profile_username'],
+        description=translations["boost_question"][lang].format(
+            amount=amount,
+            username=profile_data["discord_username"]
+        )
+    )
+    embed.set_image(url=image_url)
+    return embed

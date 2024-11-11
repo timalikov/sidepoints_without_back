@@ -780,7 +780,7 @@ translations = {
         "en": "You have already been rewarded for adding the SideKick bot to this server.",
         "ru": "Вы уже получили награду за добавление SideKick бота на этот сервер. "
     },
-    "guild_bot_added_title" : {
+    "guild_bot_added_title": {
         "en" : "Bot added to server",
         "ru" : "Бот добавлен на сервер"
     },
@@ -788,11 +788,11 @@ translations = {
         "en": "The SideKick App has just been added to the server {guild_name} successfully and you’ve gained 1000 points.\nCheck out https://app.sidekick.fans/tasks or with the /points command.",
         "ru": "Приложение Sidekick было успешно добавлено на сервер {guild_name} получено 1000 очков\nПереходите по ссылке https://app.sidekick.fans/tasks или используйте команду /points command."
     },
-    "guild_sidekick_app_added_full_title" : {
+    "guild_sidekick_app_added_full_title": {
         "en": "Bot added to the server",
         "ru": "Бот добавлен на сервер"
     },
-    "guild_sidekick_app_added_full" : {
+    "guild_sidekick_app_added_full": {
         "en":"The SideKick App has just been added to the server {guild_name}.\nInviter: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nPoints: 1000",
         "ru":"Приложение Sidekick только что было добавлено на сервер {guild_name}.\nПригласил: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nОчки: 1000"
     },
@@ -800,4 +800,8 @@ translations = {
         "en": "@{username} has just boosted @{kickername} by {amount}. Let's celebrate!\nCheck it out in #🚀boost-a-kicker ",
         "ru": "@{username} только что поддержал @{kickername} на сумму {amount}. Давайте отпразднуем! Проверь в #🚀boost-a-kicker"
     },
+    "boost_question": {
+        "en": "Are you sure to boost @{username} with **{amount} USD** ?",
+        "ru": "Вы уверены что хотите забустить @{username} на сумму **{amount} USD** ?"
+    }
 }
