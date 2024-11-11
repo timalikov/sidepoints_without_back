@@ -84,13 +84,6 @@ async def save_user_id(user_id):
         return
     else:
         await services_db.save_user_wot_tournament(user_id)
-
-@bot.tree.command(name="cell", description="cell test")
-async def test(interaction: discord.Interaction):
-    await send_interaction_message(
-        interaction=interaction,
-        message=hide_half_string("5343423426")
-    )
     
     
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
