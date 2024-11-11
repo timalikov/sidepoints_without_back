@@ -8,6 +8,7 @@ from translate import translations, get_lang_prefix
 
 from services.messages.customer_support_messenger import send_message_to_customer_support
 from services.sqs_client import SQSClient
+from services.utils import hide_half_string
 from views.access_reject import AccessRejectView
 from views.check_reaction import CheckReactionView
 from views.order_view import OrderView
@@ -80,11 +81,13 @@ async def send_confirm_order_message(
     if kicker.id not in TEST_ACCOUNTS and customer.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, cs_team_message)
 
+    kicker_message_username = hide_half_string(kicker.name)
+    customer_message_username = hide_half_string(customer.name)
     order_successful_message_embed = discord.Embed(
         title=translations["order_successful"][lang],
         description=translations["order_successful_description"][lang].format(
-            customer=customer.mention,
-            kicker=kicker.mention,
+            customer=customer_message_username,
+            kicker=kicker_message_username,
         ),
         colour=discord.Colour.from_rgb(*YELLOW_LOGO_COLOR)
     )

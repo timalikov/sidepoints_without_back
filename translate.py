@@ -27,8 +27,8 @@ translations = {
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
     'order_new_alert_new':{
-        'ru': 'Юзер: **{customer_discord_id}**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
-        'en': 'Customer: **{customer_discord_id}**\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+        'ru': 'Юзер: ** {customer_discord_id} **\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': 'Customer: ** {customer_discord_id} **\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
     },
     'order_alert_title': {
         'ru': 'Новый заказ!',
@@ -107,8 +107,8 @@ translations = {
         'ru': '✅ Заказ успешен'
     },
     'order_successful_description': {
-        'en': '{customer} Customer has successfully ordered {kicker} Kicker',
-        'ru': '{customer} Пользователь успешно заказал {kicker} Кикер'
+        'en': '@{customer} Customer has successfully ordered @{kicker} Kicker',
+        'ru': '@{customer} Пользователь успешно заказал @{kicker} Кикер'
     },
     'points_message': {
         'ru': "Для доступных задач нажмите ссылку ниже:\n{link}",

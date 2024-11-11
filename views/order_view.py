@@ -15,6 +15,7 @@ from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
+from services.utils import hide_half_string
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.payment import get_usdt_balance_by_discord_user, send_payment
 from models.enums import PaymentStatusCodes
@@ -77,10 +78,14 @@ class OrderView(discord.ui.View):
             server = "Все" if self.lang == "ru" else "All"
 
         guild = bot.get_guild(self.guild_id)
+        if self.customer:
+            customer_discord_id: str = hide_half_string(str(self.customer.id))
+        else:
+            customer_discord_id: str = translations["order_from_webapp"][self.lang],
         embed = discord.Embed(
             title=translations["order_alert_title"][self.lang],
             description=translations["order_new_alert_new"][self.lang].format(
-                customer_discord_id=self.customer.id if self.customer else translations["order_from_webapp"][self.lang],
+                customer_discord_id=customer_discord_id,
                 choice=service_title,
                 server_name=guild.name,
                 language=language,
