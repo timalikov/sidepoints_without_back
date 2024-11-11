@@ -9,7 +9,9 @@ async def send_interaction_message(
     embed: discord.Embed = None,
     ephemeral: bool = True
 ) -> None:
-    kwargs = {"ephemeral": ephemeral}
+    kwargs: dict = {}
+    if ephemeral:
+        kwargs["ephemeral"] = ephemeral
     if message:
         kwargs["content"] = message
     if view:

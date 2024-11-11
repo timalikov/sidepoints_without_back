@@ -1,4 +1,5 @@
 from database.dto.psql_leaderboard import LeaderboardDatabase
+import re
 import os
 import discord
 from discord import app_commands
@@ -195,7 +196,12 @@ async def find(interaction: discord.Interaction, username: str):
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    view = await FindView.create(username=username, lang=lang)
+    pattern: str = r"<@(\d+)>"
+    if re.fullmatch(pattern, username):
+        user_id: int = int(username[2:-1])
+        view = await FindView.create(user_id=user_id, lang=lang)
+    else:
+        view = await FindView.create(username=username, lang=lang)
 
     if view.no_user:
         await interaction.followup.send(
@@ -378,7 +384,12 @@ async def boost(interaction: discord.Interaction, username: str, amount: float):
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    view = BoostView(user_name=username, lang=lang, amount=amount)
+    pattern: str = r"<@(\d+)>"
+    if re.fullmatch(pattern, username):
+        user_id: int = int(username[2:-1])
+        view = BoostView(user_id=user_id, lang=lang, amount=amount)
+    else:
+        view = BoostView(user_name=username, lang=lang, amount=amount)
     await view.initialize()
     if view.no_user:
         if interaction.response.is_done():

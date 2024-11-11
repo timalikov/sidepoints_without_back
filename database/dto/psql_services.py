@@ -238,19 +238,21 @@ class Services_Database(BasePsqlDTO):
             services = await conn.fetch(query, str(discordId))
         return services
     
-    async def get_services_by_username(self, username):
+    async def get_services_by_username(self, username: str):
+        username = username.removeprefix("@")
         async with self.get_connection() as conn:
             if self.app_choice == "ALL":
                 query = (
                     "SELECT * FROM discord_services "
                     "WHERE profile_username ILIKE $1 "
+                    "OR discord_username ILIKE $1 "
                     "LIMIT 1;"
                 )
                 query_args = [f"%{username}%"]
             else:
                 query = (
                     "SELECT * FROM discord_services "
-                    "WHERE (profile_username ILIKE $1) "
+                    "WHERE (profile_username ILIKE $1 OR discord_username ILIKE $1) "
                     "AND service_type_id = $2 "
                     "LIMIT 1;"
                 )

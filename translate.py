@@ -797,8 +797,8 @@ translations = {
         "ru":"Приложение Sidekick только что было добавлено на сервер {guild_name}.\nПригласил: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nОчки: 1000"
     },
     "public_boost_announcement_message": {
-        "en": "@{username} has just boosted @{kickername} by {amount}. Let's celebrate!\nCheck it out in #🚀boost-a-kicker ",
-        "ru": "@{username} только что поддержал @{kickername} на сумму {amount}. Давайте отпразднуем! Проверь в #🚀boost-a-kicker"
+        "en": "@{username} has just boosted @{kickername} by {amount}. Let's celebrate!\nCheck it out in {link}",
+        "ru": "@{username} только что поддержал @{kickername} на сумму {amount}. Давайте отпразднуем! Проверь в {link}"
     },
     "boost_question": {
         "en": "Are you sure to boost @{username} with **{amount} USD** ?",

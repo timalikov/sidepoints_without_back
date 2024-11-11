@@ -40,7 +40,7 @@ class KickerSortingService:
         try:
             member = main_guild.get_member(int(user_id))
         except ValueError as e:
-            print("IS USER ONLINE ERROR: {e}")
+            print(f"IS USER ONLINE ERROR: {e}")
             member = None
         return member is not None and member.status == discord.Status.online
 

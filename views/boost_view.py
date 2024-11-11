@@ -1,4 +1,4 @@
-from typing import Literal, List, Dict
+from typing import Literal, Dict
 import os
 from dotenv import load_dotenv
 
@@ -6,14 +6,13 @@ import discord
 from discord.ui import View
 
 from bot_instance import get_bot
-from config import APP_CHOICES, FORUM_NAME
+from config import APP_CHOICES, BOOST_KICKER_CATEGORY_NAME, BOOST_KICKER_CHANNEL_NAME
 from translate import translations
 
-from database.dto.sql_forum_posted import ForumUserPostDatabase
 from message_constructors import create_boost_embed
 from services.messages.interaction import send_interaction_message
 from models.payment import send_boost
-from models.forum import find_forum
+from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import PaymentStatusCodes
 from views.top_up_view import TopUpView
 from database.dto.psql_services import Services_Database
@@ -27,19 +26,34 @@ app_choices = APP_CHOICES
 
 
 class BoostView(View):
-    def __init__(self, user_name, amount: float, lang: Literal["ru", "en"] = "en"):
+    def __init__(
+        self,
+        amount: float,
+        user_name: str = None,
+        user_id: int = None,
+        lang: Literal["ru", "en"] = "en"
+    ) -> None:
         super().__init__(timeout=None)
         self.user_name = user_name
+        self.user_id = user_id
         self.no_user = False
-        self.service_db = Services_Database(user_name=self.user_name)
         self.user_data = None
         self.index = 0
         self.profile_embed = None
         self.amount = amount
         self.lang = lang
+        if user_id:
+            self.service_db = Services_Database()
+            self.service_index = 0
+        else:
+            self.service_db = Services_Database(user_name=self.user_name)
 
     async def initialize(self):
-        self.user_data = await self.service_db.get_next_service()
+        if self.user_id:
+            self.services = await self.service_db.get_services_by_discordId(self.user_id)
+            self.user_data = self.services[self.service_index]
+        else:
+            self.user_data = await self.service_db.get_next_service()
         if self.user_data:
             self.profile_embed = create_boost_embed(self.user_data, lang=self.lang, amount=self.amount)
         else:
@@ -58,13 +72,19 @@ class BoostView(View):
             target_service=target_service,
             amount=amount
         )
+        boost_channel = await get_or_create_channel_by_category_and_name(
+            category_name=BOOST_KICKER_CATEGORY_NAME,
+            channel_name=BOOST_KICKER_CHANNEL_NAME,
+            guild=bot.get_guild(main_guild_id)
+        )
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
                     description=translations["public_boost_announcement_message"][lang].format(
                         username=user.name,
                         kickername=target_service["discord_username"],
-                        amount=amount
+                        amount=amount,
+                        link=boost_channel.jump_url
                     ),
                     title="✅ Payment Success",
                     colour=discord.Colour.green()
@@ -82,14 +102,14 @@ class BoostView(View):
                     guild=guild,
                     lang=lang
                 ),
-                "ephemeral": False
+                "ephemeral": True
             },
             PaymentStatusCodes.SERVER_PROBLEM: {
                 "embed": discord.Embed(
                     description=translations["server_error_payment"][lang],
                     colour=discord.Colour.red()
                 ),
-                "ephemeral": False
+                "ephemeral": True
             },
         }
         response = messages_kwargs.get(payment_status_code)
@@ -124,8 +144,11 @@ class BoostView(View):
             "next_kicker", 
             interaction.guild.id if interaction.guild else None
         )
-
-        self.user_data = await self.service_db.get_next_service()
+        if self.user_id:
+            self.service_index += 1
+            self.user_data = self.services[self.service_index]
+        else:
+            self.user_data = await self.service_db.get_next_service()
 
         self.profile_embed = create_boost_embed(self.user_data, lang=self.lang, amount=self.amount)
         await interaction.edit_original_response(embed=self.profile_embed, view=self)

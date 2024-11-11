@@ -28,7 +28,13 @@ app_choices = APP_CHOICES
 
 class FindView(View):
     @classmethod
-    async def create(cls, user_choice="ALL", username=None, lang: Literal["ru", "en"] = "en"):
+    async def create(
+        cls,
+        user_choice = "ALL",
+        username: str = None,
+        user_id: int = None,
+        lang: Literal["ru", "en"] = "en"
+    ):
         services_db = Services_Database(app_choice=user_choice)
         instance = cls(None, services_db, lang=lang)
         
@@ -37,6 +43,9 @@ class FindView(View):
 
         if username:
             service = await services_db.get_services_by_username(username)
+        elif user_id:
+            services = await services_db.get_services_by_discordId(user_id)
+            service = services[0] if services else None
         else:
             service = await instance.kicker_sorting_service.fetch_first_service()
 
