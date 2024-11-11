@@ -757,20 +757,20 @@ translations = {
         "ru": "Не удалось получить данные приглашения. Пожалуйста, проверьте вручную."
     },
     "task_records_error": {
-       "en": "Error tracking invite on member join: {e}",
-       "ru":"Ошибка отслеживания приглашения при присоединении участника: {e}"
+        "en": "Error tracking invite on member join: {e}",
+        "ru":"Ошибка отслеживания приглашения при присоединении участника: {e}"
     },
     "task_records_error_name": {
-       "en": "Error",
-       "ru": "Ошибка"
+        "en": "Error",
+        "ru": "Ошибка"
     },
-   "task_records_error_value": {
-       "en": "Failed to track invite usage.",
-       "ru": "Не удалось отследить использование приглашения."
+    "task_records_error_value": {
+        "en": "Failed to track invite usage.",
+        "ru": "Не удалось отследить использование приглашения."
     },
     "guild_join_inviter": {
-       "en": "You can receive points when the SideKick bot added to servers with 100 or more members.",
-       "ru": "Вы можете получить очки когда SideKick бот добавит вас на сервер, где есть как минимум 100 участников."
+        "en": "You can receive points when the SideKick bot added to servers with 100 or more members.",
+        "ru": "Вы можете получить очки когда SideKick бот добавит вас на сервер, где есть как минимум 100 участников."
     },
     "guild_bot_is_added" : {
         "en": "The SideKick bot has already been added to this server.",
@@ -795,5 +795,9 @@ translations = {
     "guild_sidekick_app_added_full" : {
         "en":"The SideKick App has just been added to the server {guild_name}.\nInviter: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nPoints: 1000",
         "ru":"Приложение Sidekick только что было добавлено на сервер {guild_name}.\nПригласил: {inviter_mention} (`{inviter}` | `{inviter_id}`)\nОчки: 1000"
-    }
+    },
+    "public_boost_announcement_message": {
+        "en": "@{username} has just boosted @{kickername} by {amount}. Let's celebrate!\nCheck it out in #🚀boost-a-kicker ",
+        "ru": "@{username} только что поддержал @{kickername} на сумму {amount}. Давайте отпразднуем! Проверь в #🚀boost-a-kicker"
+    },
 }

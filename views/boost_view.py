@@ -61,10 +61,15 @@ class BoostView(View):
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
-                    description="Ok",
+                    description=translations["public_boost_announcement_message"][lang].format(
+                        username=user.name,
+                        kickername=target_service["discord_username"],
+                        amount=amount
+                    ),
                     title="✅ Payment Success",
                     colour=discord.Colour.green()
-                )
+                ),
+                "ephemeral": False
             },
             PaymentStatusCodes.NOT_ENOUGH_MONEY: {
                 "embed": discord.Embed(
@@ -76,13 +81,15 @@ class BoostView(View):
                     amount=amount,
                     guild=guild,
                     lang=lang
-                )
+                ),
+                "ephemeral": False
             },
             PaymentStatusCodes.SERVER_PROBLEM: {
                 "embed": discord.Embed(
                     description=translations["server_error_payment"][lang],
                     colour=discord.Colour.red()
-                )
+                ),
+                "ephemeral": False
             },
         }
         response = messages_kwargs.get(payment_status_code)

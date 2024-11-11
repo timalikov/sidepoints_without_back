@@ -6,9 +6,10 @@ async def send_interaction_message(
     interaction: discord.Integration,
     message: str = None,
     view: discord.ui.View = None,
-    embed: discord.Embed = None
+    embed: discord.Embed = None,
+    ephemeral: bool = True
 ) -> None:
-    kwargs = {"ephemeral": True}
+    kwargs = {"ephemeral": ephemeral}
     if message:
         kwargs["content"] = message
     if view:
