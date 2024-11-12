@@ -7,9 +7,12 @@ import discord.ext
 import discord.ext.commands
 from logging import getLogger
 
+
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
+from services.utils import hide_half_string
 from views.find_view import FindView
+from test_commands import TestCommands
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import (
@@ -56,6 +59,7 @@ from core_command_choices import (
     gender_options
 )
 
+
 main_guild_id: int = MAIN_GUILD_ID
 bot = get_bot()
 logger = getLogger("")
@@ -84,8 +88,8 @@ async def save_user_id(user_id):
         return
     else:
         await services_db.save_user_wot_tournament(user_id)
-
-
+    
+    
 @bot.tree.command(name="forum", description="Create or update SideKick forum! [Only channel owner]")
 async def forum_command(interaction: discord.Interaction):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
@@ -509,6 +513,8 @@ async def _create_channels() -> None:
 async def on_ready():
     delete_old_channels.start()
     await bot.add_cog(InviteTracker(bot))
+    if TEST:
+     await bot.add_cog(TestCommands(bot))
     await bot.tree.sync()
     await _create_channels()
     rename_kickers.start()
@@ -517,6 +523,7 @@ async def on_ready():
     send_random_guide_message.start()
     check_success_top_up_balance.start()
     assign_roles_to_kickers.start()
+    
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")
 
 
