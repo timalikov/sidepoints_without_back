@@ -8,11 +8,13 @@ import discord.ext.commands
 from logging import getLogger
 
 
+from services.messages.base import send_confirm_order_message
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
 from services.utils import hide_half_string
 from views.find_view import FindView
 from test_commands import TestCommands
+from views.order_dm_view import OrderDMView
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import (
@@ -287,19 +289,21 @@ async def order(
     text: str = ""
 ):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
+    interaction_user_id: int = interaction.user.id
+    interaction_user: discord.User = interaction.user
     lang = get_lang_prefix(guild_id)
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
     await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
-        interaction.user.id, 
+        interaction_user_id, 
         "/order", 
         guild_id
     )
-    await save_user_id(interaction.user.id)
+    await save_user_id(interaction_user_id)
     order_data = {
-        'user_id': interaction.user.id,
+        'user_id': interaction_user_id,
         'task_id': choices
     }
     await Order_Database.set_user_data(order_data)
@@ -316,12 +320,17 @@ async def order(
         )
     )
     view = OrderView(
-        customer=interaction.user,
+        customer=interaction_user,
         services_db=services_db,
         lang=lang,
         guild_id=guild_id,
         extra_text=text
     )
+    user_dm_view: OrderDMView = OrderDMView(order_view=view, lang=lang)
+    await interaction_user.send(
+        view=user_dm_view,
+        embed=user_dm_view.embed_message
+        )
     order_dispathing_embed = discord.Embed(
         title=translations["order_dispatching_title"][lang],
         description=translations["order_dispatching"][lang].format(link=main_link),

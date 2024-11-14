@@ -157,11 +157,13 @@ async def assign_roles_to_kickers() -> None:
             if service_tag:
                 role = await get_or_create_role(guild, service_tag)
                 await assign_role(member, role)
+                await asyncio.sleep(1)
 
             service_lang = service.get("profile_languages", [])
             for lang in service_lang:
                 role = await get_or_create_role(guild, lang)
                 await assign_role(member, role)
+                await asyncio.sleep(1)
 
 async def get_or_create_role(guild: discord.Guild, tag: str) -> Optional[discord.Role]:
     dto = RolesDTO()

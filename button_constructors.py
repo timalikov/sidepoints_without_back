@@ -190,3 +190,13 @@ class InformKickerButton(discord.ui.View):
             self.informed = True
 
             await interaction.response.edit_message(view=self)
+
+
+class StopDispatchingButton(discord.ui.Button):
+    def __init__(self, *, order_view: discord.ui.View):
+        super().__init__(label="Stop Dispatching", style=discord.ButtonStyle.danger, custom_id="stop_dispatching")
+        self.order_view = order_view
+
+    async def callback(self, interaction: discord.Interaction):
+        self.order_view.on_timeout()
+        await interaction.response.send_message("Stopped dispatching orders", ephemeral=True)
