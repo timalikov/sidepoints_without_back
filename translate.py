@@ -807,5 +807,14 @@ translations = {
     "boost_question": {
         "en": "Are you sure to boost @{username} with **{amount} USD** ?",
         "ru": "Вы уверены что хотите забустить @{username} на сумму **{amount} USD** ?"
+    },
+    "thanks_for_placing_order": {
+        "en": "🎟Thanks for placing an order",
+        "ru": "🎟Спасибо за размещение заказа"
+    },
+    "thanks_for_placing_order_description": {
+        "en": "While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.",
+        "ru": "Пока вы ждете отправку заказа, убедитесь, что у вас есть 💰достаточный баланс💰 на вашем счету.\nВы можете 💶пополнить💶 с помощью следующих методов."
     }
+
 }

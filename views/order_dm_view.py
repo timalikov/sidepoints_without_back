@@ -3,6 +3,7 @@ from button_constructors import StopDispatchingButton
 from config import YELLOW_LOGO_COLOR
 import discord
 from views.top_up_view import TopUpDropdownMenu
+from translate import translations
 
 class OrderDMView(discord.ui.View):
 
@@ -21,11 +22,10 @@ class OrderDMView(discord.ui.View):
         )
         self.add_item(StopDispatchingButton(order_view=order_view))
 
-
     def _build_embed_message_points(self):
         embed = discord.Embed(
-            title="🎟Thanks for placing an order",
-            description="While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.",
+            title=translations["thanks_for_placing_order"][self.lang],
+            description=translations["thanks_for_placing_order_description"][self.lang],    
             color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
         )
        
