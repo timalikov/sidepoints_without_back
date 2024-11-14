@@ -33,7 +33,8 @@ from config import (
     LINK_LEADERBOARD,
     GUIDE_CATEGORY_NAME,
     GUIDE_CHANNEL_NAME,
-    TEST
+    TEST,
+    YELLOW_LOGO_COLOR
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
@@ -255,9 +256,15 @@ async def order_all(interaction: discord.Interaction):
         lang=lang,
         guild_id=guild_id
     )
+
+    order_dispathing_embed = discord.Embed(
+        title=translations["order_dispatching_title"][lang],
+        description=translations["order_dispatching"][lang].format(link=main_link),
+        color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
+    )
     await interaction.followup.send(
-        translations["order_dispatching"][lang].format(link=main_link),
-        ephemeral=True
+        embed=order_dispathing_embed,
+        ephemeral=False
     )
     await view.send_all_messages()
 
@@ -315,9 +322,14 @@ async def order(
         guild_id=guild_id,
         extra_text=text
     )
+    order_dispathing_embed = discord.Embed(
+        title=translations["order_dispatching_title"][lang],
+        description=translations["order_dispatching"][lang].format(link=main_link),
+        color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
+    )
     await interaction.followup.send(
-        translations["order_dispatching"][lang].format(link=main_link),
-        ephemeral=True
+        embed=order_dispathing_embed,
+        ephemeral=False
     )
     await view.send_all_messages()
 

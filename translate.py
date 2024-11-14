@@ -94,9 +94,13 @@ translations = {
         'ru': 'Нажмите, чтобы посмотреть таблицу лидеров!',
         'en': 'Click to check the leaderboard!',
     },
+    'order_dispatching_title': {
+        'en': 'Your order is dispatching now',
+        'ru': 'Ваш заказ обрабатывается'
+    },
     'order_dispatching': {
-        'ru': 'Ваш заказ обрабатывается. Как только исполнители примут заказ, их профили будут отправлены вам в личные сообщения.\n{link}',
-        'en': 'Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{link}'
+        'ru': 'Как только исполнители примут заказ, их профили будут отправлены вам в личные сообщения.\n{link}',
+        'en': 'Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{link}'
     },
     'order_in_process': {
         'en': '🔴 Order in Process',
