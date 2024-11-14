@@ -387,8 +387,8 @@ translations = {
         )
     },
     "order_sent": {
-        "en": "🔔 Your order has been sent to Kicker {kicker_name} for confirmation.\n📥  If there is no response within 1 minute, you will not be charged your balance and will be able to replace the Kicker.",
-        "eu": "🔔 Ваш заказ отправлен кикеру {kicker_name} для подтверждения.\n📥  Если в течение 1 минуты не будет ответа, ваш баланс не будет списан, и вы сможете заменить кикера."
+        "en": "🔔 Your order has been sent to Kicker {kicker_name} for confirmation.\n📥  If there is no response within 5 minute, you will not be charged your balance and will be able to replace the Kicker.",
+        "eu": "🔔 Ваш заказ отправлен кикеру {kicker_name} для подтверждения.\n📥  Если в течение 5 минут не будет ответа, ваш баланс не будет списан, и вы сможете заменить кикера."
     },
     "order_confirmed": {
         "en": "✅ Order Confirmed",
@@ -803,5 +803,13 @@ translations = {
     "boost_question": {
         "en": "Are you sure to boost @{username} with **{amount} USD** ?",
         "ru": "Вы уверены что хотите забустить @{username} на сумму **{amount} USD** ?"
+    },
+    "final_boost_step_title": {
+        "en": "Final step!",
+        "ru": "Последний шаг!"
+    },
+    "final_boost_step_message": {
+        "en": "Only one step left to boost **{username}** by **{amount} USD**. Just click the button! 👇🏻",
+        "ru": "Остался последний шаг, чтобы забустить **{username}** на сумму **{amount} USD**. Просто нажми на кнопку! 👇🏻"
     }
 }

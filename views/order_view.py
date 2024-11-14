@@ -1,5 +1,5 @@
 import asyncio
-from typing import Coroutine, List, Callable, Any, Literal
+from typing import Coroutine, List, Any, Literal
 from datetime import datetime
 import uuid
 import discord
@@ -12,15 +12,10 @@ from config import (
 )
 
 from database.dto.psql_services import Services_Database
-from message_constructors import create_profile_embed
-from services.messages.interaction import send_interaction_message
-from services.sqs_client import SQSClient
 from services.utils import hide_half_string
 from models.public_channel import get_or_create_channel_by_category_and_name
-from models.payment import get_usdt_balance_by_discord_user, send_payment
-from models.enums import PaymentStatusCodes
-from views.boost_view import BoostDropdownMenu
-from views.top_up_view import TopUpView
+from views.buttons.order_go_button import OrderGoButton
+from views.buttons.count_button import CountButton
 from translate import translations
 
 from bot_instance import get_bot
@@ -62,6 +57,12 @@ class OrderView(discord.ui.View):
         else:
             self.order_id = str(uuid.uuid4())
         self.embed_message = self._build_embed_message_order(extra_text)
+        self.boost_amount = None
+        self.add_buttons()
+
+    def add_buttons(self) -> None:
+        self.add_item(OrderGoButton(lang=self.lang))
+        self.add_item(CountButton(lang=self.lang))
 
     def _build_embed_message_order(self, extra_text: str) -> str:
         service_title = self.services_db.app_choice
@@ -203,236 +204,3 @@ class OrderView(discord.ui.View):
                 color=discord.Color.red()
             )
             await self.customer.send(embed=timeout_message_embed, view=None)
-
-    async def _bot_order(self, interaction: discord.Interaction, kicker: discord.User):
-        services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
-        service = services[0]
-        embed = create_profile_embed(profile_data=service, lang=self.lang)
-        embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
-        view = OrderAccessRejectView(
-            customer=self.customer,
-            main_interaction=interaction,
-            service=service,
-            kicker_id=kicker.id,
-            order_view=self,
-            guild_id=self.guild_id,
-            lang=self.lang
-        )
-        view.message = await self.customer.send(embed=embed, view=view)
-
-        service_category = self.services_db.app_choice if self.services_db.app_choice == "ALL" else self.services_db.app_choice
-        await self.services_db.save_order(
-            timestamp=self.created_at,
-            order_id=self.order_id,
-            user_discord_id=self.customer.id,
-            kicker_discord_id=kicker.id,
-            order_category=service_category,
-            respond_time=datetime.now(),
-            service_price=service['service_price']
-        )
-        await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
-
-    async def _webapp_order(self, interaction: discord.Interaction, kicker: discord.User):
-        services = await self.services_db.get_services_by_discordId(kicker.id)
-        sqs = SQSClient()
-        sqs.send_order_confirm_message(order_id=self.order_id, service_id=services[0]["service_id"])
-        await send_interaction_message(interaction=interaction, message=translations['request_received'][self.lang])
-
-    @discord.ui.button(label="Go", style=discord.ButtonStyle.green)
-    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-
-        kicker = interaction.user
-        if kicker in self.pressed_kickers:
-            return await send_interaction_message(interaction=interaction, message=translations['already_pressed'][self.lang])
-
-        services: list[dict] = await self.services_db.get_services_by_discordId(discordId=kicker.id)
-        kicker_score: int = await self.services_db.get_kicker_score(kicker.id)
-        if not services or kicker_score < 100:
-            return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
-        suitable_services = await self.services_db.get_kicker_order_service(kicker.id)
-        if not suitable_services:
-            return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
-        
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "kicker_go_after_order", 
-            self.guild_id
-        )
-        self.pressed_kickers.append(kicker)
-
-        if not self.webapp_order:
-            await self._bot_order(interaction, kicker)
-        else:
-            await self._webapp_order(interaction, kicker)
-
-        number_of_clicks = len(self.pressed_kickers)
-        for item in self.children:
-            if isinstance(item, discord.ui.Button) and item.label.isdigit():
-                item.label = f"{number_of_clicks}"
-        
-        for message in self.messages:
-            await message.edit(view=self)
-        await interaction.message.edit(view=self)
-
-    @discord.ui.button(label="0", style=discord.ButtonStyle.gray, disabled=True)
-    async def count_clicks(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-
-
-class OrderAccessRejectView(discord.ui.View):
-    
-    def __init__(
-        self,
-        *,
-        customer: discord.User,
-        main_interaction: discord.Interaction,
-        service: dict,
-        kicker_id: int,
-        guild_id: int,
-        order_view: Any,
-        lang: Literal["en", "ru"]
-
-    ) -> None:
-        super().__init__(timeout=10 * 30)
-        self.main_interaction = main_interaction
-        self.service = service
-        self.service_id = service['service_id']
-        self.kicker_id = kicker_id
-        self.customer = customer
-        self.already_pressed = False
-        self.discord_service_id = guild_id
-        self.order_view = order_view
-        self.lang = lang
-
-    async def on_timeout(self) -> Coroutine[Any, Any, None]:
-        await self.message.edit(view=None)
-
-    def check_already_pressed(func: Callable) -> Callable:
-        async def decorator(self, interaction: discord.Interaction, *args, **kwargs) -> None:
-            if not self.already_pressed:
-                result: Any = await func(self, interaction, *args, **kwargs)
-                self.already_pressed = True
-                return result
-            else:
-                await send_interaction_message(
-                    interaction=interaction,
-                    message=translations['already_pressed'][self.lang]
-                )
-        return decorator
-
-    @discord.ui.button(
-        label="Go",
-        style=discord.ButtonStyle.green,
-        custom_id="access"
-    )
-    @check_already_pressed
-    async def access(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ) -> None:
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        payment_status_code = await send_payment(
-            user=interaction.user,
-            target_service=self.service,
-            discord_server_id=self.discord_service_id
-        )
-        balance = await get_usdt_balance_by_discord_user(interaction.user)
-        try:
-            guild: discord.Guild = bot.get_guild(
-                int(self.discord_service_id)
-            )
-        except ValueError:
-            guild: discord.Guild = None
-        messages_kwargs = {
-            PaymentStatusCodes.SUCCESS: {
-                "embed": discord.Embed(
-                    description=translations["success_payment"][self.lang].format(
-                        amount=self.service["service_price"], balance=balance
-                    ),
-                    title="✅ Payment Success",
-                    colour=discord.Colour.green()
-                )
-            },
-            PaymentStatusCodes.NOT_ENOUGH_MONEY: {
-                "embed": discord.Embed(
-                    description=translations["not_enough_money_payment"][self.lang],
-                    title="🔴 Not enough balance",
-                    colour=discord.Colour.gold()
-                ),
-                "view": TopUpView(
-                    amount=float(self.service["service_price"]) - float(balance),
-                    guild=guild,
-                    lang=self.lang
-                )
-            },
-            PaymentStatusCodes.SERVER_PROBLEM: {
-                "embed": discord.Embed(
-                    description=translations["server_error_payment"][self.lang],
-                    colour=discord.Colour.red()
-                )
-            },
-        }
-        message_kwargs = messages_kwargs.get(payment_status_code, translations["server_error_payment"][self.lang])
-        await send_interaction_message(
-            interaction=interaction,
-            **message_kwargs
-        )
-        button.disabled = True
-
-    @discord.ui.button(
-        label="Reject",
-        style=discord.ButtonStyle.red,
-        custom_id="reject"
-    )
-    @check_already_pressed
-    async def reject(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button
-    ) -> None:
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "user_reject_after_order", 
-            interaction.guild.id if interaction.guild else None
-        )
-        await interaction.message.edit(embed=discord.Embed(description=translations['canceled'][self.lang]), view=None)
-
-    @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_kicker")
-    async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "chat_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-        chat_link = translations["trial_chat_with_kicker"][self.lang].format(user_id=self.kicker_id)
-        await send_interaction_message(
-            interaction=interaction,
-            message=chat_link
-        )
-
-    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_kicker")
-    async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "boost_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        if self.service:
-            dropdown = BoostDropdownMenu(target_service=self.service, lang=self.lang)
-            view = discord.ui.View(timeout=None)
-            view.add_item(dropdown)
-            await send_interaction_message(
-                interaction=interaction,
-                view=view
-            )
-        else:
-            await send_interaction_message(
-                interaction=interaction,
-                message=translations["no_user_found_to_boost"][self.lang]
-            )
-            print(f"Boost button clicked, but no service found for user {interaction.user.id}")

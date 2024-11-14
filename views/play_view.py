@@ -1,24 +1,20 @@
 from typing import Literal
 
-import discord
 from discord.ui import View
 
 import os
 from dotenv import load_dotenv
 
-from translate import translations
-from config import APP_CHOICES, MAIN_GUILD_ID, FORUM_NAME
+from config import APP_CHOICES
 from services.kicker_sort_service import KickerSortingService
-from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
-from models.forum import find_forum
-from models.payment import send_payment, get_usdt_balance_by_discord_user, send_boost
-from models.enums import PaymentStatusCodes
-from views.top_up_view import TopUpView
-from views.boost_view import BoostDropdownMenu
+from views.buttons.boost_button import BoostButton
+from views.buttons.payment_button import PaymentButton
+from views.buttons.next_button import NextButton
+from views.buttons.share_button import ShareButton
+from views.buttons.chat_button import ChatButton
 from database.dto.psql_services import Services_Database
-from database.dto.sql_forum_posted import ForumUserPostDatabase
 
 
 bot = get_bot()
@@ -46,7 +42,7 @@ class PlayView(View):
             instance.set_service(service)
         else:
             instance.no_user = True
-
+        instance.add_buttons()
         return instance 
     
     def __init__(
@@ -63,6 +59,21 @@ class PlayView(View):
         self.kicker_sorting_service = None
         self.lang = lang
 
+    def add_buttons(self) -> None:
+        payment_button = PaymentButton(lang=self.lang)
+        next_button = NextButton(
+            kicker_sorting_service=self.kicker_sorting_service,
+            lang=self.lang
+        )
+        share_button = ShareButton(lang=self.lang)
+        boost_button = BoostButton(show_dropdown=True, lang=self.lang)
+        chat_button = ChatButton(lang=self.lang)
+        self.add_item(payment_button)
+        self.add_item(next_button)
+        self.add_item(share_button)
+        self.add_item(chat_button)
+        self.add_item(boost_button)
+
     def set_service(self, service):
         """
         Helper function to set the service and create the embed.
@@ -70,159 +81,3 @@ class PlayView(View):
         self.service = service
         self.profile_embed = create_profile_embed(service, lang=self.lang)
         self.no_user = False  
-
-    @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
-    async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        discord_server_id = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
-        payment_status_code = await send_payment(
-            user=interaction.user,
-            target_service=self.service,
-            discord_server_id=discord_server_id
-        )
-        balance = await get_usdt_balance_by_discord_user(interaction.user)
-        try:
-            guild: discord.Guild = bot.get_guild(
-                int(discord_server_id)
-            )
-        except ValueError:
-            guild: discord.Guild = None
-        messages_kwargs = {
-            PaymentStatusCodes.SUCCESS: {
-                "embed": discord.Embed(
-                    description=translations["success_payment"][self.lang].format(
-                        amount=self.service["service_price"], balance=balance
-                    ),
-                    title="✅ Payment Success",
-                    colour=discord.Colour.green()
-                )
-            },
-            PaymentStatusCodes.NOT_ENOUGH_MONEY: {
-                "embed": discord.Embed(
-                    description=translations["not_enough_money_payment"][self.lang],
-                    title="🔴 Not enough balance",
-                    colour=discord.Colour.gold()
-                ),
-                "view": TopUpView(
-                    amount=float(self.service["service_price"]) - float(balance),
-                    guild=guild,
-                    lang=self.lang
-                )
-            },
-            PaymentStatusCodes.SERVER_PROBLEM: {
-                "embed": discord.Embed(
-                    description=translations["server_error_payment"][self.lang],
-                    colour=discord.Colour.red()
-                )
-            },
-        }
-        message_kwargs = messages_kwargs.get(payment_status_code, translations["server_error_payment"][self.lang])
-        await send_interaction_message(
-            interaction=interaction,
-            **message_kwargs
-        )
-        button.disabled = True
-
-    @discord.ui.button(label="Next", style=discord.ButtonStyle.primary, custom_id="next_kicker")
-    async def next(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "next_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-        next_service = await self.kicker_sorting_service.get_next_valid_service()
-        if next_service:
-            self.set_service(next_service)
-            await interaction.edit_original_response(embed=self.profile_embed, view=self)
-        else:
-            await interaction.followup.send(
-                translations["no_valid_players"][self.lang],
-                ephemeral=True
-            )
-
-    @discord.ui.button(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_kicker")
-    async def share(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "share_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        user_id = self.service['discord_id']
-        forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
-        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(user_id, interaction.guild.id)
-
-        message: str = ""
-        if thread_id:
-            try:
-                thread = forum.get_thread(int(thread_id))
-            except ValueError as e:
-                print("Play View SHARE ERROR: {e}")
-                thread = None
-            if not thread:
-                message = translations["profile_not_found"][self.lang]
-            else:
-                message = (
-                    translations["share_profile_account"][self.lang]
-                    .format(profile_link=thread.jump_url)
-                )
-        else:
-            message = translations["sidekicker_account_not_posted"][self.lang]
-        if interaction.response.is_done():
-            await interaction.followup.send(message, ephemeral=True)
-        else:
-            await interaction.response.send_message(message, ephemeral=True)
-
-    @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_kicker")
-    async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "chat_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        user_id = self.service['discord_id']
-        try:
-            member = interaction.guild.get_member(int(user_id))
-        except ValueError as e:
-            print(f"CHAT ERROR: {e}")
-            member = None
-        if member:
-            chat_link = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
-            if interaction.response.is_done():
-                await interaction.followup.send(chat_link, ephemeral=True)
-            else:
-                await interaction.response.send_message(chat_link, ephemeral=True)
-        else:
-            chat_link = translations["connect_with_user"][self.lang].format(user_id=user_id)
-            await interaction.followup.send(
-                translations["connect_with_user"][self.lang].format(user_id=user_id),
-                ephemeral=True
-            )
-
-    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_kicker")
-    async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "boost_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        if self.service:
-            dropdown = BoostDropdownMenu(target_service=self.service, lang=self.lang)
-            view = discord.ui.View(timeout=None)
-            view.add_item(dropdown)
-            await send_interaction_message(
-                interaction=interaction,
-                view=view
-            )
-        else:
-            await send_interaction_message(
-                interaction=interaction,
-                message=translations["no_user_found_to_boost"][self.lang]
-            )
-            print(f"Boost button clicked, but no service found for user {interaction.user.id}")

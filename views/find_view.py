@@ -1,22 +1,17 @@
 from typing import Literal
 
-import discord
 from discord.ui import View
 
 import os
 from dotenv import load_dotenv
 
-from translate import translations
-from config import APP_CHOICES, MAIN_GUILD_ID, FORUM_NAME
+from config import APP_CHOICES
 from services.kicker_sort_service import KickerSortingService
-from services.messages.interaction import send_interaction_message
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
-from models.forum import find_forum
-from models.payment import send_payment, get_usdt_balance_by_discord_user
-from models.enums import PaymentStatusCodes
-from views.top_up_view import TopUpView
-from views.boost_view import BoostDropdownMenu
+from views.buttons.boost_button import BoostButton
+from views.buttons.payment_button import PaymentButton
+from views.buttons.chat_button import ChatButton
 from database.dto.psql_services import Services_Database
 
 bot = get_bot()
@@ -53,7 +48,7 @@ class FindView(View):
             instance.set_service(service)
         else:
             instance.no_user = True
-
+        instance.add_buttons()
         return instance 
     
     def __init__(
@@ -76,101 +71,12 @@ class FindView(View):
         """
         self.service = service
         self.profile_embed = create_profile_embed(service, lang=self.lang)
-        self.no_user = False  
+        self.no_user = False
 
-    @discord.ui.button(label="Go", style=discord.ButtonStyle.success, custom_id="play_kicker")
-    async def play(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
-        payment_status_code = await send_payment(
-            user=interaction.user,
-            target_service=self.service,
-            discord_server_id=discordServerId
-        )
-        balance = await get_usdt_balance_by_discord_user(interaction.user)
-        messages_kwargs = {
-            PaymentStatusCodes.SUCCESS: {
-                "embed": discord.Embed(
-                    description=translations["success_payment"][self.lang].format(
-                        amount=self.service["service_price"], balance=balance
-                    ),
-                    title="✅ Payment Success",
-                    colour=discord.Colour.green()
-                )
-            },
-            PaymentStatusCodes.NOT_ENOUGH_MONEY: {
-                "embed": discord.Embed(
-                    description=translations["not_enough_money_payment"][self.lang],
-                    title="🔴 Not enough balance",
-                    colour=discord.Colour.gold()
-                ),
-                "view": TopUpView(
-                    amount=float(self.service["service_price"]) - float(balance),
-                    lang=self.lang
-                )
-            },
-            PaymentStatusCodes.SERVER_PROBLEM: {
-                "embed": discord.Embed(
-                    description=translations["server_error_payment"][self.lang],
-                    colour=discord.Colour.red()
-                )
-            },
-        }
-        message_kwargs = messages_kwargs.get(payment_status_code, translations["server_error_payment"][self.lang])
-        await send_interaction_message(
-            interaction=interaction,
-            **message_kwargs
-        )
-        button.disabled = True
-
-    @discord.ui.button(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_kicker")
-    async def chat(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "chat_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        user_id = self.service['discord_id']
-        try:
-            member = interaction.guild.get_member(int(user_id))
-        except ValueError as e:
-            print(f"CHAT ERROR: {e}")
-            member = None
-        if member:
-            chat_link = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
-            if interaction.response.is_done():
-                await interaction.followup.send(chat_link, ephemeral=True)
-            else:
-                await interaction.response.send_message(chat_link, ephemeral=True)
-        else:
-            chat_link = translations["connect_with_user"][self.lang].format(user_id=user_id)
-            await interaction.followup.send(
-                translations["connect_with_user"][self.lang].format(user_id=user_id),
-                ephemeral=True
-            )
-
-    @discord.ui.button(label="Boost", style=discord.ButtonStyle.success, custom_id="boost_kicker")
-    async def boost(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        await Services_Database().log_to_database(
-            interaction.user.id, 
-            "boost_kicker", 
-            interaction.guild.id if interaction.guild else None
-        )
-
-        if self.service:
-            dropdown = BoostDropdownMenu(target_service=self.service, lang=self.lang)
-            view = discord.ui.View(timeout=None)
-            view.add_item(dropdown)
-            await send_interaction_message(
-                interaction=interaction,
-                view=view
-            )
-        else:
-            await send_interaction_message(
-                interaction=interaction,
-                message=translations["no_user_found_to_boost"][self.lang]
-            )
-            print(f"Boost button clicked, but no service found for user {interaction.user.id}")
+    def add_buttons(self) -> None:
+        payment_button = PaymentButton(lang=self.lang)
+        chat_button = ChatButton(lang=self.lang)
+        boost_button = BoostButton(show_dropdown=True, lang=self.lang)
+        self.add_item(payment_button)
+        self.add_item(chat_button)
+        self.add_item(boost_button)

@@ -1,62 +1,64 @@
 import discord
-from typing import Literal, Dict
+from typing import Literal
 
 from translate import translations
 
 from config import MAIN_GUILD_ID
+from bot_instance import get_bot
 from models.payment import send_payment, get_usdt_balance_by_discord_user
 from models.enums import PaymentStatusCodes
 from services.messages.interaction import send_interaction_message
+from views.buttons.base_button import BaseButton
 from views.top_up_view import TopUpView
 
+bot = get_bot()
 
-class PaymentButton(discord.ui.Button):
+
+class PaymentButton(BaseButton):
     def __init__(
         self,
-        service: Dict,
-        discord_server_id: int,
+        discord_server_id: int = None,
         lang: Literal["ru", "en"] = "en",
     ):
-        super().__init__(label="Go", style=discord.ButtonStyle.green, custom_id="payment")
-        self.service = service
+        super().__init__(label="Go", style=discord.ButtonStyle.primary, custom_id="payment", emoji="🎮")
         self.discord_server_id = discord_server_id
         self.lang = lang
         self.pressed_kickers = []
+        self._view_variables = ["service"]
 
     async def callback(self, interaction: discord.Interaction):
-        return
         await interaction.response.defer(ephemeral=True, thinking=True)
-        if interaction.user in self.pressed_kickers:
-            return await send_interaction_message(
-                interaction=interaction,
-                message=translations['already_pressed'][self.lang]
-            )
-        self.pressed_kickers.append(interaction.user)
-        discordServerId = interaction.guild.id if interaction.guild else MAIN_GUILD_ID
+        if not self.discord_server_id:
+            self.discord_server_id = interaction.guild_id if interaction.guild_id else int(MAIN_GUILD_ID)
         payment_status_code = await send_payment(
             user=interaction.user,
-            target_service=self.service,
-            discord_server_id=discordServerId
+            target_service=self.view.service,
+            discord_server_id=self.discord_server_id
         )
         balance = await get_usdt_balance_by_discord_user(interaction.user)
+        try:
+            guild: discord.Guild = bot.get_guild(int(self.discord_server_id))
+        except ValueError:
+            guild: discord.Guild = None
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
                     description=translations["success_payment"][self.lang].format(
-                        amount=self.service["service_price"], balance=balance
+                        amount=self.view.service["service_price"], balance=balance
                     ),
-                    title="Success",
+                    title="✅ Payment Success",
                     colour=discord.Colour.green()
                 )
             },
             PaymentStatusCodes.NOT_ENOUGH_MONEY: {
                 "embed": discord.Embed(
                     description=translations["not_enough_money_payment"][self.lang],
-                    title="Not enough money",
+                    title="🔴 Not enough balance",
                     colour=discord.Colour.gold()
                 ),
                 "view": TopUpView(
-                    amount=float(self.service["service_price"]) - float(balance),
+                    amount=float(self.view.service["service_price"]) - float(balance),
+                    guild=guild,
                     lang=self.lang
                 )
             },
