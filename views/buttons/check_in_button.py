@@ -11,13 +11,13 @@ from models.payment import get_jwt_token
 from services.logger.client import CustomLogger
 from services.messages.interaction import send_interaction_message
 from services.common_http import handle_status_code
+from views.buttons.base_button import BaseButton
 
 logger = CustomLogger
 bot = get_bot()
 
 
-class CheckInButton(discord.ui.Button):
-
+class CheckInButton(BaseButton):
     def __init__(
         self,
         *,
@@ -27,7 +27,7 @@ class CheckInButton(discord.ui.Button):
         row: int | None = None
     ) -> None:
         super().__init__(
-            style=discord.ButtonStyle.blurple,
+            style=discord.ButtonStyle.primary,
             label="Daily check in",
             row=row
         )

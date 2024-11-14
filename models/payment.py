@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Dict
 from decimal import Decimal
 import discord
 import requests
@@ -8,8 +8,9 @@ from config import (
     JWT_AUTH_URL,
     PAYMENT_LINK,
     SERVER_WALLET_URL,
-    BOOST_URL
+    BOOST_URL,
 )
+from bot_instance import get_bot
 
 from services.logger.client import CustomLogger
 from services.common_http import handle_status_code
@@ -17,6 +18,7 @@ from web3_interaction.balance_checker import get_usdt_balance
 from models.enums import PaymentStatusCodes
 
 logger = CustomLogger
+bot = get_bot()
 
 
 async def get_server_wallet_by_discord_id(user_id: int) -> str:

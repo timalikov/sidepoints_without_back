@@ -26,7 +26,7 @@ class RefundReplaceView(discord.ui.View):
         stop_task: Callable = None,
         discord_server_id: int = int(MAIN_GUILD_ID),
         lang: Literal["en", "ru"] = "en",
-        timeout: Optional[int] = 60 * 5
+        timeout: Optional[int] = 60 * 10
 
     ) -> None:
         super().__init__(timeout=timeout)
