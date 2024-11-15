@@ -361,16 +361,6 @@ async def order(
         )
     await view.send_all_messages()
 
-@bot.tree.command(name="sss", description="TEST")
-async def test_sss(interaction: discord.Interaction):
-    me: discord.User = bot.get_user(836655813048402011)
-    await send_confirm_order_message(
-        customer=me,
-        kicker=me,
-        kicker_username="Billi Jin",
-        purchase_id=1,
-        discord_server_id=1276403616961400912
-    )
 
 @bot.tree.command(name="subscribe", description="Use this command to post your service request and summon Kickers to take the order.")
 @app_commands.choices(choices=[app_commands.Choice(name="Subscribe", value=1),
