@@ -8,11 +8,13 @@ import discord.ext.commands
 from logging import getLogger
 
 
+from services.messages.base import send_confirm_order_message
 from services.messages.interaction import send_interaction_message
 from services.storage.bucket import ImageS3Bucket
 from services.utils import hide_half_string
 from views.find_view import FindView
 from test_commands import TestCommands
+from views.order_dm_view import OrderDMView
 from views.play_view import PlayView
 from bot_instance import get_bot
 from background_tasks import (
@@ -33,7 +35,8 @@ from config import (
     LINK_LEADERBOARD,
     GUIDE_CATEGORY_NAME,
     GUIDE_CHANNEL_NAME,
-    TEST
+    TEST,
+    YELLOW_LOGO_COLOR
 )
 from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
@@ -231,34 +234,53 @@ async def get_guild_invite_link(guild_id):
 @bot.tree.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
 async def order_all(interaction: discord.Interaction):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
+    interaction_user: discord.User = interaction.user
+    interaction_user_id: int = interaction_user.id
     lang = get_lang_prefix(guild_id)
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer()
     await Services_Database().log_to_database(
-        interaction.user.id, 
+        interaction_user_id, 
         "/order", 
         interaction.guild.id if interaction.guild else None
     )
-    await save_user_id(interaction.user.id)
+    await save_user_id(interaction_user_id)
     order_data = {
-        'user_id': interaction.user.id,
+        'user_id': interaction_user_id,
         'task_id': "ALL"
     }
     await Order_Database.set_user_data(order_data)
     main_link = await get_guild_invite_link(guild_id)
     services_db = Services_Database(app_choice="ALL")
     view = OrderView(
-        customer=interaction.user,
+        customer=interaction_user,
         services_db=services_db,
         lang=lang,
         guild_id=guild_id
     )
-    await interaction.followup.send(
-        translations["order_dispatching"][lang].format(link=main_link),
-        ephemeral=True
+    user_dm_view: OrderDMView = OrderDMView(order_view=view, lang=lang)
+    await interaction_user.send(
+        view=user_dm_view,
+        embed=user_dm_view.embed_message
+        )
+
+    order_dispathing_embed = discord.Embed(
+        title=translations["order_dispatching_title"][lang],
+        description=translations["order_dispatching"][lang].format(link=main_link),
+        color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
     )
+    if interaction.response.is_done():
+        await interaction.followup.send(
+            embed=order_dispathing_embed,
+            ephemeral=False
+        )
+    else:
+        await interaction.response.send_message(
+            embed=order_dispathing_embed,
+            ephemeral=False
+        )
     await view.send_all_messages()
 
 
@@ -280,19 +302,21 @@ async def order(
     text: str = ""
 ):
     guild_id: int = interaction.guild_id if interaction.guild_id else None
+    interaction_user_id: int = interaction.user.id
+    interaction_user: discord.User = interaction.user
     lang = get_lang_prefix(guild_id)
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer()
     await Services_Database().log_to_database(
-        interaction.user.id, 
+        interaction_user_id, 
         "/order", 
         guild_id
     )
-    await save_user_id(interaction.user.id)
+    await save_user_id(interaction_user_id)
     order_data = {
-        'user_id': interaction.user.id,
+        'user_id': interaction_user_id,
         'task_id': choices
     }
     await Order_Database.set_user_data(order_data)
@@ -309,16 +333,32 @@ async def order(
         )
     )
     view = OrderView(
-        customer=interaction.user,
+        customer=interaction_user,
         services_db=services_db,
         lang=lang,
         guild_id=guild_id,
         extra_text=text
     )
-    await interaction.followup.send(
-        translations["order_dispatching"][lang].format(link=main_link),
-        ephemeral=True
+    user_dm_view: OrderDMView = OrderDMView(order_view=view, lang=lang)
+    await interaction_user.send(
+        view=user_dm_view,
+        embed=user_dm_view.embed_message
+        )
+    order_dispathing_embed = discord.Embed(
+        title=translations["order_dispatching_title"][lang],
+        description=translations["order_dispatching"][lang].format(link=main_link),
+        color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
     )
+    if interaction.response.is_done():
+        await interaction.followup.send(
+            embed=order_dispathing_embed,
+            ephemeral=False
+        )
+    else:
+        await interaction.response.send_message(
+            embed=order_dispathing_embed,
+            ephemeral=False
+        )
     await view.send_all_messages()
 
 
