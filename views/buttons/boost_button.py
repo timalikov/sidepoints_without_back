@@ -54,8 +54,8 @@ class BoostButton(BaseButton):
             await send_interaction_message(
                 interaction=interaction,
                 embed=discord.Embed(
-                    title="Please choose your fighter!",
-                    description="Mortal combat! Tun-tun-tun-tu-u-tu-uru-u-tun-run",
+                    title="Please choose boost amount first!",
+                    description="Just one step before you will be able to boost kicker",
                     colour=discord.Colour.dark_red()
                 )
             )
