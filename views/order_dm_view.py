@@ -18,7 +18,7 @@ class OrderDMView(discord.ui.View):
         self.embed_message = self._build_embed_message_points()
 
         self.add_item(TopUpDropdownMenu(lang=lang))
-        self.add_item(StopDispatchingButton(order_view=order_view))
+        self.add_item(StopDispatchingButton(order_view=order_view, order_dm_view=self))
 
     def _build_embed_message_points(self):
         embed = discord.Embed(
