@@ -31,9 +31,9 @@ class BoostDropdownMenu(discord.ui.Select):
             10: "Heart - 10 USDT",
             50: "Sunglasses - 50 USDT",
             100: "Carnival - 100 USDT",
-            # 100: "Air Balloon - 100 USDT",
+            100: "Air Balloon - 100 USDT",
             200: "Boost rocket - 200 USDT",
-            # 200: "Sport car - 200 USDT",
+            200: "Sport car - 200 USDT",
         }
         options = [
             discord.SelectOption(label=str(amount), description=text)
