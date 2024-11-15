@@ -15,7 +15,10 @@ def create_profile_embed(
         image_url = random.choice(image_url)
     if not category_name:
         category_name = profile_data['tag']
-        
+    
+    description: str = profile_data['service_description']
+    if len(description) >= 100:
+        description = description[:95] + "..."
     embed = discord.Embed(
         title=profile_data['profile_username'],
         description=profile_data['service_description']

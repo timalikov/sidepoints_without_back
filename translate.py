@@ -828,5 +828,4 @@ translations = {
         "en": "Only one step left to boost **{username}** by **{amount} USD**. Just click the button! 👇🏻",
         "ru": "Остался последний шаг, чтобы забустить **{username}** на сумму **{amount} USD**. Просто нажми на кнопку! 👇🏻"
     }
-
 }
