@@ -83,14 +83,15 @@ class TopUpView(View):
                 wallet=self.wallet
             )
         )
-        error_message = translations["server_error_payment"][self.lang]
+        error_message = discord.Embed(
+            title=f"🔴 {method} Top up",
+            description=translations["server_error_payment"][self.lang],
+            colour=discord.Colour.red()
+        )
         await send_interaction_message(
             interaction=interaction,
             message=top_up_response_url,
-            embed=discord.Embed(
-                description=message_embed if top_up_response_url else error_message,
-                title=method
-            )
+            embed=message_embed if top_up_response_url else error_message
         )
 
     @discord.ui.button(label="BinancePay", style=discord.ButtonStyle.blurple, row=1)
