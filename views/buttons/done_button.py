@@ -3,13 +3,14 @@ from typing import Literal
 
 from translate import translations
 
-class DoneButton(discord.ui.View):
+from views.buttons.base_button import BaseButton
+
+class DoneButton(BaseButton):
     def __init__(self, lang: Literal["ru", "en"] = "en"):
-        super().__init__(timeout=None)
+        super().__init__(label="Done", style=discord.ButtonStyle.green, custom_id="done")
         self.lang = lang
 
-    @discord.ui.button(label="Done", style=discord.ButtonStyle.green)
-    async def button_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def callback(self, interaction: discord.Interaction):
         # Fetch the role from the guild using the provided role ID
         role_ids = [1235556503596040224, 1242457735988252692]
         role = None

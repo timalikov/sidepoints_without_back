@@ -14,7 +14,7 @@ from database.dto.sql_profile import Profile_Database
 from services.schedule_tasks.session_delivery_check import session_delivery_check
 
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_team_channel
-from views.done_button import DoneButton
+from views.buttons.done_button import DoneButton
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -188,7 +188,8 @@ async def create_private_discord_channel(
             description=translations["kicker_intro_message"][lang], 
             color=discord.Color.blue()
         )
-        view = DoneButton(lang=lang)
+        view = discord.ui.View(timeout=None)
+        view.add_item(DoneButton(lang=lang))
         await channel.send(embed=embed, view=view)
     return True, channel
 

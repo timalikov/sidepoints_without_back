@@ -42,7 +42,7 @@ from views.boost_view import BoostView
 from views.exist_service import Profile_Exist
 from views.points_view import PointsView
 from views.order_view import OrderView
-from views.top_up_view import TopUpDropdownMenu
+from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from models.forum import get_or_create_forum
 from models.thread_forum import start_posting
 from models.public_channel import (
@@ -554,7 +554,7 @@ async def on_ready():
     delete_old_channels.start()
     await bot.add_cog(InviteTracker(bot))
     if TEST:
-     await bot.add_cog(TestCommands(bot))
+        await bot.add_cog(TestCommands(bot))
     await bot.tree.sync()
     await _create_channels()
     rename_kickers.start()
