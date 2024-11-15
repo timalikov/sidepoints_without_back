@@ -2,7 +2,7 @@ from typing import Literal
 from button_constructors import StopDispatchingButton
 from config import YELLOW_LOGO_COLOR
 import discord
-from views.top_up_view import TopUpDropdownMenu
+from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from translate import translations
 
 class OrderDMView(discord.ui.View):
