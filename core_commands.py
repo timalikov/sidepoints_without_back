@@ -48,29 +48,6 @@ bot = get_bot()
 logger = getLogger("")
 
 
-async def list_online_users(guild):
-    if guild is None:
-        return []
-    online_members = [member for member in guild.members if str(member.status) == 'online']
-    online_member_ids = [member.id for member in online_members]
-    return online_member_ids
-
-
-def is_owner(interaction: discord.Interaction) -> bool:
-    return interaction.guild is not None and interaction.guild.owner_id == interaction.user.id
-
-
-def is_admin(interaction: discord.Interaction) -> bool:
-    return interaction.user.guild_permissions.administrator
-
-
-async def list_all_users_with_online_status(guild):
-    if guild is None:
-        return []
-    all_member_ids = [member.id for member in guild.members]
-    return all_member_ids
-
-
 @bot.event
 async def on_guild_join(guild: discord.Guild):
     message: str = "@everyone\n" + translations["welcome_message"]["en"].format(server_name=guild.name)

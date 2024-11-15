@@ -4,6 +4,7 @@ from discord import app_commands
 
 from translate import get_lang_prefix, translations
 from bot_instance import get_bot
+from services.utils import is_admin
 from database.dto.psql_services import Services_Database
 from services.messages.interaction import send_interaction_message
 from models.thread_forum import start_posting
@@ -11,8 +12,6 @@ from models.forum import get_or_create_forum
 
 bot = get_bot()
 
-def is_admin(interaction: discord.Interaction) -> bool:
-    return interaction.user.guild_permissions.administrator
 
 class ForumCommand(commands.Cog):
     def __init__(self, bot):
