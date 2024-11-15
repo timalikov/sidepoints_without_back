@@ -161,7 +161,7 @@ async def create_private_discord_channel(
         
     manager_members = []
 
-    if challenged in kicker_members:
+    if challenged.id in kicker_ids:
         for manager_id in managers:
             try:
                 manager = await bot.fetch_user(manager_id)
