@@ -240,7 +240,7 @@ async def order_all(interaction: discord.Interaction):
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer()
     await Services_Database().log_to_database(
         interaction_user_id, 
         "/order", 
@@ -308,7 +308,7 @@ async def order(
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    await interaction.response.defer(ephemeral=True)
+    await interaction.response.defer()
     await Services_Database().log_to_database(
         interaction_user_id, 
         "/order", 
