@@ -94,9 +94,13 @@ translations = {
         'ru': 'Нажмите, чтобы посмотреть таблицу лидеров!',
         'en': 'Click to check the leaderboard!',
     },
+    'order_dispatching_title': {
+        'en': 'Your order is dispatching now',
+        'ru': 'Ваш заказ обрабатывается'
+    },
     'order_dispatching': {
-        'ru': 'Ваш заказ обрабатывается. Как только исполнители примут заказ, их профили будут отправлены вам в личные сообщения.\n{link}',
-        'en': 'Your order is dispatching now. Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{link}'
+        'ru': 'Как только исполнители примут заказ, их профили будут отправлены вам в личные сообщения.\n{link}',
+        'en': 'Once there are Kickers accepting the order, their profile will be sent to you via DM.\n{link}'
     },
     'order_in_process': {
         'en': '🔴 Order in Process',
@@ -141,6 +145,10 @@ translations = {
     'order_terminated': {
         'en': "🔴 Order Terminated",
         'ru': "🔴 Заказ завершен"
+    },
+    'you_requested_stop_summon': {
+        'en': "🔔 You just requested to stop summoning kickers 👾",
+        'ru': "🔔 Вы только что запросили остановить призыв кикеров 👾"
     },
     'already_pressed': {
         'ru': "Уже нажато",
@@ -804,6 +812,13 @@ translations = {
         "en": "Are you sure to boost @{username} with **{amount} USD** ?",
         "ru": "Вы уверены что хотите забустить @{username} на сумму **{amount} USD** ?"
     },
+    "thanks_for_placing_order": {
+        "en": "🎟Thanks for placing an order",
+        "ru": "🎟Спасибо за размещение заказа"
+    },
+    "thanks_for_placing_order_description": {
+        "en": "While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.",
+        "ru": "Пока вы ждете отправку заказа, убедитесь, что у вас есть 💰достаточный баланс💰 на вашем счету.\nВы можете 💶пополнить💶 с помощью следующих методов."
     "final_boost_step_title": {
         "en": "Final step!",
         "ru": "Последний шаг!"
@@ -812,4 +827,5 @@ translations = {
         "en": "Only one step left to boost **{username}** by **{amount} USD**. Just click the button! 👇🏻",
         "ru": "Остался последний шаг, чтобы забустить **{username}** на сумму **{amount} USD**. Просто нажми на кнопку! 👇🏻"
     }
+
 }

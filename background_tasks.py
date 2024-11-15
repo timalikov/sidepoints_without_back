@@ -137,7 +137,6 @@ async def assign_roles_to_kickers() -> None:
     for super_kicker_id in super_kicker_ids:
         member: Optional[discord.Member] = guild.get_member(super_kicker_id)
         if not member:
-            logger.warning(f"Member with ID {super_kicker_id} not found in guild.")
             continue
 
         try:
@@ -157,11 +156,13 @@ async def assign_roles_to_kickers() -> None:
             if service_tag:
                 role = await get_or_create_role(guild, service_tag)
                 await assign_role(member, role)
+                await asyncio.sleep(1)
 
             service_lang = service.get("profile_languages", [])
             for lang in service_lang:
                 role = await get_or_create_role(guild, lang)
                 await assign_role(member, role)
+                await asyncio.sleep(1)
 
 async def get_or_create_role(guild: discord.Guild, tag: str) -> Optional[discord.Role]:
     dto = RolesDTO()
@@ -169,12 +170,10 @@ async def get_or_create_role(guild: discord.Guild, tag: str) -> Optional[discord
     if role_id:
         role: Optional[discord.Role] = discord.utils.get(guild.roles, id=role_id)
         if role:
-            print(f"Role '{tag}' already exists in guild '{guild.name}'.")
             return role
 
     try:
         role = await guild.create_role(name=tag)
-        logger.info(f"Created role '{tag}' in guild '{guild.name}'.")
         await dto.save_role_id_by_tag(tag, guild.id, role.id)
         return role
     except discord.Forbidden:
@@ -189,12 +188,10 @@ async def assign_role(member: discord.Member, role: Optional[discord.Role]) -> N
         return
 
     if role in member.roles:
-        logger.info(f"Member {member.display_name} ({member.id}) already has the role '{role.name}'.")
         return
 
     try:
         await member.add_roles(role)
-        logger.info(f"Added role '{role.name}' to member {member.display_name} ({member.id}) for ")
     except discord.Forbidden:
         logger.error(f"Missing permissions to add role '{role.name}' to member {member.display_name} ({member.id}).")
     except discord.HTTPException as e:
