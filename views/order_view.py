@@ -190,12 +190,20 @@ class OrderView(discord.ui.View):
                 print(f"General Discord error for user {kicker_id}: {e}")
                 continue
 
-    async def on_timeout(self) -> Coroutine[Any, Any, None]:
+    async def on_timeout(self, stop_button_pressed: bool = False) -> Coroutine[Any, Any, None]:
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
         for message_instance in self.messages:
             await message_instance.edit(view=self)
+        if stop_button_pressed:
+            stopped_message_embed = discord.Embed(
+                title=translations['order_terminated'][self.lang],
+                description=translations['you_requested_stop_summon'][self.lang],
+                color=discord.Color.red()
+            )
+            await self.customer.send(embed=stopped_message_embed, view=None)
+            return
         if not self.is_pressed:
             timeout_message_embed = discord.Embed(
                 title=translations['order_terminated'][self.lang],

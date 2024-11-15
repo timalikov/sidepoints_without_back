@@ -198,5 +198,5 @@ class StopDispatchingButton(discord.ui.Button):
         self.order_view = order_view
 
     async def callback(self, interaction: discord.Interaction):
-        await self.order_view.on_timeout()
+        await self.order_view.on_timeout(stop_button_pressed=True)
         await interaction.response.send_message("Stopped dispatching orders", ephemeral=True)

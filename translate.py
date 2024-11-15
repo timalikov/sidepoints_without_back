@@ -146,6 +146,10 @@ translations = {
         'en': "🔴 Order Terminated",
         'ru': "🔴 Заказ завершен"
     },
+    'you_requested_stop_summon': {
+        'en': "🔔 You just requested to stop summoning kickers 👾",
+        'ru': "🔔 Вы только что запросили остановить призыв кикеров 👾"
+    },
     'already_pressed': {
         'ru': "Уже нажато",
         'en': "Already pressed"

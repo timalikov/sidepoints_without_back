@@ -288,6 +288,7 @@ async def order(
     language: app_commands.Choice[str],
     text: str = ""
 ):
+    await interaction.response.defer(ephemeral=True)
     guild_id: int = interaction.guild_id if interaction.guild_id else None
     interaction_user_id: int = interaction.user.id
     interaction_user: discord.User = interaction.user
@@ -295,7 +296,6 @@ async def order(
     if not guild_id:
         await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
         return
-    await interaction.response.defer(ephemeral=True)
     await Services_Database().log_to_database(
         interaction_user_id, 
         "/order", 
@@ -336,10 +336,16 @@ async def order(
         description=translations["order_dispatching"][lang].format(link=main_link),
         color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
     )
-    await interaction.followup.send(
-        embed=order_dispathing_embed,
-        ephemeral=False
-    )
+    if interaction.response.is_done():
+        await interaction.followup.send(
+            embed=order_dispathing_embed,
+            ephemeral=False
+        )
+    else:
+        await interaction.response.send_message(
+            embed=order_dispathing_embed,
+            ephemeral=False
+        )
     await view.send_all_messages()
 
 
