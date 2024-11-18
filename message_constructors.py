@@ -21,7 +21,7 @@ def create_profile_embed(
         description = description[:95] + "..."
     embed = discord.Embed(
         title=profile_data['profile_username'],
-        description=profile_data['service_description']
+        description=description
     )
     embed.set_image(url=image_url)
     

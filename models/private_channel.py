@@ -127,9 +127,6 @@ async def create_private_discord_channel(
         challenged: discord.PermissionOverwrite(read_messages=True),
     }
 
-    if challenged.id in kicker_ids:
-        overwrites[kicker_role] = discord.PermissionOverwrite(read_messages=True)
-
     formatted_time = datetime.now().strftime("%H:%M_%d.%m.%y")    
     channel_name = f"{challenged.name}_{challenger.name}_{formatted_time}"
 
