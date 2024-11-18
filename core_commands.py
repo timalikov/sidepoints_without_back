@@ -3,7 +3,6 @@ import discord.ext
 import discord.ext.commands
 from logging import getLogger
 
-
 from services.storage.bucket import ImageS3Bucket
 from commands.boost_command import BoostCommand
 from commands.find_command import FindCommand
@@ -18,16 +17,6 @@ from commands.start_command import StartCommand
 from commands.test_command import TestCommand
 from commands.wallet_command import WalletCommand
 from commands.forum_command import ForumCommand
-
-
-from services.messages.base import send_confirm_order_message
-from services.messages.interaction import send_interaction_message
-from services.storage.bucket import ImageS3Bucket
-from services.utils import hide_half_string
-from views.find_view import FindView
-from test_commands import TestCommands
-from views.order_dm_view import OrderDMView
-from views.play_view import PlayView
 
 from bot_instance import get_bot
 from background_tasks import (
@@ -46,7 +35,6 @@ from config import (
     GUIDE_CATEGORY_NAME,
     GUIDE_CHANNEL_NAME,
     TEST,
-    YELLOW_LOGO_COLOR
 )
 from models.public_channel import (
     get_or_create_channel_by_category_and_name,
