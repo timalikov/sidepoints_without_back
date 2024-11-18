@@ -5,16 +5,8 @@ import random
 from database.dto.sql_subscriber import Subscribers_Database
 from button_constructors import ButtonAcceptView
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
+from services.utils import get_guild_invite_link
 bot = get_bot()
-
-
-async def get_guild_invite_link(guild_id):
-    guild = bot.get_guild(guild_id)
-    if guild:
-        # Create an invite link
-        invite = "https://discord.gg/sidekick"  # Expires in 1 day, 1 use
-        return invite
-    return None
 
 
 async def send_push_notifications(order_id):

@@ -26,5 +26,4 @@ class OrderDMView(discord.ui.View):
             description=translations["thanks_for_placing_order_description"][self.lang],    
             color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
         )
-       
         return embed
