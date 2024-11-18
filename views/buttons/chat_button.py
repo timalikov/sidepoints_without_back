@@ -39,6 +39,8 @@ class ChatButton(BaseButton):
         user_id = self.view.service['discord_id']
         try:
             member = interaction.guild.get_member(int(user_id))
+        except AttributeError:
+            member = None
         except ValueError as e:
             print(f"CHAT ERROR: {e}")
             member = None
