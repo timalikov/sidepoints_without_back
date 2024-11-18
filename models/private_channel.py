@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Set
 
 from datetime import datetime
 import discord
@@ -106,16 +106,8 @@ async def create_private_discord_channel(
 ):
     guild = bot.get_guild(guild_id)
     services_db = Services_Database()
-    kickers = await services_db.get_super_kickers()
+    kicker_ids: Set[int] = await services_db.get_super_kickers()
     managers = await services_db.get_managers()
-
-    kicker_members = []
-    for kicker_id in kickers:
-        kicker = guild.get_member(kicker_id)
-        if kicker:
-            kicker_members.append(kicker)
-        else:
-            print(f"Kicker with ID {kicker_id} not found in the guild.")
 
     category = None
     index = 1
@@ -128,15 +120,15 @@ async def create_private_discord_channel(
         elif not category:
             category = await guild.create_category(category_name)
 
+    kicker_role: discord.Role = discord.utils.get(guild.roles, name="Kicker")  
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
         challenger: discord.PermissionOverwrite(read_messages=True),
-        challenged: discord.PermissionOverwrite(read_messages=True)
+        challenged: discord.PermissionOverwrite(read_messages=True),
     }
 
-    if challenged in kicker_members:
-        for kicker in kicker_members:
-            overwrites[kicker] = discord.PermissionOverwrite(read_messages=True)
+    if challenged.id in kicker_ids:
+        overwrites[kicker_role] = discord.PermissionOverwrite(read_messages=True)
 
     formatted_time = datetime.now().strftime("%H:%M_%d.%m.%y")    
     channel_name = f"{challenged.name}_{challenger.name}_{formatted_time}"
@@ -169,7 +161,7 @@ async def create_private_discord_channel(
         
     manager_members = []
 
-    if challenged in kicker_members:
+    if challenged.id in kicker_ids:
         for manager_id in managers:
             try:
                 manager = await bot.fetch_user(manager_id)
