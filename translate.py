@@ -817,8 +817,8 @@ translations = {
         "ru": "🎟Спасибо за размещение заказа"
     },
     "thanks_for_placing_order_description": {
-        "en": "While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.",
-        "ru": "Пока вы ждете отправку заказа, убедитесь, что у вас есть 💰достаточный баланс💰 на вашем счету.\nВы можете 💶пополнить💶 с помощью следующих методов."
+        "en": "While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.\nYour balance: {balance}",
+        "ru": "Пока вы ждете отправку заказа, убедитесь, что у вас есть 💰достаточный баланс💰 на вашем счету.\nВы можете 💶пополнить💶 с помощью следующих методов.\nВаш баланс: {balance}"
     },
     "final_boost_step_title": {
         "en": "Final step!",
