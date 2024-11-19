@@ -33,7 +33,7 @@ class OrderGoButton(BaseButton):
         self.lang = lang
         self._view_variables = [
             "services_db", "main_interaction", "created_at", "customer",
-            "order_id", "pressed_kickers", "messages", "webapp_order", "guild_id"
+            "order_id", "pressed_kickers", "messages", "webapp_order", "guild_id", "go_command"
             
         ]
 
@@ -95,9 +95,10 @@ class OrderGoButton(BaseButton):
         kicker_score: int = await self.view.services_db.get_kicker_score(kicker.id)
         if not services or kicker_score < 100:
             return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
-        suitable_services = await self.view.services_db.get_kicker_order_service(kicker.id)
-        if not suitable_services:
-            return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
+        if not self.view.go_command:
+            suitable_services = await self.view.services_db.get_kicker_order_service(kicker.id)
+            if not suitable_services:
+                return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
         
         await Services_Database().log_to_database(
             interaction.user.id, 

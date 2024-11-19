@@ -39,13 +39,15 @@ class OrderView(discord.ui.View):
         order_id: uuid.UUID = None,
         extra_text: str = "",
         lang: Literal["en", "ru"] = "en",
-        services_db: Services_Database = None
+        services_db: Services_Database = None,
+        go_command: bool = False
     ):
         super().__init__(timeout=15 * 60)
         self.customer: discord.User = customer
         self.pressed_kickers: List[discord.User] = []
         self.is_pressed = False
         self.services_db = services_db
+        self.go_command = go_command
         self.messages = []  # for drop button after timeout
         self.created_at = datetime.now()
         self.guild_id = int(guild_id) if guild_id else None

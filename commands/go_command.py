@@ -44,7 +44,8 @@ class GoCommand(commands.Cog):
             customer=interaction.user,
             services_db=services_db,
             lang=lang,
-            guild_id=guild_id
+            guild_id=guild_id,
+            go_command=True
         )
         await interaction.followup.send(
             translations["order_dispatching"][lang].format(link=main_link),

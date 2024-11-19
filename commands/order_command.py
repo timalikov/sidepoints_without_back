@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from models.payment import get_server_wallet_by_discord_id
 from translate import get_lang_prefix, translations
 from bot_instance import get_bot
 from config import YELLOW_LOGO_COLOR
@@ -19,6 +20,7 @@ from services.utils import save_user_id
 from services.utils import get_guild_invite_link
 from views.order_dm_view import OrderDMView
 from views.order_view import OrderView
+from web3_interaction.balance_checker import get_usdt_balance
 
 bot = get_bot()
 
@@ -82,7 +84,10 @@ class OrderCommand(commands.Cog):
                 guild_id=guild_id,
                 extra_text=text
             )
-            user_dm_view: OrderDMView = OrderDMView(order_view=view, lang=lang)
+
+            wallet: str = await get_server_wallet_by_discord_id(user_id=interaction_user_id)
+            balance = get_usdt_balance(wallet) if wallet else 0
+            user_dm_view: OrderDMView = OrderDMView(order_view=view, balance=balance, lang=lang)
             await interaction_user.send(
                 view=user_dm_view,
                 embed=user_dm_view.embed_message
