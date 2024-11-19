@@ -160,8 +160,8 @@ async def assign_roles_to_kickers() -> None:
 
             service_lang = service.get("profile_languages") or []
             if not isinstance(service_lang, list):
-                logger.warning(f"Expected list for 'profile_languages', got {type(service_lang).__name__}.")
-                continue
+                logger.warning(f"Expected list for 'profile_languages', got {type(service_lang).__name__}. Converting to list.")
+                service_lang = [service_lang]
 
             for lang in service_lang:
                 role = await get_or_create_role(guild, lang)

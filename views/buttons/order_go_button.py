@@ -33,7 +33,7 @@ class OrderGoButton(BaseButton):
         self.lang = lang
         self._view_variables = [
             "services_db", "main_interaction", "created_at", "customer",
-            "order_id", "pressed_kickers", "messages", "webapp_order", "guild_id"
+            "order_id", "pressed_kickers", "messages", "webapp_order", "guild_id", "go_command"
             
         ]
 
