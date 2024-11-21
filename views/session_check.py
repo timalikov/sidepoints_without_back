@@ -4,12 +4,13 @@ from database.dto.psql_services import Services_Database
 import discord
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
+from views.base_view import BaseView
 
 from translate import translations, get_lang_prefix
 
 bot = get_bot()
 
-class SessionCheckView(discord.ui.View):
+class SessionCheckView(BaseView):
     def __init__(
         self, 
         *, 

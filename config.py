@@ -147,7 +147,7 @@ BOOST_KICKER_CHANNEL_NAME = "🚀boost-a-kicker"
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
 LEADERBOARD_CATEGORY_NAME = "Community 😎"
-POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points.png"
+POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points+2_2.png"
 
 YELLOW_LOGO_COLOR = [255, 211, 14]
 

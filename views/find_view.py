@@ -1,7 +1,5 @@
 from typing import Literal
 
-from discord.ui import View
-
 import os
 from dotenv import load_dotenv
 
@@ -11,6 +9,7 @@ from message_constructors import create_profile_embed
 from bot_instance import get_bot
 from views.buttons.boost_button import BoostButton
 from views.buttons.payment_button import PaymentButton
+from views.base_view import BaseView
 from views.buttons.chat_button import ChatButton
 from database.dto.psql_services import Services_Database
 
@@ -21,7 +20,7 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 app_choices = APP_CHOICES
 
-class FindView(View):
+class FindView(BaseView):
     @classmethod
     async def create(
         cls,

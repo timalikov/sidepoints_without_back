@@ -1,7 +1,13 @@
 import random
-from typing import Optional, Dict, Literal
 import discord
+from typing import Optional, Dict, Literal
+
 from translate import translations
+from bot_instance import get_bot
+
+from services.utils import hide_half_string
+
+bot = get_bot()
 
 
 def create_profile_embed(
@@ -89,4 +95,45 @@ def create_boost_embed(
         )
     )
     embed.set_image(url=image_url)
+    return embed
+
+
+def _build_embed_message_order(
+    services_db,
+    extra_text: str,
+    lang: str,
+    guild_id: int,
+    customer: discord.User = None
+) -> str:
+    service_title = services_db.app_choice
+    if not service_title:
+        service_title = "All players"
+    sex = services_db.sex_choice
+    if not sex:
+        sex = "Male/Female"
+    language = services_db.language_choice
+    if not language:
+        language = "Русский" if lang == "ru" else "English"
+    server = services_db.server_choice
+    if not server:
+        server = "Все" if lang == "ru" else "All"
+
+    guild = bot.get_guild(guild_id)
+    if customer:
+        customer_discord_id: str = hide_half_string(str(customer.id))
+    else:
+        customer_discord_id: str = translations["order_from_webapp"][lang],
+    embed = discord.Embed(
+        title=translations["order_alert_title"][lang],
+        description=translations["order_new_alert_new"][lang].format(
+            customer_discord_id=customer_discord_id,
+            choice=service_title,
+            server_name=guild.name,
+            language=language,
+            gender=sex.capitalize(),
+            game_server=server,
+            extra_text=extra_text if extra_text else ""
+        ),
+        color=discord.Color.blue()
+    )
     return embed

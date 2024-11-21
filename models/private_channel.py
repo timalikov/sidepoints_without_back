@@ -32,6 +32,11 @@ async def send_connect_message_between_kicker_and_customer(
         challenger_name=challenger.name,
         service_name=serviceName
     )
+    kicker_embed = discord.Embed(
+        title=translations["kicker_session_started_message_title"][lang],
+        description=kicker_message,
+        colour=discord.Colour.green()
+    )
     user_message_embed = discord.Embed(
         title=translations["order_confirmed"][lang],
         description=translations["user_order_accepted_message"][lang].format(

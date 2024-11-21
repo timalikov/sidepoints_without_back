@@ -1,7 +1,6 @@
 from typing import Literal, List
 
 import discord
-from discord.ui import View
 import requests
 
 from config import (
@@ -18,12 +17,13 @@ from models.public_channel import get_or_create_channel_by_category_and_name
 from services.messages.interaction import send_interaction_message
 from services.logger.client import CustomLogger
 from services.cache.client import custom_cache
+from views.base_view import BaseView
 
 logger = CustomLogger
 bot = get_bot()
 
 
-class TopUpView(View):
+class TopUpView(BaseView):
     """
     View special for core command top-up.
     """

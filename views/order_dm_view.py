@@ -4,9 +4,10 @@ from button_constructors import StopDispatchingButton
 from config import YELLOW_LOGO_COLOR
 import discord
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
+from views.base_view import BaseView
 from translate import translations
 
-class OrderDMView(discord.ui.View):
+class OrderDMView(BaseView):
 
     def __init__(
         self, 

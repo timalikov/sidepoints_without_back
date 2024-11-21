@@ -1,15 +1,14 @@
-from typing import Literal, Dict
+from typing import Literal
 import os
 from dotenv import load_dotenv
 
-import discord
-from discord.ui import View
 
 from bot_instance import get_bot
 from config import APP_CHOICES
 
 from message_constructors import create_boost_embed
 from views.buttons.boost_button import BoostButton
+from views.base_view import BaseView
 from views.buttons.next_button import NextButton
 from database.dto.psql_services import Services_Database
 
@@ -21,7 +20,7 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 app_choices = APP_CHOICES
 
 
-class BoostView(View):
+class BoostView(BaseView):
     def __init__(
         self,
         amount: float,

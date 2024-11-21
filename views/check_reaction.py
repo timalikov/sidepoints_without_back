@@ -10,8 +10,10 @@ from config import (
 from database.dto.psql_reaction import ReactionDTO
 from translate import translations
 
+from views.base_view import BaseView
 
-class CheckReactionView(discord.ui.View):
+
+class CheckReactionView(BaseView):
     """
     Class for check kicker reaction.
     """
