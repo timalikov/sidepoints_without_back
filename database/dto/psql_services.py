@@ -381,3 +381,9 @@ class Services_Database(BasePsqlDTO):
             query = "SELECT 1 FROM discord_bot.rewards WHERE server_id = $1;"
             result = await conn.fetchrow(query, server_id)
         return result is not None
+    
+    async def get_kicker_gender_by_id(self, discord_id: int) -> str:
+        async with self.get_connection() as conn:
+            query = "SELECT profile_gender from discord_services WHERE discord_id = $1;"
+            result = await conn.fetchval(query, str(discord_id))
+        return result
