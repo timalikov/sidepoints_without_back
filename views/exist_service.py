@@ -3,7 +3,6 @@ from typing import Literal
 import os
 
 import discord
-from discord.ui import View
 
 from services.messages.interaction import send_interaction_message
 from translate import translations
@@ -13,6 +12,7 @@ from bot_instance import get_bot
 from message_constructors import create_profile_embed
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
+from views.base_view import BaseView
 from views.share_command_view import ShareCommandView
 
 bot = get_bot()
@@ -23,7 +23,7 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 app_choices = APP_CHOICES
 
 
-class Profile_Exist(View):
+class Profile_Exist(BaseView):
     def __init__(self, discord_id, user_choice="ALL", lang: Literal["ru", "en"] = "en"):
         super().__init__(timeout=None)
         self.discord_id = discord_id

@@ -11,13 +11,14 @@ from config import (
 from discord.ui import Button
 from views.buttons.check_in_button import CheckInButton
 from views.buttons.invite_user_button import InviteUserButton
+from views.base_view import BaseView
 from services.logger.client import CustomLogger
 from bot_instance import get_bot
 
 logger = CustomLogger
 bot = get_bot()
 
-class PointsView(discord.ui.View):
+class PointsView(BaseView):
 
     def __init__(
         self, 

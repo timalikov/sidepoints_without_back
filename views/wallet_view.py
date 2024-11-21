@@ -5,11 +5,10 @@ from database.dto.psql_wallets import Wallets_Database
 from dotenv import load_dotenv
 import os
 
-from discord.ui import View
-
 from config import APP_CHOICES
 from bot_instance import get_bot
 from database.dto.psql_services import Services_Database
+from views.base_view import BaseView
 
 from web3_interaction.balance_checker import get_usdt_balance
 
@@ -20,7 +19,7 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 app_choices = APP_CHOICES
 
-class Wallet_exist(View):
+class Wallet_exist(BaseView):
     def __init__(self, discord_id="random id", wallet_id="random id", lang="en"):
         super().__init__(timeout=None)
         self.lang = lang

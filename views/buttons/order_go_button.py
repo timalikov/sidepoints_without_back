@@ -9,7 +9,7 @@ from services.sqs_client import SQSClient
 from views.dropdown.boost_dropdown import BoostDropdownMenu
 from views.dropdown.access_reject_dropdown import OrderAccessRejectDropdown
 from views.buttons.base_button import BaseButton
-from views.order_access_reject_view import OrderAccessRejectView
+from views.order_access_reject_view import OrderPlayView
 from translate import translations
 
 from bot_instance import get_bot
@@ -34,13 +34,12 @@ class OrderGoButton(BaseButton):
         self._view_variables = [
             "services_db", "main_interaction", "created_at", "customer",
             "order_id", "pressed_kickers", "messages", "webapp_order", "guild_id", "go_command"
-            
         ]
 
     async def _bot_order(self, interaction: discord.Interaction, kicker: discord.User):
         services: list[dict] = await self.view.services_db.get_services_by_discordId(discordId=kicker.id)
-        boost_services = await self.view.services_db.get_kicker_order_service(kicker.id)
-        service = boost_services[0]
+        order_services = await self.view.services_db.get_services_by_discordId(kicker.id)
+        service = order_services[0]
         embed = create_profile_embed(profile_data=service, lang=self.lang)
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
         order_dropdown = OrderAccessRejectDropdown(
@@ -53,7 +52,7 @@ class OrderGoButton(BaseButton):
             need_send_boost=False,
             lang=self.lang
         )
-        view = OrderAccessRejectView(
+        view = OrderPlayView(
             customer=self.view.customer,
             main_interaction=interaction,
             service=service,

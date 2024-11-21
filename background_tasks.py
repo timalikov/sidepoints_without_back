@@ -21,56 +21,15 @@ from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
 from models.thread_forum import start_posting
 from models.payment import get_server_wallet_by_discord_id
-from services.sqs_client import SQSClient
 from services.storage.bucket import ImageS3Bucket
 from services.cache.client import custom_cache
 from web3_interaction.balance_checker import get_usdt_balance
-from views.refund_replace import RefundReplaceView
 from database.dto.psql_leaderboard import LeaderboardDatabase
 from database.dto.psql_services import Services_Database
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
 logger = getLogger("")
-
-
-@tasks.loop(seconds=20, count=4)
-async def send_user_refund_replace(
-    *,
-    customer: discord.User,
-    kicker: discord.User,
-    purchase_id: int,
-    channel: Any = None,
-    invite_url: str = None,
-    stop_event: asyncio.Event,
-    lang: Literal["en", "ru"] = "en"
-):
-    if stop_event.is_set():
-        print("send_user_refund_replace task stopped.")
-        send_user_refund_replace.cancel()
-        return
-    
-    sqs_client = SQSClient()
-    
-    message_embed = discord.Embed(
-        colour=discord.Colour.dark_blue(),
-        title=translations["kicker_not_responded_yet"][lang],
-        description=translations["refund_replace_prompt"][lang]
-    )
-
-    view = RefundReplaceView(
-        customer=customer,
-        kicker=kicker,
-        purchase_id=purchase_id,
-        sqs_client=sqs_client,
-        channel=channel,
-        stop_task=stop_event.set,
-        lang=lang
-    )
-    view.message = await customer.send(
-        view=view,
-        embed=message_embed
-    )
 
 
 @tasks.loop(count=1)  # Ensure this runs only once

@@ -2,16 +2,17 @@ from typing import Coroutine, Any, Literal
 import discord
 
 from views.buttons.chat_button import ChatButton
-from views.buttons.payment_button import PaymentButton
 from views.buttons.boost_button import BoostButton
 from views.buttons.reject_button import RejectButton
+from views.buttons.send_accept_reject_button import SendAcceptRejectButton
+from views.base_view import BaseView
 
 from bot_instance import get_bot
 
 bot = get_bot()
 
 
-class OrderAccessRejectView(discord.ui.View):
+class OrderPlayView(BaseView):
     
     def __init__(
         self,
@@ -39,14 +40,19 @@ class OrderAccessRejectView(discord.ui.View):
         self.add_buttons()
 
     def add_buttons(self) -> None:
-        payment_button = PaymentButton(discord_server_id=self.discord_service_id, lang=self.lang)
+        accept_reject_button = SendAcceptRejectButton(
+            discord_server_id=self.discord_service_id,
+            lang=self.lang
+        )
         reject_button = RejectButton(lang=self.lang)
         boost_button = BoostButton(show_dropdown=False, lang=self.lang)
         chat_button = ChatButton(lang=self.lang)
-        self.add_item(payment_button)
+        self.add_item(accept_reject_button)
         self.add_item(reject_button)
         self.add_item(chat_button)
         self.add_item(boost_button)
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
-        await self.message.edit(view=None)
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True

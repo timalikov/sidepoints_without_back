@@ -9,7 +9,7 @@ from bot_instance import get_bot
 from config import MAIN_GUILD_ID
 
 from services.sqs_client import SQSClient
-from views.refund_replace import RefundReplaceView
+from views.refund_replace import ReplaceView
 
 bot = get_bot()
 
@@ -49,17 +49,14 @@ class RefundReplaceManager:
 
         timeout = 60 * 5 if start_timer else None
 
-        view = RefundReplaceView(
+        view = ReplaceView(
             customer=self.customer,
             kicker=self.kicker,
-            purchase_id=self.purchase_id,
-            sqs_client=SQSClient(),
-            stop_task=self.stop_event.set,
             access_reject_view=self.access_reject_view,
-            service_name=self.service_name,
             timeout=timeout,
             lang=self.lang,
-            discord_server_id=self.discord_server_id
+            discord_server_id=self.discord_server_id,
+            replace_manager=self
         )
 
         embed = discord.Embed(
@@ -87,7 +84,11 @@ class RefundReplaceManager:
             start_timer = True if index == 4 else False
             await self.send_refund_replace(start_timer=start_timer)
             await self.kicker.send(
-                translations["waiting_for_response"][self.lang].format(customer_id=self.customer.id)
+                embed=discord.Embed(
+                    title="Are you there?",
+                    description=translations["waiting_for_response"][self.lang].format(customer_id=self.customer.id),
+                    colour=discord.Colour.red()
+                )
             )
 
     def start_periodic_refund_replace(self):
