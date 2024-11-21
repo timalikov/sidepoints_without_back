@@ -50,4 +50,4 @@ class PointsCommand(commands.Cog):
                 lang=lang
             )
         send_method = interaction.followup.send if interaction.response.is_done() else interaction.response.send_message
-        await send_method(embed=view.embed_message, view=view)
+        view.message = await send_method(embed=view.embed_message, view=view)
