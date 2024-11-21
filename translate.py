@@ -677,8 +677,8 @@ translations = {
         "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
     },
     "success_payment": {
-        "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🔔Thank you for making the order!\n🔉Matching Kickers for you now. Please check your DM for service updates.",
-        "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🔔Спасибо за покупку!\n🔉Подбираем кикеров для вас. Пожалуйста, проверьте личные сообщения для обновлений по услуге."
+        "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🔔Thank you for making the order!",
+        "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🔔Спасибо за покупку!"
     },
     "server_error_payment": {
         "en": "Oops, something went wrong. Please try again...",

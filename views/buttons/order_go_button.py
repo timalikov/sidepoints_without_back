@@ -98,8 +98,8 @@ class OrderGoButton(BaseButton):
         #     suitable_services = await self.view.services_db.get_kicker_order_service(kicker.id)
         #     if not suitable_services:
         #         return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
-        kicker_gender = await self.view.services_db.get_kicker_gender_by_id(kicker.id)
-        if kicker_gender != self.view.services_db.sex_choice:
+        gender_service = await self.view.services_db.get_service_by_id_and_gender(kicker.id)
+        if not gender_service:
             return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
         
         await Services_Database().log_to_database(

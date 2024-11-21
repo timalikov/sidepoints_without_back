@@ -26,7 +26,7 @@ class OrderPlayView(BaseView):
         lang: Literal["en", "ru"]
 
     ) -> None:
-        super().__init__(timeout=10 * 30)
+        super().__init__(timeout=60 * 5)
         self.main_interaction = main_interaction
         self.service = service
         self.service_id = service['service_id']
@@ -53,6 +53,4 @@ class OrderPlayView(BaseView):
         self.add_item(boost_button)
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                child.disabled = True
+        await self.disable_all_buttons()

@@ -48,7 +48,10 @@ async def send_connect_message_between_kicker_and_customer(
     )
     
     if invite_url:
-        kicker_message += f"\n{invite_url}"
+        kicker_embed.add_field(
+            name="Invite link",
+            value=invite_url
+        )
         user_message_embed.add_field(
             name="Invite link",
             value=invite_url
@@ -57,7 +60,7 @@ async def send_connect_message_between_kicker_and_customer(
     try:
         await challenger.send(embed=user_message_embed)
         if challenged.id != 1208433940050874429:
-            await challenged.send(kicker_message)
+            await challenged.send(embed=kicker_embed)
     except discord.HTTPException:
         print("Failed to send invite links to one or more participants.")
 
