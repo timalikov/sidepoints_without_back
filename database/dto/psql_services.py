@@ -108,26 +108,26 @@ class Services_Database(BasePsqlDTO):
         query_args: list = []
         variable_count: int = 1
         # TODO: NEED REFACTORING. Code duplicated
-        if self.app_choice and self.app_choice != "ALL":
-            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-            query += filter_seq + f" tag = ${variable_count}"
-            variable_count += 1
-            query_args.append(self.app_choice)
+        # if self.app_choice and self.app_choice != "ALL":
+        #     filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+        #     query += filter_seq + f" tag = ${variable_count}"
+        #     variable_count += 1
+        #     query_args.append(self.app_choice)
         if self.sex_choice:
             filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
             query += filter_seq + f" profile_gender = ${variable_count}"
             variable_count += 1
             query_args.append(self.sex_choice)
-        if self.language_choice:
-            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-            query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
-            variable_count += 1
-            query_args.append(self.language_choice)
-        if self.server_choice:
-            filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
-            query += filter_seq + f" server = ${variable_count}"
-            variable_count += 1
-            query_args.append(self.server_choice)
+        # if self.language_choice:
+        #     filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+        #     query += filter_seq + f" ${variable_count} = ANY(profile_languages)"
+        #     variable_count += 1
+        #     query_args.append(self.language_choice)
+        # if self.server_choice:
+        #     filter_seq = " AND" if "WHERE" in self.BASE_QUERY else " WHERE"
+        #     query += filter_seq + f" server = ${variable_count}"
+        #     variable_count += 1
+        #     query_args.append(self.server_choice)
         return query, query_args, variable_count
 
     async def get_kickers_by_service_title(self) -> List[dict]:
