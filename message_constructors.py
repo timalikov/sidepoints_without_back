@@ -113,7 +113,7 @@ def _build_embed_message_order(
         sex = "Male/Female"
     language = services_db.language_choice
     if not language:
-        language = "Русский" if lang == "ru" else "English"
+        language = "ALL"
     server = services_db.server_choice
     if not server:
         server = "Все" if lang == "ru" else "All"

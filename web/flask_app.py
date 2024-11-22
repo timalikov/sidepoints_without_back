@@ -155,6 +155,21 @@ async def handle_confirm_order():
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
+@app.route('/discord_api/get_guild_members', methods=['GET'])
+async def handle_get_guild_members():
+    guild_ids = config.GUILDS_TO_GET_MEMBER_COUNT
+    guild_members = {}
+    for guild_id in guild_ids:
+        guild = bot.get_guild(guild_id)
+        if guild:
+            try:
+                guild_members[guild.name] = guild.member_count
+            except AttributeError:
+                guild_members[guild.name] = "Unable to fetch member count"
+        else:
+            guild_members[guild.name] = "Guild not found"
+
+    return jsonify(guild_members), 200
 
 @app.route('/discord_api/create_private_channel', methods=['POST'])
 async def handle_create_private_channel():
