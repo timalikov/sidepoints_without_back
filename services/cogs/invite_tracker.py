@@ -54,14 +54,14 @@ class InviteTracker(commands.Cog):
             invites_before = self.invites[member.guild.id]
             invites_after = await member.guild.invites()
             self.invites[member.guild.id] = invites_after
-            
+
             used_invite = None
             for invite in invites_before:
                 updated_invite = self.find_invite_by_code(invites_after, invite.code)
                 if updated_invite and invite.uses < updated_invite.uses:
                     used_invite = updated_invite
                     break
-            
+
             if used_invite:
                 inviter = self.manual_invites.get(used_invite.code, used_invite.inviter)
 
