@@ -71,7 +71,7 @@ class InviteTracker(commands.Cog):
                     return
                 
                 embed.add_field(
-                    name=translations["used_invited"][lang],
+                    name=translations["used_invite"][lang],
                     value=translations["invited_user_point"][lang].format(
                         inviter_mention=inviter.mention,
                         inviter=inviter,
