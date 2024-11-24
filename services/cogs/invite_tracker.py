@@ -40,6 +40,7 @@ class InviteTracker(commands.Cog):
             return
         
         lang = get_lang_prefix(member.guild.id)
+        print(f"Member joined: {member.name}")
      
 
         logs = self.bot.get_channel(int(self.logs_channel))
@@ -54,15 +55,19 @@ class InviteTracker(commands.Cog):
             invites_before = self.invites[member.guild.id]
             invites_after = await member.guild.invites()
             self.invites[member.guild.id] = invites_after
-
+            
+            print(f"Invites before: {invites_before}")
+            print(f"Invites after: {invites_after}")
             used_invite = None
             for invite in invites_before:
                 updated_invite = self.find_invite_by_code(invites_after, invite.code)
                 if updated_invite and invite.uses < updated_invite.uses:
                     used_invite = updated_invite
                     break
-
+            
+            print(f"Used invite: {used_invite}")
             if used_invite:
+                print(f"Used invite: {used_invite.code}")
                 inviter = self.manual_invites.get(used_invite.code, used_invite.inviter)
 
                 if_user_already_invited = await self.services_db.check_if_user_already_been_invited(invited_discord_id=member.id)
@@ -71,7 +76,7 @@ class InviteTracker(commands.Cog):
                     return
                 
                 embed.add_field(
-                    name=translations["used_invited"][lang],
+                    name=translations["used_invite"][lang],
                     value=translations["invited_user_point"][lang].format(
                         inviter_mention=inviter.mention,
                         inviter=inviter,

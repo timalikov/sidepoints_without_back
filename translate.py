@@ -756,6 +756,10 @@ translations = {
         "en": "{member_name} has been invited to the SideKick server with your invite link: https://discord.gg/{used_invite_code} and you've gained 100 points.\nCheck out https://app.sidekick.fans/tasks or use the /points command.",
         "ru": "{member_name} был приглашен на сервер SideKick по вашему приглашению : https://discord.gg/{used_invite_code} за это вы получаете 100 очков.\nПереходите по ссылке https://app.sidekick.fans/tasks или используйте комманду /points."
     },
+    "invite_already_rewarded": {
+        "en": "You have already been rewarded for inviting this user.",
+        "ru": "Вы уже были вознаграждены за приглашение этого пользователя."
+    },
     "task_records_name": {
         "en": "Used invite",
         "ru": "Был приглашен"
