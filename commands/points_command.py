@@ -42,7 +42,7 @@ class PointsCommand(commands.Cog):
             
         total_points = user_ranking.get('total_score', 0)
         rank = user_ranking.get('total_pos', 0)
-
+        
         view = PointsView(
             username=username,
             user=interaction.user,
