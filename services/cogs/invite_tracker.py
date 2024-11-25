@@ -11,7 +11,7 @@ from translate import get_lang_prefix, translations
 from logging import getLogger
 
 bot = get_bot()
-logger = getLogger("")
+logger = getLogger("")   
 
 
 class InviteTracker(commands.Cog):
