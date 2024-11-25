@@ -1,6 +1,7 @@
 import discord
 from typing import Literal
 
+from services.messages.base import send_confirm_order_message
 from translate import translations
 
 from config import MAIN_GUILD_ID
@@ -26,7 +27,7 @@ class PaymentButton(BaseButton):
         self.lang = lang
         self.pressed_kickers = []
         self.customer = customer
-        self._view_variables = ["service"]
+        self._view_variables = ["service", "kicker"]
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
@@ -96,6 +97,17 @@ class PaymentButton(BaseButton):
                 interaction=interaction,
                 **message_kwargs
             )
+
+        if payment_status_code == PaymentStatusCodes.SUCCESS:
+            await send_confirm_order_message(
+                customer=user,
+                kicker=self.view.kicker,
+                kicker_username=self.view.kicker.name,
+                service_name=self.view.service["tag"],
+                purchase_id=self.view.service["id"],
+                discord_server_id=int(self.discord_server_id),
+            )
+
         self.disabled = True
         try:
             self.view.already_pressed = True
