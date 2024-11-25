@@ -38,10 +38,10 @@ class InviteUserButton(BaseButton):
 
         if invite_tracker and guild:
             channel = guild.text_channels[0]  
-            invite = await channel.create_invite(max_age=max_age, unique=True)
-            
             guild_id = guild.id
+
             invite_tracker.invites[guild_id] = await guild.invites() 
+            invite = await channel.create_invite(max_age=max_age, unique=True)
             invite_tracker.manual_invites[invite.code] = interaction.user
             
             embed_message = discord.Embed(
