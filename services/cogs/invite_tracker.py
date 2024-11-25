@@ -94,9 +94,6 @@ class InviteTracker(commands.Cog):
                     await inviter.send(translations["link_invite_message"][lang].format(member_name=member.name,used_invite_code=used_invite.code))
                     await self.services_db.save_user_reward(discord_id=inviter.id, reward_type="DISCORD_INVITE", server_id=0, invited_discord_id=member.id)
                 
-                if logs is None:
-                    logger.error("Logs channel not found. Check `self.logs_channel` value.")
-                    return
                 try:
                     await logs.send(embed=embed)
                 except discord.Forbidden:
