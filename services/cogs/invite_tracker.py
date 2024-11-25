@@ -12,6 +12,8 @@ from logging import getLogger
 
 bot = get_bot()
 logger = getLogger("")
+
+
 class InviteTracker(commands.Cog):
     """
     Tracks invites and logs which invite was used when a member joins or leaves the server.
@@ -97,9 +99,9 @@ class InviteTracker(commands.Cog):
                 try:
                     await logs.send(embed=embed)
                 except discord.Forbidden:
-                    self.bot.logger.error("Bot lacks permission to send messages in the logs channel.")
+                    logger.error("Bot lacks permission to send messages in the logs channel.")
                 except discord.HTTPException as e:
-                    self.bot.logger.error(f"Failed to send message to logs channel: {e}")
+                    logger.error(f"Failed to send message to logs channel: {e}")
                 
             else:
                 embed.add_field(
