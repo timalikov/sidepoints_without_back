@@ -17,6 +17,7 @@ from commands.start_command import StartCommand
 from commands.test_command import TestCommand
 from commands.wallet_command import WalletCommand
 from commands.forum_command import ForumCommand
+from commands.test_payment_command import TestPaymentCommand
 
 from bot_instance import get_bot
 from background_tasks import (
@@ -80,6 +81,7 @@ async def on_ready():
     await bot.add_cog(InviteTracker(bot))
     if TEST:
         await bot.add_cog(TestCommand(bot))
+        await bot.add_cog(TestPaymentCommand(bot))
     await bot.add_cog(ForumCommand(bot))
     await bot.add_cog(GoCommand(bot))
     await bot.add_cog(LeaderboardCommand(bot))
