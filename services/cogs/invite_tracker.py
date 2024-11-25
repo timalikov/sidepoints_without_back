@@ -104,11 +104,7 @@ class InviteTracker(commands.Cog):
                     logger.error(f"Failed to send message to logs channel: {e}")
                 
             else:
-                embed.add_field(
-                    name=translations["task_records_name"][lang],
-                    value=translations["task_records_value"][lang],
-                    inline=False
-                )
+                logger.warning(f"Couldn't find the invite used by {member.name}")
 
         except Exception as e:
             print(f"Error tracking invite on member join: {e}")
