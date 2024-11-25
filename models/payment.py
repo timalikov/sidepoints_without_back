@@ -67,22 +67,23 @@ async def top_up_free_ten_usdt(user: discord.User, amount: int) -> None:
             channel_name=BECOME_CHANNEL_NAME,
             guild=bot.get_guild(MAIN_GUILD_ID)
         )
-        await user.send(
-            embed=discord.Embed(
-                title="Thanks for you using /Order command",
-                description=(
-                    "Here is 10$ bonus 💵 for fist order free. and all the kickers price are 6$ now!!\n"
-                    f"In {order_lobby_channel.jump_url} use the /order command to Get 10$\n"
-                    "```Command Info: \n\n"
-                    "/find  +@discord name   :find a kicker\n\n"
-                    "/order :place an order\n\n"
-                    "/boost  +@discord name+anount  : boost a kicker\n\n"
-                    "/wallet :Top Up```\n\n"
-                    f"*In {order_lobby_channel.jump_url} use the /order command to Get 10$, in {become_channel.jump_url}  to sign up as a kicker*"
-                ),
-                colour=discord.Colour.green()
-            )
+        user_embed = discord.Embed(
+            title="Thanks for you using /Order command",
+            description=(
+                "Here is 10$ bonus 💵 for fist order free. and all the kickers price are 6$ now!!\n"
+                f"In {order_lobby_channel.jump_url} use the /order command to Get 10$\n"
+                "```Command Info: \n\n"
+                "/find  +@discord name   :find a kicker\n\n"
+                "/order :place an order\n\n"
+                "/boost  +@discord name+anount  : boost a kicker\n\n"
+                "/wallet :Top Up```\n\n"
+                f"*In {order_lobby_channel.jump_url} use the /order command to Get 10$, in {become_channel.jump_url}  to sign up as a kicker*\n"
+                "10 USD will be in your wallet in just a second! Use the /wallet command to check it out!"
+            ),
+            colour=discord.Colour.green()
         )
+        user_embed.set_image(url="https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/free_poster.png")
+        await user.send(embed=user_embed)
 
 
 async def get_server_wallet_by_discord_id(user_id: int) -> str:
