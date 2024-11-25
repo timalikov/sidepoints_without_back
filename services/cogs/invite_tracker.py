@@ -38,7 +38,6 @@ class InviteTracker(commands.Cog):
             
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        print("on_member_join")
 
         if member.guild.id != MAIN_GUILD_ID:
             return
