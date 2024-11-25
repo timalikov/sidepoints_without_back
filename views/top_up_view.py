@@ -60,7 +60,7 @@ class TopUpView(BaseView):
             logger.error(f"Top Up timeount! {url}")
             return None
         if response.status_code != 200:
-            logger.http_error("TOP UP", response=response)
+            await logger.http_error("TOP UP", response=response)
             return None
         balance = await get_usdt_balance_by_discord_user(user)
         custom_cache.set_top_up(user.id, balance)

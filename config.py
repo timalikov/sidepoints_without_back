@@ -25,6 +25,8 @@ SERVER_WALLET_URL = os.getenv('SERVER_WALLET_URL')
 CHECK_IN_URL = BACKEND_DOMAIN + "/api/wallets/check-in"
 CHECK_IN_AVAILABLE = BACKEND_DOMAIN + "/api/task-records/check-in-available"
 BOOST_URL = BACKEND_DOMAIN + "/api/boosts/custom"
+FREE_TOP_UP_URL = os.getenv('FREE_TOP_UP_URL')
+FREE_TOP_UP_TOKEN = os.getenv('FREE_TOP_UP_TOKEN')
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 PORT_ID = int(os.getenv('PORT_ID'))
@@ -144,6 +146,9 @@ ANNOUNCEMENTS_CHANNEL_NAME = "sidekick-announcement"
 
 BOOST_KICKER_CATEGORY_NAME = "Sidekick: Match to Play"
 BOOST_KICKER_CHANNEL_NAME = "🚀boost-a-kicker"
+
+BECOME_CATEGORY_NAME = "kickers-and-partners"
+BECOME_CHANNEL_NAME = "⭐️become-a-kicker"
 
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
@@ -654,3 +659,6 @@ TEST_ACCOUNTS = [
     939139881597296751,
     939132286199275640
 ]
+
+LOGGER_SEND_DISCORD_DM_LOGS = False
+LOGGER_DISCORD_USERS_LOGS = [930005621728763904, 243040580186144769]

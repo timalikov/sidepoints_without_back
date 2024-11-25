@@ -9,6 +9,13 @@ from config import (
     PAYMENT_LINK,
     SERVER_WALLET_URL,
     BOOST_URL,
+    GUIDE_CATEGORY_NAME,
+    GUIDE_CHANNEL_NAME,
+    BECOME_CATEGORY_NAME,
+    BECOME_CHANNEL_NAME,
+    MAIN_GUILD_ID,
+    FREE_TOP_UP_URL,
+    FREE_TOP_UP_TOKEN,
 )
 from bot_instance import get_bot
 
@@ -16,18 +23,75 @@ from services.logger.client import CustomLogger
 from services.common_http import handle_status_code
 from web3_interaction.balance_checker import get_usdt_balance
 from models.enums import PaymentStatusCodes
+from models.public_channel import get_or_create_channel_by_category_and_name
 
 logger = CustomLogger
 bot = get_bot()
 
 
-async def get_server_wallet_by_discord_id(user_id: int) -> str:
+async def create_wallet(user_id: int) -> requests.Response:
+    return requests.post(SERVER_WALLET_URL + "/create", json={"userId": str(user_id)})
+
+
+async def find_wallet(user_id: int) -> requests.Response:
+    return requests.get(SERVER_WALLET_URL + f"/find?userId={user_id}")
+
+
+async def is_wallet_exist_by_discord_id(user_id: int) -> bool:
     exists_response = requests.get(SERVER_WALLET_URL + f"/exists?userId={user_id}")
     is_exists = exists_response.json().get("exists")
+    return is_exists
+
+
+async def top_up_free_ten_usdt(user: discord.User, amount: int) -> None:
+    response: requests.Response = await create_wallet(user.id)
+    success = await handle_status_code(response)
+    if not success:
+        return PaymentStatusCodes.SERVER_PROBLEM
+    response_data = response.json()
+    sender_address: str = response_data["address"]
+    response = requests.post(
+        url=FREE_TOP_UP_URL, 
+        headers={"Content-Type": "application/json", "X-API-Token": FREE_TOP_UP_TOKEN},
+        json={"message": "send_transaction", "to_address": sender_address, "amount": str(amount)}
+    )
+    top_up_success = await handle_status_code(response)
+    if top_up_success:
+        order_lobby_channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=GUIDE_CHANNEL_NAME,
+            guild=bot.get_guild(MAIN_GUILD_ID)
+        )
+        become_channel = await get_or_create_channel_by_category_and_name(
+            category_name=BECOME_CATEGORY_NAME,
+            channel_name=BECOME_CHANNEL_NAME,
+            guild=bot.get_guild(MAIN_GUILD_ID)
+        )
+        user_embed = discord.Embed(
+            title="Thanks for you using /Order command",
+            description=(
+                "Here is 10$ bonus 💵 for fist order free. and all the kickers price are 6$ now!!\n"
+                f"In {order_lobby_channel.jump_url} use the /order command to Get 10$\n"
+                "```Command Info: \n\n"
+                "/find  +@discord name   :find a kicker\n\n"
+                "/order :place an order\n\n"
+                "/boost  +@discord name+anount  : boost a kicker\n\n"
+                "/wallet :Top Up```\n\n"
+                f"*In {order_lobby_channel.jump_url} use the /order command to Get 10$, in {become_channel.jump_url}  to sign up as a kicker*\n"
+                "10 USD will be in your wallet in just a second! Use the /wallet command to check it out!"
+            ),
+            colour=discord.Colour.green()
+        )
+        user_embed.set_image(url="https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/free_poster.png")
+        await user.send(embed=user_embed)
+
+
+async def get_server_wallet_by_discord_id(user_id: int) -> str:
+    is_exists = await is_wallet_exist_by_discord_id(user_id)
     if is_exists:
-        response = requests.get(SERVER_WALLET_URL + f"/find?userId={user_id}")
+        response = await find_wallet(user_id)
     else:
-        response = requests.post(SERVER_WALLET_URL + "/create", json={"userId": str(user_id)})
+        response = await create_wallet(user_id)
     is_success = await handle_status_code(response=response)
     if not is_success:
         return None
@@ -65,7 +129,7 @@ def get_jwt_token(user: discord.User) -> str:
         url=JWT_AUTH_URL, json=request_json
     )
     if jwt_response.status_code != 200:
-        logger.http_error(
+        logger.http_error_sync(
             place="JWT", response=jwt_response
         )
         return
@@ -90,7 +154,7 @@ async def send_payment(user: discord.User, target_service: Dict, discord_server_
         json=payment_json
     )
     if payment_response.status_code != 200:
-        logger.http_error(
+        await logger.http_error(
             place="Payment", response=payment_response
         )
         return PaymentStatusCodes.SERVER_PROBLEM

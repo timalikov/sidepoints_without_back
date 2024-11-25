@@ -11,7 +11,10 @@ from bot_instance import get_bot
 from services.messages.interaction import send_interaction_message
 from views.order_view import OrderView
 from views.order_dm_view import OrderDMView
-from models.payment import get_usdt_balance, get_server_wallet_by_discord_id
+from models.payment import (
+    get_usdt_balance,
+    get_server_wallet_by_discord_id,
+)
 
 from services.utils import save_user_id
 from services.utils import get_guild_invite_link
