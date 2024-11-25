@@ -39,7 +39,10 @@ class PointsCommand(commands.Cog):
         else:
             dto = LeaderboardDatabase()
             user_ranking = await dto.get_user_ranking(profile_id=profile_id)
-            
+        
+        if not user_ranking:
+            user_ranking = {"total_score": 0, "total_pos": 0}
+
         total_points = user_ranking.get('total_score', 0)
         rank = user_ranking.get('total_pos', 0)
         

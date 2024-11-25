@@ -8,8 +8,11 @@ import json
 from config import INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
 from services.sqs_client import SQSClient
 from translate import get_lang_prefix, translations
+from logging import getLogger
 
 bot = get_bot()
+logger = getLogger("")   
+
 
 class InviteTracker(commands.Cog):
     """
@@ -93,8 +96,12 @@ class InviteTracker(commands.Cog):
                     await inviter.send(translations["link_invite_message"][lang].format(member_name=member.name,used_invite_code=used_invite.code))
                     await self.services_db.save_user_reward(discord_id=inviter.id, reward_type="DISCORD_INVITE", server_id=0, invited_discord_id=member.id)
                 
-                await logs.send(embed=embed)
-            
+                try:
+                    await logs.send(embed=embed)
+                except discord.Forbidden:
+                    logger.error("Bot lacks permission to send messages in the logs channel.")
+                except discord.HTTPException as e:
+                    logger.error(f"Failed to send message to logs channel: {e}")
                 
             else:
                 embed.add_field(
