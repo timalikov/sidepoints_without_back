@@ -65,7 +65,7 @@ SUPER_KICKER_IDS = [
 ]
 TEAM_CHANNEL_ID = 1283327337777074177
 INVITE_LOGS_CHANNEL_ID = 1301798774259318805
-
+IGNORE_INVITE_CODES = ["EYJFZTvz", "WGWGMtth2b", "KsTQ9pF5QT"]
 # link_to_back = f"http://127.0.0.1:8001/discordServices"
 link_to_back = os.getenv('BOTAPI_URL') # f"http://172.31.7.179:8001/discordServices"
 

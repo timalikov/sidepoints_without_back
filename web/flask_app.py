@@ -45,6 +45,8 @@ async def send_notification():
         message: str = data["message"]
     except KeyError as e:
         return jsonify({"message": f"Missing key: {e}"}), 400
+    print(f"User ID: {user_id}")
+    print(f"Message: {message}")
     future = asyncio.run_coroutine_threadsafe(send_discord_notification(user_id=user_id, message=message), bot.loop)
     is_user_found = future.result()
     if not is_user_found:
