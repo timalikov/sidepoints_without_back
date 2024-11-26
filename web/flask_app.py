@@ -41,7 +41,7 @@ async def server_user_counts():
 async def send_notification():
     data = request.json
     try:
-        user_id: int = data["kickerDiscordId"]
+        user_id: int = int(data["discordId"]) if data.get("type") == "message" else data["kickerDiscordId"]
         message: str = data["message"]
     except KeyError as e:
         return jsonify({"message": f"Missing key: {e}"}), 400

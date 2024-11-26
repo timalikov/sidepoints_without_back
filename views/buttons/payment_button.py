@@ -99,12 +99,15 @@ class PaymentButton(BaseButton):
 
         if payment_status_code == PaymentStatusCodes.SUCCESS:
             from services.messages.base import send_confirm_order_message
+            print("service")
+            print(self.view.service)
+            kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))
             await send_confirm_order_message(
                 customer=user,
-                kicker=self.view.kicker,
-                kicker_username=self.view.kicker.name,
-                service_name=self.view.service["service_name"],
-                purchase_id=self.purchase_id,
+                kicker=kicker,
+                kicker_username=self.view.service["discord_username"],
+                service_name=self.view.service["service_title"],
+                purchase_id=purchase_id,
                 discord_server_id=int(self.discord_server_id),
             )
 

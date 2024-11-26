@@ -34,7 +34,7 @@ class Receiver:
             aws_secret_access_key="diSyU0WCuXpBtKlQIP0rgyzOGVU2zI6W5Qvdo27Q",
             region_name='eu-central-1'
         )
-        self.queue_router = "sidekick_dev_bot_" if TEST else "sidekick_prod_bot_"
+        self.queue_router = "sidekick_dev_" if TEST else "sidekick_prod_"
         self.queue_host = f"https://sqs.eu-central-1.amazonaws.com/104037811570/{self.queue_router}"
         self.queues = {}
 
@@ -112,27 +112,33 @@ def send_request(url: str, message_body: dict) -> requests.Response:
     return False
 
 
-@sqs_receiver.receive(queue="deliveries.fifo")
+@sqs_receiver.receive(queue="bot_deliveries.fifo")
 def send_message_to_endpoint(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/order/confirm"
     _ = send_request(url, message_body)
 
 
-@sqs_receiver.receive(queue="new_purchases.fifo")
+@sqs_receiver.receive(queue="bot_new_purchases.fifo")
 def send_notification_to_endpoint(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/notification"
     _ = send_request(url, message_body)
 
 
-@sqs_receiver.receive(queue="boost_messages.fifo")
+@sqs_receiver.receive(queue="bot_boost_messages.fifo")
 def send_boost_notification(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/boost"
     print(message_body)
     _ = send_request(url, message_body)
 
-@sqs_receiver.receive(queue="orders_new")
+@sqs_receiver.receive(queue="bot_orders_new")
 def send_order(message_body):
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/order/choice"
+    _ = send_request(url, message_body)
+
+@sqs_receiver.receive(queue="discord_messages_to_user")
+def send_message_to_user(message_body):
+    message_body['type'] = "message"
+    url = f"{os.getenv('WEB_APP_URL')}/discord_api/notification"
     _ = send_request(url, message_body)
 
 def main():
