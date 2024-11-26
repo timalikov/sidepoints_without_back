@@ -1,7 +1,6 @@
 import discord
 from typing import Literal
 
-from services.messages.base import send_confirm_order_message
 from translate import translations
 
 from config import MAIN_GUILD_ID
@@ -50,7 +49,7 @@ class PaymentButton(BaseButton):
         if not self.discord_server_id:
             self.discord_server_id = interaction.guild_id if interaction.guild_id else int(MAIN_GUILD_ID)
         user = self.customer if self.customer else interaction.user
-        payment_status_code = await send_payment(
+        payment_status_code, purchase_id = await send_payment(
             user=user,
             target_service=self.view.service,
             discord_server_id=self.discord_server_id
@@ -99,12 +98,13 @@ class PaymentButton(BaseButton):
             )
 
         if payment_status_code == PaymentStatusCodes.SUCCESS:
+            from services.messages.base import send_confirm_order_message
             await send_confirm_order_message(
                 customer=user,
                 kicker=self.view.kicker,
                 kicker_username=self.view.kicker.name,
-                service_name=self.view.service["tag"],
-                purchase_id=self.view.service["id"],
+                service_name=self.view.service["service_name"],
+                purchase_id=self.purchase_id,
                 discord_server_id=int(self.discord_server_id),
             )
 
