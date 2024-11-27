@@ -26,7 +26,7 @@ class OrderPlayView(BaseView):
         lang: Literal["en", "ru"]
 
     ) -> None:
-        super().__init__(timeout=60 * 5)
+        super().__init__(timeout=60 * 60)
         self.main_interaction = main_interaction
         self.service = service
         self.service_id = service['service_id']

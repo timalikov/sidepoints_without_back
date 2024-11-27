@@ -31,6 +31,8 @@ class RejectButton(BaseButton):
         try:
             await self.view.stop_refund_manager()
             await self.view.refund_manager.send_refund_replace(start_timer=True)
+        except (AttributeError, Exception):
+            await self.view.disable_all_buttons()
         finally:
             await Services_Database().log_to_database(
                 interaction.user.id, 
