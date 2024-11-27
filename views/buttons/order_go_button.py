@@ -53,11 +53,7 @@ class OrderGoButton(BaseButton):
             lang=self.lang
         )
         view = OrderPlayView(
-            customer=self.view.customer,
-            main_interaction=interaction,
             service=service,
-            kicker_id=kicker.id,
-            order_view=self.view,
             guild_id=self.view.guild_id,
             lang=self.lang
         )

@@ -17,40 +17,44 @@ class OrderPlayView(BaseView):
     def __init__(
         self,
         *,
-        customer: discord.User,
-        main_interaction: discord.Interaction,
         service: dict,
-        kicker_id: int,
         guild_id: int,
-        order_view: Any,
-        lang: Literal["en", "ru"]
-
+        need_reject_button: bool = True,
+        need_boost_button: bool = True,
+        need_payment_button: bool = True,
+        need_chat_button: bool = True,
+        lang: Literal["en", "ru"],
+        timeout: int = 60 * 60
     ) -> None:
-        super().__init__(timeout=60 * 60)
-        self.main_interaction = main_interaction
+        super().__init__(timeout=timeout)
         self.service = service
         self.service_id = service['service_id']
-        self.kicker_id = kicker_id
-        self.customer = customer
         self.already_pressed = False
         self.discord_service_id = guild_id
-        self.order_view = order_view
         self.boost_amount = None
         self.lang = lang
+        self.need_reject_button = need_reject_button
+        self.need_boost_button = need_boost_button
+        self.need_payment_button = need_payment_button
+        self.need_chat_button = need_chat_button
         self.add_buttons()
 
     def add_buttons(self) -> None:
-        accept_reject_button = SendAcceptRejectButton(
-            discord_server_id=self.discord_service_id,
-            lang=self.lang
-        )
-        reject_button = RejectButton(lang=self.lang)
-        boost_button = BoostButton(show_dropdown=False, lang=self.lang)
-        chat_button = ChatButton(lang=self.lang)
-        self.add_item(accept_reject_button)
-        self.add_item(reject_button)
-        self.add_item(chat_button)
-        self.add_item(boost_button)
+        if self.need_payment_button:
+            accept_reject_button = SendAcceptRejectButton(
+                discord_server_id=self.discord_service_id,
+                lang=self.lang
+            )
+            self.add_item(accept_reject_button)
+        if self.need_reject_button:
+            reject_button = RejectButton(lang=self.lang)
+            self.add_item(reject_button )
+        if self.need_boost_button:
+            boost_button = BoostButton(show_dropdown=False, lang=self.lang)
+            self.add_item(boost_button)
+        if self.need_chat_button:
+            chat_button = ChatButton(lang=self.lang)
+            self.add_item(chat_button)
 
     async def on_timeout(self) -> Coroutine[Any, Any, None]:
         await self.disable_all_buttons()

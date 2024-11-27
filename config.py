@@ -129,14 +129,14 @@ PORT_PSQL = os.getenv('PORT_PSQL').strip()
 BOOST_CHANNEL_ID = 1285193246183784488
 ORDER_CHANNEL_ID = 1284079837941731379
 
-ORDER_CATEGORY_NAME = "Kickers"
-ORDER_CHANNEL_NAME = "🔔order-dispatch"
-
 FIRST_LIMIT_CHECK_MINUTES = 5
 SECOND_LIMIT_CHECK_MINUTES = 30
 
 FORUM_CATEGORY_NAME = "Sidekick: Match to Play"
 FORUM_NAME = "🔎find-your-kickers"
+
+ORDER_CATEGORY_NAME = "Kickers"
+ORDER_CHANNEL_NAME = "🔔order-dispatch"
 
 GUIDE_CATEGORY_NAME = "Sidekick: Match to Play"
 GUIDE_CHANNEL_NAME = "📥order-lobby"
