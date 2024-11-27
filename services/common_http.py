@@ -7,21 +7,22 @@ logger = CustomLogger
 
 
 async def _handle_500(response: requests.Response) -> dict:
-    logger.http_error("Unknown error", response)
+    await logger.http_error("Unknown error", response)
     return False
 
 
 async def _handle_400(response: requests.Response) -> dict:
-    logger.http_warning("GET WALLET", response)
+    await logger.http_warning("GET WALLET", response)
     return False
 
 
 async def _handle_404(response: requests.Response) -> dict:
-    logger.http_warning("GET WALLET", response)
+    await logger.http_warning("GET WALLET", response)
     return False
 
 
 async def _handle_200(response: requests.Response) -> dict:
+    await logger.http_warning("GET WALLET", response)
     return True
 
 

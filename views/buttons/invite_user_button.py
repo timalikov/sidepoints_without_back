@@ -8,7 +8,9 @@ from config import MAIN_GUILD_ID
 
 from services.cogs.invite_tracker import InviteTracker
 from views.buttons.base_button import BaseButton
+from services.logger.client import CustomLogger
 
+logger = CustomLogger
 bot = get_bot()
 
 
@@ -36,12 +38,10 @@ class InviteUserButton(BaseButton):
 
         if invite_tracker and guild:
             channel = guild.text_channels[0]  
-            invite = await channel.create_invite(max_age=max_age, unique=True)
-            
             guild_id = guild.id
-            if guild_id not in invite_tracker.invites:
-                invite_tracker.invites[guild_id] = await guild.invites() 
 
+            invite_tracker.invites[guild_id] = await guild.invites() 
+            invite = await channel.create_invite(max_age=max_age, unique=True)
             invite_tracker.manual_invites[invite.code] = interaction.user
             
             embed_message = discord.Embed(
@@ -56,7 +56,7 @@ class InviteUserButton(BaseButton):
             await interaction.response.send_message(embed=embed_message, ephemeral=True)
             
         else:
-            print("InviteTracker cog not loaded or Guild not found")
+            logger.error("InviteTracker cog not loaded or Guild not found")
             error_message = discord.Embed(
                 description="Something went wrong. Please try again later.",
                 color=discord.Color.red()

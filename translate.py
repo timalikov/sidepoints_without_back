@@ -197,12 +197,10 @@ translations = {
     'replace_requested': {
         'en': (
             "The replacement has been requested. "
-            "We have also issued a refund for this service to you. "
-            "Please wait while we look for a replacement kicker."
+            "Please wait while we are looking for a replacement kicker 🔁🎮"
         ),
         'ru': (
             "Запрошена замена исполнителя. "
-            "Мы также оформили возврат средств за эту услугу. "
             "Пожалуйста, подождите, пока мы найдем замену исполнителю."
         )
     },
@@ -299,8 +297,8 @@ translations = {
         "ru": "Извините, кикер {kicker_name} не принял сессию."
     },
     "refund_replace_prompt": {
-        "en": "Would you like a refund or replace the kicker?",
-        "ru": "Хотите ли вы возврат средств или заменить кикера?"
+        "en": "Would you like to replace the kicker?",
+        "ru": "Хотите ли вы заменить кикера?"
     },
     "success_check": {
         "en": "Great! You've successfully passed the availability check. Keep up the quick responses!",
@@ -418,9 +416,12 @@ translations = {
         "en": "Hi {kicker_name}, we’re doing a quick check to see if you're available online. Please click the 'Check' button below within the next 5 minutes to pass the test.",
         "ru": "Привет {kicker_name}, мы проводим быструю проверку, доступен ли ты онлайн. Пожалуйста, нажми кнопку 'Check' внизу в течение следующих 5 минут, чтобы пройти тест."
     },
+    "kicker_session_started_message_title": {
+        "en": "**Your session has started:**",
+        "ru": "**Ваша сессия началась:**\n"
+    },
     "kicker_session_started_message": {
         "en": (
-            "**Your session has started:**\n"
             "User: <@{challenger_id}>\n"
             "Username: {challenger_name}\n"
             "User discord id: {challenger_id}\n"
@@ -429,7 +430,6 @@ translations = {
             "Connect via Direct message:<@{challenger_id}>\n"
         ),
         "ru": (
-            "**Ваша сессия началась:**\n"
             "Пользователь: <@{challenger_id}>\n"
             "Имя пользователя: {challenger_name}\n"
             "Discord ID пользователя: {challenger_id}\n"
@@ -677,8 +677,8 @@ translations = {
         "ru": "Вы уже были вознаграждены за приглашение этого пользователя"
     },
     "success_payment": {
-        "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🔔Thank you for making the order!\n🔉Matching Kickers for you now. Please check your DM for service updates.",
-        "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🔔Спасибо за покупку!\n🔉Подбираем кикеров для вас. Пожалуйста, проверьте личные сообщения для обновлений по услуге."
+        "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🔔Thank you for making the order!",
+        "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🔔Спасибо за покупку!"
     },
     "server_error_payment": {
         "en": "Oops, something went wrong. Please try again...",
@@ -756,6 +756,10 @@ translations = {
         "en": "{member_name} has been invited to the SideKick server with your invite link: https://discord.gg/{used_invite_code} and you've gained 100 points.\nCheck out https://app.sidekick.fans/tasks or use the /points command.",
         "ru": "{member_name} был приглашен на сервер SideKick по вашему приглашению : https://discord.gg/{used_invite_code} за это вы получаете 100 очков.\nПереходите по ссылке https://app.sidekick.fans/tasks или используйте комманду /points."
     },
+    "invite_already_rewarded": {
+        "en": "You have already been rewarded for inviting this user.",
+        "ru": "Вы уже были вознаграждены за приглашение этого пользователя."
+    },
     "task_records_name": {
         "en": "Used invite",
         "ru": "Был приглашен"
@@ -817,8 +821,8 @@ translations = {
         "ru": "🎟Спасибо за размещение заказа"
     },
     "thanks_for_placing_order_description": {
-        "en": "While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.",
-        "ru": "Пока вы ждете отправку заказа, убедитесь, что у вас есть 💰достаточный баланс💰 на вашем счету.\nВы можете 💶пополнить💶 с помощью следующих методов."
+        "en": "While you wait for the order dispatch, please make sure you have 💰sufficient balance💰 on your account.\nYou may 💶top up💶 using the following methods.\nYour balance: {balance} 💰",
+        "ru": "Пока вы ждете отправку заказа, убедитесь, что у вас есть 💰достаточный баланс💰 на вашем счету.\nВы можете 💶пополнить💶 с помощью следующих методов.\nВаш баланс: {balance} 💰"
     },
     "final_boost_step_title": {
         "en": "Final step!",
@@ -827,5 +831,9 @@ translations = {
     "final_boost_step_message": {
         "en": "Only one step left to boost **{username}** by **{amount} USD**. Just click the button! 👇🏻",
         "ru": "Остался последний шаг, чтобы забустить **{username}** на сумму **{amount} USD**. Просто нажми на кнопку! 👇🏻"
+    },
+    "session_accepted_message": {
+        "en": "Thanks for accepting the session with @{discord_user}!",
+        "ru": "Спасибо за принятие сессии с @{discord_user}!"
     }
 }

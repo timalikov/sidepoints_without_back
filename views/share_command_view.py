@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 from typing import Literal
 
 from translate import translations
-from config import MAIN_GUILD_ID
 
-class ShareCommandView(discord.ui.View):
+from views.base_view import BaseView
+
+
+class ShareCommandView(BaseView):
     cooldowns = {}  
 
     def __init__(

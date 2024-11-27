@@ -7,13 +7,12 @@ from config import BOOST_CHANNEL_ID, GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME, MA
 from translate import translations, get_lang_prefix
 
 from services.messages.customer_support_messenger import send_message_to_customer_support
-from services.sqs_client import SQSClient
 from services.utils import hide_half_string
-from views.access_reject import AccessRejectView
 from views.check_reaction import CheckReactionView
 from views.order_view import OrderView
 from database.dto.psql_services import Services_Database
 from models.enums import StatusCodes
+from models.private_channel import create_private_discord_channel, send_connect_message_between_kicker_and_customer
 from models.public_channel import find_channel_by_category_and_name, get_or_create_channel_by_category_and_name
 
 bot = get_bot()
@@ -67,7 +66,7 @@ async def send_confirm_order_message(
 ) -> StatusCodes:
     lang = get_lang_prefix(int(discord_server_id))
     services_db = Services_Database()
-    service = await services_db.get_services_by_username(username=kicker_username)
+    service = await services_db.get_services_by_username(username=kicker.name)
     if service:
         service["service_category_name"] = service["tag"]
 
@@ -91,59 +90,39 @@ async def send_confirm_order_message(
         ),
         colour=discord.Colour.from_rgb(*YELLOW_LOGO_COLOR)
     )
+    guild = bot.get_guild(discord_server_id)
     channel = await get_or_create_channel_by_category_and_name(
-        guild=bot.get_guild(discord_server_id),
+        guild=guild,
         category_name=GUIDE_CATEGORY_NAME,
         channel_name=GUIDE_CHANNEL_NAME
     )
     await channel.send(embed=order_successful_message_embed)
 
-    customer_message_embed = discord.Embed(
-        colour=discord.Colour.dark_blue(),
-        title=translations["order_in_process"][lang],
-        description=translations["order_sent"][lang].format(kicker_name=kicker.name)
-    )
-    await customer.send(
-        embed=customer_message_embed
-    )
-
-    message_embend = discord.Embed(
-        colour=discord.Colour.dark_blue(),
-        title=translations["service_purchased_title"][lang],
-        description=translations["service_details"][lang].format(
-            service_name=service['service_category_name'] if service else 'Not found',
-            service_price=service['service_price'] if service else 'Not found'
-        )       
-    )
-    
-    sqs_client = SQSClient()
-
-    view = AccessRejectView(
-        kicker=kicker,
-        customer=customer,
-        kicker_username=kicker_username,
-        service_name=service_name,
-        purchase_id=purchase_id,
-        sqs_client=sqs_client,
-        discord_server_id=discord_server_id,
-        lang=lang
-    )
-
-    success: bool = True
-    response: str = None
-    try:
-        view.message = await kicker.send(
-            view=view,
-            embed=message_embend
+    channel: discord.VoiceChannel = None
+    if guild.get_member(customer.id):
+        is_success, channel = await create_private_discord_channel(
+            bot_instance=bot,
+            guild_id=discord_server_id,
+            challenged=kicker,
+            challenger=customer,
+            serviceName=service_name,
+            kicker_username=kicker_username,
+            purchase_id=purchase_id,
+            lang=lang
         )
-    except Exception as e:
-        response = translations["failed_to_send_message"][lang].format(error=str(e))
-        success = False
-    if view.message.channel:
-        response = view.message.channel.id
+    else:
+        await send_connect_message_between_kicker_and_customer(
+            challenger=customer,
+            challenged=kicker,
+            serviceName=service_name,
+            lang=lang
+        )
+
+    if channel:
+        response = channel.id
     else:
         response = "Direct message"
-    return success, response
+    return is_success, response
 
 async def send_reaction_message() -> StatusCodes:
     ...

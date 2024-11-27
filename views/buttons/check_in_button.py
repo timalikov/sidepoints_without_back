@@ -39,9 +39,9 @@ class CheckInButton(BaseButton):
         try:
             response = requests.get(CHECK_IN_AVAILABLE, timeout=5, headers=self.headers)
         except requests.Timeout:
-            logger.http_error("Check in available [timeout]", response)
+            logger.http_error_sync("Check in available [timeout]", response)
         if response.status_code != 200:
-            logger.http_error("Check in available", response)
+            logger.http_error_sync("Check in available", response)
         else:
             if response.json():
                 self.disabled = False

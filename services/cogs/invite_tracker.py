@@ -5,11 +5,14 @@ import discord
 from discord.ext import commands, tasks
 from discord import Embed
 import json
-from config import INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
+from config import IGNORE_INVITE_CODES, INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
 from services.sqs_client import SQSClient
 from translate import get_lang_prefix, translations
+from logging import getLogger
 
 bot = get_bot()
+logger = getLogger("")   
+
 
 class InviteTracker(commands.Cog):
     """
@@ -61,6 +64,9 @@ class InviteTracker(commands.Cog):
                 if updated_invite and invite.uses < updated_invite.uses:
                     used_invite = updated_invite
                     break
+            
+            if used_invite.code in IGNORE_INVITE_CODES:
+                return
 
             if used_invite:
                 inviter = self.manual_invites.get(used_invite.code, used_invite.inviter)
@@ -71,7 +77,7 @@ class InviteTracker(commands.Cog):
                     return
                 
                 embed.add_field(
-                    name=translations["used_invited"][lang],
+                    name=translations["used_invite"][lang],
                     value=translations["invited_user_point"][lang].format(
                         inviter_mention=inviter.mention,
                         inviter=inviter,
@@ -93,15 +99,15 @@ class InviteTracker(commands.Cog):
                     await inviter.send(translations["link_invite_message"][lang].format(member_name=member.name,used_invite_code=used_invite.code))
                     await self.services_db.save_user_reward(discord_id=inviter.id, reward_type="DISCORD_INVITE", server_id=0, invited_discord_id=member.id)
                 
-                await logs.send(embed=embed)
-            
+                try:
+                    await logs.send(embed=embed)
+                except discord.Forbidden:
+                    logger.error("Bot lacks permission to send messages in the logs channel.")
+                except discord.HTTPException as e:
+                    logger.error(f"Failed to send message to logs channel: {e}")
                 
             else:
-                embed.add_field(
-                    name=translations["task_records_name"][lang],
-                    value=translations["task_records_value"][lang],
-                    inline=False
-                )
+                logger.warning(f"Couldn't find the invite used by {member.name}")
 
         except Exception as e:
             print(f"Error tracking invite on member join: {e}")

@@ -36,7 +36,7 @@ class StartCommand(commands.Cog):
                 message=translations["not_dm"][lang]
             )
             return
-        view = await PlayView.create(user_choice="ALL", lang=lang)
+        view = await PlayView.create(user_choice="ALL", lang=lang, guild_id=guild_id)
         if view.no_user:
             await interaction.followup.send(
                 content=translations["no_players"][lang],

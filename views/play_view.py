@@ -10,10 +10,11 @@ from services.kicker_sort_service import KickerSortingService
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
 from views.buttons.boost_button import BoostButton
-from views.buttons.payment_button import PaymentButton
 from views.buttons.next_button import NextButton
 from views.buttons.share_button import ShareButton
 from views.buttons.chat_button import ChatButton
+from views.buttons.send_accept_reject_button import SendAcceptRejectButton
+from views.base_view import BaseView
 from database.dto.psql_services import Services_Database
 
 
@@ -24,11 +25,17 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 app_choices = APP_CHOICES
 
-class PlayView(View):
+class PlayView(BaseView):
     @classmethod
-    async def create(cls, user_choice="ALL", username=None, lang: Literal["ru", "en"] = "en"):
+    async def create(
+        cls,
+        user_choice = "ALL",
+        username = None,
+        guild_id: int = main_guild_id,
+        lang: Literal["ru", "en"] = "en"
+    ):
         services_db = Services_Database(app_choice=user_choice)
-        instance = cls(None, services_db, lang=lang)
+        instance = cls(None, services_db, discord_service_id=guild_id, lang=lang)
         
         instance.services_db = services_db
         instance.kicker_sorting_service = KickerSortingService(services_db)
@@ -49,6 +56,7 @@ class PlayView(View):
         self,
         service: dict = None,
         services_db: Services_Database = None,
+        discord_service_id: int = main_guild_id,
         lang: Literal["ru", "en"] = "en"
     ) -> None:
         super().__init__(timeout=None)
@@ -57,10 +65,14 @@ class PlayView(View):
         self.no_user = False  
         self.profile_embed = None
         self.kicker_sorting_service = None
+        self.discord_service_id = discord_service_id
         self.lang = lang
 
     def add_buttons(self) -> None:
-        payment_button = PaymentButton(lang=self.lang)
+        payment_button = SendAcceptRejectButton(
+            discord_server_id=self.discord_service_id,
+            lang=self.lang
+        )
         next_button = NextButton(
             kicker_sorting_service=self.kicker_sorting_service,
             lang=self.lang

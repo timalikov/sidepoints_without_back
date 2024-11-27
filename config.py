@@ -10,6 +10,7 @@ RU_GUILDS = [773446008053956650]
 GUILDS_FOR_TASKS = [*RU_GUILDS, MAIN_GUILD_ID]
 CLIENT_ID = 1208433940050874429
 INVITE_BOT_URL = f"https://discord.com/oauth2/authorize?client_id={CLIENT_ID}&permissions=8&integration_type=0&scope=bot"
+GUILDS_TO_GET_MEMBER_COUNT = [773446008053956650, 1055398067303624714, 664655649975566355]
 
 JWT_AUTH_URL = os.getenv('JWT_AUTH_URL')
 JWT_AUTH_PASSWORD = os.getenv('JWT_AUTH_PASSWORD')
@@ -24,6 +25,8 @@ SERVER_WALLET_URL = os.getenv('SERVER_WALLET_URL')
 CHECK_IN_URL = BACKEND_DOMAIN + "/api/wallets/check-in"
 CHECK_IN_AVAILABLE = BACKEND_DOMAIN + "/api/task-records/check-in-available"
 BOOST_URL = BACKEND_DOMAIN + "/api/boosts/custom"
+FREE_TOP_UP_URL = os.getenv('FREE_TOP_UP_URL')
+FREE_TOP_UP_TOKEN = os.getenv('FREE_TOP_UP_TOKEN')
 
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 PORT_ID = int(os.getenv('PORT_ID'))
@@ -62,7 +65,7 @@ SUPER_KICKER_IDS = [
 ]
 TEAM_CHANNEL_ID = 1283327337777074177
 INVITE_LOGS_CHANNEL_ID = 1301798774259318805
-
+IGNORE_INVITE_CODES = ["EYJFZTvz", "WGWGMtth2b", "KsTQ9pF5QT"]
 # link_to_back = f"http://127.0.0.1:8001/discordServices"
 link_to_back = os.getenv('BOTAPI_URL') # f"http://172.31.7.179:8001/discordServices"
 
@@ -144,10 +147,13 @@ ANNOUNCEMENTS_CHANNEL_NAME = "sidekick-announcement"
 BOOST_KICKER_CATEGORY_NAME = "Sidekick: Match to Play"
 BOOST_KICKER_CHANNEL_NAME = "🚀boost-a-kicker"
 
+BECOME_CATEGORY_NAME = "kickers-and-partners"
+BECOME_CHANNEL_NAME = "⭐️become-a-kicker"
+
 LINK_LEADERBOARD = "https://app.sidekick.fans/leaderboard/points"
 LEADERBOARD_CHANNEL_NAME = "🏆sidekick-leaderboards"
 LEADERBOARD_CATEGORY_NAME = "Community 😎"
-POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points.png"
+POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points+2_2.png"
 
 YELLOW_LOGO_COLOR = [255, 211, 14]
 
@@ -653,3 +659,6 @@ TEST_ACCOUNTS = [
     939139881597296751,
     939132286199275640
 ]
+
+LOGGER_SEND_DISCORD_DM_LOGS = False
+LOGGER_DISCORD_USERS_LOGS = [930005621728763904, 243040580186144769]

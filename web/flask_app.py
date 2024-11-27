@@ -19,6 +19,7 @@ from models.private_channel import create_private_discord_channel
 from bot_instance import get_bot
 from models.enums import Genders, Languages
 import discord
+from services.cache.client import custom_cache
 
 main_guild_id = config.MAIN_GUILD_ID
 bot = get_bot()
@@ -41,7 +42,7 @@ async def server_user_counts():
 async def send_notification():
     data = request.json
     try:
-        user_id: int = data["kickerDiscordId"]
+        user_id: int = int(data["discordId"]) if data.get("type") == "message" else data["kickerDiscordId"]
         message: str = data["message"]
     except KeyError as e:
         return jsonify({"message": f"Missing key: {e}"}), 400
@@ -118,6 +119,10 @@ async def handle_confirm_order():
     kickerUsername: str = data.get("kickerUsername")
     purchaseId: str = data.get("purchaseId")
     discord_server_id: int = data.get("discordServerId")
+
+    is_channel_created = custom_cache.get_purchase_id(purchaseId)
+    if is_channel_created:
+        return jsonify({"message": "Private channel created before sqs"}), 200
     
     try:
         challenger: discord.User = await asyncio.wrap_future(
@@ -155,6 +160,21 @@ async def handle_confirm_order():
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
+@app.route('/discord_api/get_guild_members', methods=['GET'])
+async def handle_get_guild_members():
+    guild_ids = config.GUILDS_TO_GET_MEMBER_COUNT
+    guild_members = {}
+    for guild_id in guild_ids:
+        guild = bot.get_guild(guild_id)
+        if guild:
+            try:
+                guild_members[guild.name] = guild.member_count
+            except AttributeError:
+                guild_members[guild.name] = "Unable to fetch member count"
+        else:
+            guild_members[guild.name] = "Guild not found"
+
+    return jsonify(guild_members), 200
 
 @app.route('/discord_api/create_private_channel', methods=['POST'])
 async def handle_create_private_channel():
