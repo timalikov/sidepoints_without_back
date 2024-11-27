@@ -112,10 +112,10 @@ def send_request(url: str, message_body: dict) -> requests.Response:
     return False
 
 
-@sqs_receiver.receive(queue="bot_deliveries.fifo")
-def send_message_to_endpoint(message_body):
-    url = f"{os.getenv('WEB_APP_URL')}/discord_api/order/confirm"
-    _ = send_request(url, message_body)
+# @sqs_receiver.receive(queue="bot_deliveries.fifo")
+# def send_message_to_endpoint(message_body):
+#     url = f"{os.getenv('WEB_APP_URL')}/discord_api/order/confirm"
+#     _ = send_request(url, message_body)
 
 
 @sqs_receiver.receive(queue="bot_new_purchases.fifo")

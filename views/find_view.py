@@ -12,6 +12,7 @@ from views.buttons.payment_button import PaymentButton
 from views.base_view import BaseView
 from views.buttons.chat_button import ChatButton
 from database.dto.psql_services import Services_Database
+from views.buttons.send_accept_reject_button import SendAcceptRejectButton
 
 bot = get_bot()
 load_dotenv()
@@ -73,7 +74,11 @@ class FindView(BaseView):
         self.no_user = False
 
     def add_buttons(self) -> None:
-        payment_button = PaymentButton(lang=self.lang)
+        # payment_button = PaymentButton(lang=self.lang)
+        payment_button = SendAcceptRejectButton(
+            discord_server_id=self.discord_service_id,
+            lang=self.lang
+        )
         chat_button = ChatButton(lang=self.lang)
         boost_button = BoostButton(show_dropdown=True, lang=self.lang)
         self.add_item(payment_button)
