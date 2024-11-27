@@ -101,6 +101,7 @@ class PaymentButton(BaseButton):
             )
 
         if payment_status_code == PaymentStatusCodes.SUCCESS:
+            custom_cache.set_purchase_id(purchase_id)
             from services.messages.base import send_confirm_order_message
             try:
                 kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))
@@ -115,7 +116,6 @@ class PaymentButton(BaseButton):
                 purchase_id=purchase_id,
                 discord_server_id=int(self.discord_server_id),
             )
-            custom_cache.set_purchase_id(purchase_id)
 
         self.disabled = True
         try:
