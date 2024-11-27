@@ -10,8 +10,11 @@ from models.enums import PaymentStatusCodes
 from services.messages.interaction import send_interaction_message
 from views.buttons.base_button import BaseButton
 from views.top_up_view import TopUpView
+from services.cache.client import custom_cache
+from logging import getLogger
 
 bot = get_bot()
+logger = getLogger("")
 
 
 class PaymentButton(BaseButton):
@@ -26,7 +29,7 @@ class PaymentButton(BaseButton):
         self.lang = lang
         self.pressed_kickers = []
         self.customer = customer
-        self._view_variables = ["service", "kicker"]
+        self._view_variables = ["service"]
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
@@ -99,7 +102,11 @@ class PaymentButton(BaseButton):
 
         if payment_status_code == PaymentStatusCodes.SUCCESS:
             from services.messages.base import send_confirm_order_message
-            kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))
+            try:
+                kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))
+            except (ValueError, TypeError) as e:
+                logger.error(f"Error getting kicker: {e}")
+                return
             await send_confirm_order_message(
                 customer=user,
                 kicker=kicker,
@@ -108,6 +115,7 @@ class PaymentButton(BaseButton):
                 purchase_id=purchase_id,
                 discord_server_id=int(self.discord_server_id),
             )
+            custom_cache.set_purchase_id(purchase_id)
 
         self.disabled = True
         try:

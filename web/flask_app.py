@@ -19,6 +19,7 @@ from models.private_channel import create_private_discord_channel
 from bot_instance import get_bot
 from models.enums import Genders, Languages
 import discord
+from services.cache.client import custom_cache
 
 main_guild_id = config.MAIN_GUILD_ID
 bot = get_bot()
@@ -120,6 +121,10 @@ async def handle_confirm_order():
     kickerUsername: str = data.get("kickerUsername")
     purchaseId: str = data.get("purchaseId")
     discord_server_id: int = data.get("discordServerId")
+
+    is_channel_created = custom_cache.get_purchase_id(purchaseId)
+    if is_channel_created:
+        return jsonify({"message": "Private channel created before sqs"}), 200
     
     try:
         challenger: discord.User = await asyncio.wrap_future(

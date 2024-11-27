@@ -239,6 +239,8 @@ class Services_Database(BasePsqlDTO):
         return services
     
     async def get_services_by_username(self, username: str):
+        if not username:
+            raise ValueError("The username cannot be None or empty.")
         username = username.removeprefix("@")
         async with self.get_connection() as conn:
             if self.app_choice == "ALL":

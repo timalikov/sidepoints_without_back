@@ -64,6 +64,19 @@ class _CustomCache:
         user_id: int
     ) -> Optional[Dict[str, int]]:
         return self.get_value(key=f"top_up_{user_id}")
+    
+    def set_purchase_id(
+        self,
+        purchase_id: int
+    ) -> None:
+        self.set_value(
+            key=f"purchase_{purchase_id}",
+            value=True,
+            ttl=600
+        )
+    
+    def get_purchase_id(self, purchase_id: int) -> Optional[Dict[str, int]]:
+        return self.get_value(key=f"purchase_{purchase_id}")
 
     def get_all_top_up_users(self) -> Optional[Dict[str, int]]:
         pattern = r"^top_up_"

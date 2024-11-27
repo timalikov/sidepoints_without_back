@@ -66,7 +66,7 @@ async def send_confirm_order_message(
 ) -> StatusCodes:
     lang = get_lang_prefix(int(discord_server_id))
     services_db = Services_Database()
-    service = await services_db.get_services_by_username(username=kicker_username)
+    service = await services_db.get_services_by_username(username=kicker.name)
     if service:
         service["service_category_name"] = service["tag"]
 

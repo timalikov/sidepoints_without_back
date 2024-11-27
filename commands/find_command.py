@@ -35,9 +35,9 @@ class FindCommand(commands.Cog):
         pattern: str = r"<@(\d+)>"
         if re.fullmatch(pattern, username):
             user_id: int = int(username[2:-1])
-            view = await FindView.create(user_id=user_id, lang=lang)
+            view = await FindView.create(user_id=user_id, guild_id=guild_id, lang=lang)
         else:
-            view = await FindView.create(username=username, lang=lang)
+            view = await FindView.create(username=username, guild_id=guild_id, lang=lang)
         if view.no_user:
             await interaction.followup.send(
                 content=translations["no_players"][lang],
