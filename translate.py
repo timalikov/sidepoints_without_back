@@ -835,5 +835,10 @@ translations = {
     "session_accepted_message": {
         "en": "Thanks for accepting the session with @{discord_user}!",
         "ru": "Спасибо за принятие сессии с @{discord_user}!"
-    }
+    },
+    "chat_dm": {
+        "en": "You can also DM the user {username} [@{username}](https://discord.com/users/{user_id})",
+        "ru": "Вы можете также написать личное сообщение {username} [@{username}](https://discord.com/users/{user_id})"
+    },
 }
+
