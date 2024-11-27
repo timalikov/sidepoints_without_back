@@ -7,6 +7,7 @@ from translate import translations
 
 from views.buttons.base_button import BaseButton
 from database.dto.psql_services import Services_Database
+from services.messages.interaction import send_interaction_message
 
 bot = get_bot()
 
@@ -35,24 +36,23 @@ class ChatButton(BaseButton):
             "chat_kicker", 
             interaction.guild.id if interaction.guild else None
         )
-
-        user_id = self.view.service['discord_id']
         try:
+            user_id = int(self.view.service['discord_id'])
+            kicker = bot.get_user(user_id)
+            username = kicker.name
             member = interaction.guild.get_member(int(user_id))
-        except AttributeError:
-            member = None
-        except ValueError as e:
-            print(f"CHAT ERROR: {e}")
+        except (AttributeError, TypeError):
             member = None
         if member:
-            chat_link = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
+            chat_message = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
             if interaction.response.is_done():
-                await interaction.followup.send(chat_link, ephemeral=True)
-            else:
-                await interaction.response.send_message(chat_link, ephemeral=True)
+                await interaction.followup.send(chat_message,ephemeral=True)
+            else: 
+                await interaction.response.send_message(chat_message,ephemeral=True)
         else:
-            chat_link = translations["connect_with_user"][self.lang].format(user_id=user_id)
-            await interaction.followup.send(
-                translations["connect_with_user"][self.lang].format(user_id=user_id),
-                ephemeral=True
+            username = self.view.service['profile_username']
+            chat_message = translations["chat_dm"][self.lang].format(username=username, user_id=user_id)
+            await send_interaction_message(
+                interaction=interaction,
+                message=chat_message
             )
