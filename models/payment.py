@@ -159,7 +159,7 @@ async def send_payment(user: discord.User, target_service: Dict, discord_server_
         )
         return PaymentStatusCodes.SERVER_PROBLEM
     logger.warning(payment_response.text)
-    return PaymentStatusCodes.SUCCESS
+    return PaymentStatusCodes.SUCCESS, payment_response.json().get("id")
 
 
 async def send_boost(user: discord.User, target_service: Dict, amount: int) -> PaymentStatusCodes:

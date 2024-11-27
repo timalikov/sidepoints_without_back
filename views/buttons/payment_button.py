@@ -10,8 +10,11 @@ from models.enums import PaymentStatusCodes
 from services.messages.interaction import send_interaction_message
 from views.buttons.base_button import BaseButton
 from views.top_up_view import TopUpView
+from services.cache.client import custom_cache
+from logging import getLogger
 
 bot = get_bot()
+logger = getLogger("")
 
 
 class PaymentButton(BaseButton):
@@ -49,7 +52,7 @@ class PaymentButton(BaseButton):
         if not self.discord_server_id:
             self.discord_server_id = interaction.guild_id if interaction.guild_id else int(MAIN_GUILD_ID)
         user = self.customer if self.customer else interaction.user
-        payment_status_code = await send_payment(
+        payment_status_code, purchase_id = await send_payment(
             user=user,
             target_service=self.view.service,
             discord_server_id=self.discord_server_id
@@ -96,6 +99,24 @@ class PaymentButton(BaseButton):
                 interaction=interaction,
                 **message_kwargs
             )
+
+        if payment_status_code == PaymentStatusCodes.SUCCESS:
+            from services.messages.base import send_confirm_order_message
+            try:
+                kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))
+            except (ValueError, TypeError) as e:
+                logger.error(f"Error getting kicker: {e}")
+                return
+            await send_confirm_order_message(
+                customer=user,
+                kicker=kicker,
+                kicker_username=self.view.service["discord_username"],
+                service_name=self.view.service["service_title"],
+                purchase_id=purchase_id,
+                discord_server_id=int(self.discord_server_id),
+            )
+            custom_cache.set_purchase_id(purchase_id)
+
         self.disabled = True
         try:
             self.view.already_pressed = True

@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import Embed
 import json
-from config import INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
+from config import IGNORE_INVITE_CODES, INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
 from services.sqs_client import SQSClient
 from translate import get_lang_prefix, translations
 from logging import getLogger
@@ -64,6 +64,9 @@ class InviteTracker(commands.Cog):
                 if updated_invite and invite.uses < updated_invite.uses:
                     used_invite = updated_invite
                     break
+            
+            if used_invite.code in IGNORE_INVITE_CODES:
+                return
 
             if used_invite:
                 inviter = self.manual_invites.get(used_invite.code, used_invite.inviter)

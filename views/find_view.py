@@ -12,6 +12,7 @@ from views.buttons.payment_button import PaymentButton
 from views.base_view import BaseView
 from views.buttons.chat_button import ChatButton
 from database.dto.psql_services import Services_Database
+from views.buttons.send_accept_reject_button import SendAcceptRejectButton
 
 bot = get_bot()
 load_dotenv()
@@ -27,6 +28,7 @@ class FindView(BaseView):
         user_choice = "ALL",
         username: str = None,
         user_id: int = None,
+        guild_id: int = main_guild_id,
         lang: Literal["ru", "en"] = "en"
     ):
         services_db = Services_Database(app_choice=user_choice)
@@ -34,6 +36,7 @@ class FindView(BaseView):
         
         instance.services_db = services_db
         instance.kicker_sorting_service = KickerSortingService(services_db)
+        instance.guild_id = guild_id
 
         if username:
             service = await services_db.get_services_by_username(username)
@@ -54,11 +57,13 @@ class FindView(BaseView):
         self,
         service: dict = None,
         services_db: Services_Database = None,
+        guild_id: int = main_guild_id,
         lang: Literal["ru", "en"] = "en"
     ) -> None:
         super().__init__(timeout=None)
         self.service = service
         self.services_db = services_db
+        self.guild_id = guild_id
         self.no_user = False  
         self.profile_embed = None
         self.kicker_sorting_service = None
@@ -73,7 +78,10 @@ class FindView(BaseView):
         self.no_user = False
 
     def add_buttons(self) -> None:
-        payment_button = PaymentButton(lang=self.lang)
+        payment_button = SendAcceptRejectButton(
+            discord_server_id=self.guild_id,
+            lang=self.lang
+        )
         chat_button = ChatButton(lang=self.lang)
         boost_button = BoostButton(show_dropdown=True, lang=self.lang)
         self.add_item(payment_button)
