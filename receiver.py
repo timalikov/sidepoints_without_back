@@ -138,7 +138,6 @@ def send_order(message_body):
 @sqs_receiver.receive(queue="discord_messages_to_user")
 def send_message_to_user(message_body):
     message_body["type"] = "message"
-    print(message_body)
     url = f"{os.getenv('WEB_APP_URL')}/discord_api/notification"
     _ = send_request(url, message_body)
 
