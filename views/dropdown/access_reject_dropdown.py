@@ -16,7 +16,7 @@ class OrderAccessRejectDropdown(discord.ui.Select):
         self.services = services
         options = [
             discord.SelectOption(
-                label=service["tag"],
+                label=service["tag"] + " - " + str(service["service_price"]) + "$",
                 description=(
                     service["service_description"]
                     if len(service["service_description"]) < 95
