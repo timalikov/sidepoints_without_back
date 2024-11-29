@@ -147,5 +147,5 @@ async def send_order_message(
         order_id=order_id,
         extra_text=extra_text
     )
-    await view.send_kickers_message()
+    await view.message_manager.send_kickers_message()
     return True
