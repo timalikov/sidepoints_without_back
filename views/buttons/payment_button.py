@@ -9,7 +9,7 @@ from models.payment import send_payment, get_usdt_balance_by_discord_user
 from models.enums import PaymentStatusCodes
 from services.messages.interaction import send_interaction_message
 from views.buttons.base_button import BaseButton
-from views.top_up_view import TopUpView
+from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from services.cache.client import custom_cache
 from logging import getLogger
 
@@ -62,6 +62,9 @@ class PaymentButton(BaseButton):
             guild: discord.Guild = bot.get_guild(int(self.discord_server_id))
         except ValueError:
             guild: discord.Guild = None
+        top_up_dropdown = TopUpDropdownMenu(lang=self.lang)
+        top_up_dropdown_view = discord.ui.View(timeout=None)
+        top_up_dropdown_view.add_item(top_up_dropdown)
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
@@ -78,11 +81,7 @@ class PaymentButton(BaseButton):
                     title="🔴 Not enough balance",
                     colour=discord.Colour.gold()
                 ),
-                "view": TopUpView(
-                    amount=float(self.view.service["service_price"]) - float(balance),
-                    guild=guild,
-                    lang=self.lang
-                )
+                "view": top_up_dropdown_view
             },
             PaymentStatusCodes.SERVER_PROBLEM: {
                 "embed": discord.Embed(
