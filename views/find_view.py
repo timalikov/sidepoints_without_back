@@ -8,7 +8,6 @@ from services.kicker_sort_service import KickerSortingService
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
 from views.buttons.boost_button import BoostButton
-from views.buttons.payment_button import PaymentButton
 from views.base_view import BaseView
 from views.buttons.chat_button import ChatButton
 from database.dto.psql_services import Services_Database

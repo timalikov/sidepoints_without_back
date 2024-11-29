@@ -61,10 +61,9 @@ async def start_posting(
     bot,
     order_type: Literal["DESC", "ASC"] = "DESC"
 ) -> None:
-    dto = Services_Database(order_type="DESC")
+    dto = Services_Database(order_type=order_type)
 
     services = await dto.get_all_services()
-    services = services[:10]
     guild_members: list[dict] = []
     not_guild_members: list[dict] = []
     for service in services:
@@ -87,5 +86,5 @@ async def start_posting(
             await thread.edit(archived=False)
         temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
         await temp_post.post_user_profile()
-        await asyncio.sleep(1)
+        await asyncio.sleep(4)
     await _show_forum(guild, forum_channel)

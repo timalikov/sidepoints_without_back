@@ -61,6 +61,14 @@ class SendAcceptRejectButton(BaseButton):
             kicker = bot.get_user(kicker_id)
         except (ValueError, TypeError) as e:
             print(f"ERROR IN SEND ACCEPT REJECT BUTTON: {e}")
+            await send_interaction_message(
+                interaction=interaction,
+                embed=discord.Embed(
+                    title="🔴 Error",
+                    description=translations["server_error_payment"][self.lang],
+                    color=discord.Color.red()
+                )
+            )
             return
         if not kicker:
             error_embed = discord.Embed(
@@ -81,7 +89,7 @@ class SendAcceptRejectButton(BaseButton):
             lang=self.lang
         )
         service = self.view.service
-        message_embed = discord.Embed(
+        kicker_embed = discord.Embed(
             colour=discord.Colour.dark_blue(),
             title=translations["service_purchased_title"][self.lang],
             description=translations["service_details"][self.lang].format(
@@ -91,13 +99,17 @@ class SendAcceptRejectButton(BaseButton):
                 service_price=service['service_price'] if service else 'Not found',
             )       
         )
-        message = await kicker.send(embed=message_embed, view=view)
+        message = await kicker.send(embed=kicker_embed, view=view)
         view.message = message
+        message_embed = discord.Embed(
+            colour=discord.Colour.dark_blue(),
+            title=translations["order_in_process"][self.lang],
+            description=translations["order_sent"][self.lang].format(kicker_name=kicker.name)
+        )
+        
+        if interaction.guild:
+            await interaction.user.send(embed=message_embed)
         await send_interaction_message(
             interaction=interaction,
-            embed=discord.Embed(
-                colour=discord.Colour.dark_blue(),
-                title=translations["order_in_process"][self.lang],
-                description=translations["order_sent"][self.lang].format(kicker_name=kicker.name)
-            )
+            embed=message_embed
         )
