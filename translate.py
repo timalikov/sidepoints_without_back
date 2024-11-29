@@ -248,10 +248,6 @@ translations = {
         'ru': "Пробный чат с кикером: <@!{user_id}>",
         'en': "Trial chat with the Kicker: <@!{user_id}>"
     },
-    'connect_with_user': {
-        'ru': "Нажмите ниже, чтобы связаться с пользователем: https://discord.com/users/{user_id}",
-        'en': "Click below to connect with user: https://discord.com/users/{user_id}"
-    },
     'chat_with_user': {
         'ru': "Чат с пользователем: {chat_link}",
         'en': "Chat with the user: {chat_link}"
@@ -837,8 +833,12 @@ translations = {
         "ru": "Спасибо за принятие сессии с @{discord_user}!"
     },
     "chat_dm": {
-        "en": "You can also DM the user {username} [@{username}](https://discord.com/users/{user_id})",
-        "ru": "Вы можете также написать личное сообщение {username} [@{username}](https://discord.com/users/{user_id})"
+        "en": "You can also DM the user **{username}** [@{username}](https://discord.com/users/{user_id})",
+        "ru": "Вы можете также написать личное сообщение **{username}** [@{username}](https://discord.com/users/{user_id})"
+    },
+    "chat_dm_kicker_id_is_broken": {
+        "en": "Oops... Kicker id is broken!",
+        "ru": "Упс... Идентификатор кикера повреждён!"
     },
 }
 

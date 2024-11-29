@@ -38,9 +38,12 @@ class ChatButton(BaseButton):
         try:
             user_id = int(self.view.service['discord_id'])
             username = self.view.service['profile_username']
-            chat_message = translations["chat_dm"][self.lang].format(username=username, user_id=user_id)
+            chat_message = (
+                f"{translations["connect_chat_link"][self.lang].format(user_id=user_id)}\n"
+                f"{translations["chat_dm"][self.lang].format(username=username, user_id=user_id)}"
+            )
         except (AttributeError, TypeError):
-            chat_message = "Oops... Kicker id is broken!"
+            chat_message = translations["chat_dm_kicker_id_is_broken"][self.lang]
         await send_interaction_message(
             interaction=interaction,
             message=chat_message
