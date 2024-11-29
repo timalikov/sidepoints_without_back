@@ -30,15 +30,41 @@ async def find_thread_in_forum(
     return thread
 
 
+async def _hide_forum(
+    guild: discord.Guild,
+    forum_channel: discord.ForumChannel
+) -> None:
+    overwrites = {
+        role: discord.PermissionOverwrite(view_channel=False) for role in guild.roles
+        if not role.permissions.administrator
+    }
+    overwrites.update({
+        role: discord.PermissionOverwrite(view_channel=True) for role in guild.roles
+        if role.permissions.administrator
+    })
+    await forum_channel.edit(overwrites=overwrites)
+
+
+async def _show_forum(
+    guild: discord.Guild,
+    forum_channel: discord.ForumChannel
+) -> None:
+    overwrites = {
+        role: discord.PermissionOverwrite(view_channel=True) for role in guild.roles
+    }
+    await forum_channel.edit(overwrites=overwrites)
+
+
 async def start_posting(
     forum_channel: discord.ForumChannel,
     guild: discord.Guild,
     bot,
     order_type: Literal["DESC", "ASC"] = "DESC"
 ) -> None:
-    dto = Services_Database(order_type=order_type)
+    dto = Services_Database(order_type="DESC")
 
     services = await dto.get_all_services()
+    services = services[:10]
     guild_members: list[dict] = []
     not_guild_members: list[dict] = []
     for service in services:
@@ -52,6 +78,7 @@ async def start_posting(
         else:
             not_guild_members.append(service)
     services = not_guild_members + guild_members
+    await _hide_forum(guild, forum_channel)
     for profile_data in services:
         thread: Union[bool, discord.Thread] = await find_thread_in_forum(
             guild=guild, forum=forum_channel, profile_data=profile_data
@@ -61,3 +88,4 @@ async def start_posting(
         temp_post = Post_FORUM(bot, profile_data, forum_channel, thread)
         await temp_post.post_user_profile()
         await asyncio.sleep(1)
+    await _show_forum(guild, forum_channel)

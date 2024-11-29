@@ -85,58 +85,6 @@ class ButtonAcceptView(discord.ui.View):
         # Send a confirmation message to the user who clicked the button
         await interaction.response.send_message(content=translations["sidekick_card_message"][self.lang], ephemeral=False)
 
-class ShareButton(discord.ui.Button):
-    def __init__(self, user_id, lang: Literal["ru", "en"] = "en"):
-        super().__init__(label="Share", style=discord.ButtonStyle.secondary, custom_id="share_profile")
-        self.user_id = int(user_id)
-        self.lang = lang
-
-    async def callback(self, interaction: discord.Interaction):
-        forum = await find_forum(guild=interaction.guild, forum_name=FORUM_NAME)
-        thread_id = await ForumUserPostDatabase.get_thread_id_by_user_and_server(self.user_id, str(MAIN_GUILD_ID))
-        if thread_id:
-            thread = forum.get_thread(int(thread_id))
-            profile_link = thread.jump_url
-            try:
-                if interaction.response.is_done():
-                    await interaction.followup.send(translations["profile_account_message"][self.lang].format(profile_link=profile_link), ephemeral=True)
-                else:
-                    await interaction.response.send_message(translations["profile_account_message"][self.lang].format(profile_link=profile_link), ephemeral=True)
-            except discord.errors.NotFound:
-                print("Failed to send follow-up message. Interaction webhook not found.")
-        else:
-            try:
-                if interaction.response.is_done():
-                    await interaction.followup.send(translations["not_posted_yet"][self.lang], ephemeral=True)
-                else:
-                    await interaction.response.send_message(translations["not_posted_yet"][self.lang], ephemeral=True)
-            except discord.errors.NotFound:
-                print("Failed to send follow-up message. Interaction webhook not found.")
-
-class ChatButton(discord.ui.Button):
-    def __init__(self, user_id, lang: Literal["ru", "en"] = "en"):
-        super().__init__(label="Chat", style=discord.ButtonStyle.secondary, custom_id="chat_user")
-        try:
-            self.user_id = int(user_id)
-        except ValueError as e:
-            self.user_id = 0
-            print(f"Int ChatButton: {e}")
-        self.lang = lang
-    
-    async def callback(self, interaction: discord.Interaction):
-        member = interaction.guild.get_member(int(self.user_id))
-        if member:
-            chat_link = translations["trial_chat_link"][self.lang].format(user_id=self.user_id)
-        else:
-            chat_link = translations["connect_chat_link"][self.lang].format(user_id=self.user_id)
-
-        try:
-            if interaction.response.is_done():
-                await interaction.followup.send(f"{chat_link}", ephemeral=False)
-            else:
-                await interaction.response.send_message(f"{chat_link}", ephemeral=False)
-        except discord.errors.NotFound:
-            print("Failed to send follow-up message. Interaction webhook not found.")
 
 class GoButton(discord.ui.Button):
     def __init__(self, user_profile, lang: Literal["ru", "en"] = "en"):

@@ -189,19 +189,22 @@ async def send_random_guide_message() -> None:
 
 @tasks.loop(hours=24)
 async def post_user_profiles():
-    await asyncio.sleep(360)
-    print("START LOOP POST")
     bot = get_bot()  # Assuming you have a function to get your bot instance
+    tasks: List[asyncio.Task] = []
     for guild in bot.guilds:
+        print("START LOOP POST", guild.name)
         try:
             forum_channel: discord.channel.ForumChannel = await get_and_recreate_forum(guild)
-        except discord.DiscordException:
+        except discord.DiscordException as e:
+            print(e)
             return
-        forum_channel.overwrites[guild.default_role].read_messages = False
-        await start_posting(
-            forum_channel=forum_channel, guild=guild, bot=bot, order_type="ASC"
+        task = asyncio.create_task(
+            start_posting(
+                forum_channel=forum_channel, guild=guild, bot=bot, order_type="ASC"
+            )
         )
-        forum_channel.overwrites[guild.default_role].read_messages = True
+        tasks.append(task)
+    asyncio.gather(*tasks)
 
 
 @tasks.loop(hours=24)
@@ -226,10 +229,13 @@ async def rename_kickers():
         prefix = names.get(kicker["profile_gender"])
         if not prefix:
             continue
-        if not member.nick:
-            await member.edit(nick=prefix.format(username=member.name))
-        elif not "kicker" in member.nick.lower():
-            await member.edit(nick=prefix.format(username=member.nick))
+        try:
+            if not member.nick:
+                await member.edit(nick=prefix.format(username=member.name))
+            elif not "kicker" in member.nick.lower():
+                await member.edit(nick=prefix.format(username=member.nick))
+        except discord.DiscordException:
+            continue
 
 
 @tasks.loop(seconds=30)

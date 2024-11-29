@@ -30,7 +30,6 @@ class ChatButton(BaseButton):
         self._view_variables = ["service"]
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
         await Services_Database().log_to_database(
             interaction.user.id, 
             "chat_kicker", 
@@ -38,21 +37,11 @@ class ChatButton(BaseButton):
         )
         try:
             user_id = int(self.view.service['discord_id'])
-            kicker = bot.get_user(user_id)
-            username = kicker.name
-            member = interaction.guild.get_member(int(user_id))
-        except (AttributeError, TypeError):
-            member = None
-        if member:
-            chat_message = translations["trial_chat_with_kicker"][self.lang].format(user_id=user_id)
-            if interaction.response.is_done():
-                await interaction.followup.send(chat_message,ephemeral=True)
-            else: 
-                await interaction.response.send_message(chat_message,ephemeral=True)
-        else:
             username = self.view.service['profile_username']
             chat_message = translations["chat_dm"][self.lang].format(username=username, user_id=user_id)
-            await send_interaction_message(
-                interaction=interaction,
-                message=chat_message
-            )
+        except (AttributeError, TypeError):
+            chat_message = "Oops... Kicker id is broken!"
+        await send_interaction_message(
+            interaction=interaction,
+            message=chat_message
+        )

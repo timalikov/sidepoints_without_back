@@ -63,6 +63,17 @@ class SendAcceptRejectButton(BaseButton):
         except (ValueError, TypeError) as e:
             print(f"ERROR IN SEND ACCEPT REJECT BUTTON: {e}")
             return
+        if not kicker:
+            error_embed = discord.Embed(
+                colour=discord.Colour.red(),
+                title="Oops...",
+                description="Kicker not found..." 
+            )
+            await send_interaction_message(
+                interaction=interaction,
+                embed=error_embed
+            )
+            return
         view = AccessRejectView(
             kicker=kicker,
             customer=interaction.user,

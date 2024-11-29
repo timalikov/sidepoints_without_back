@@ -23,6 +23,7 @@ class OrderPlayView(BaseView):
         need_boost_button: bool = True,
         need_payment_button: bool = True,
         need_chat_button: bool = True,
+        show_boost_dropdown: bool = False,
         lang: Literal["en", "ru"],
         timeout: int = 60 * 60
     ) -> None:
@@ -37,6 +38,7 @@ class OrderPlayView(BaseView):
         self.need_boost_button = need_boost_button
         self.need_payment_button = need_payment_button
         self.need_chat_button = need_chat_button
+        self.show_boost_dropdown = show_boost_dropdown
         self.add_buttons()
 
     def add_buttons(self) -> None:
@@ -50,7 +52,7 @@ class OrderPlayView(BaseView):
             reject_button = RejectButton(lang=self.lang)
             self.add_item(reject_button )
         if self.need_boost_button:
-            boost_button = BoostButton(show_dropdown=False, lang=self.lang)
+            boost_button = BoostButton(show_dropdown=self.show_boost_dropdown, lang=self.lang)
             self.add_item(boost_button)
         if self.need_chat_button:
             chat_button = ChatButton(lang=self.lang)
