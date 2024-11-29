@@ -12,7 +12,7 @@ from models.payment import (
 from models.enums import PaymentStatusCodes
 from views.buttons.base_button import BaseButton
 from views.access_reject import AccessRejectView
-from views.top_up_view import TopUpView
+from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 
 bot = get_bot()
 
@@ -43,6 +43,9 @@ class SendAcceptRejectButton(BaseButton):
             balance = await get_usdt_balance_by_discord_user(
                 user=interaction.user
             )
+            top_up_dropdown = TopUpDropdownMenu(lang=self.lang)
+            top_up_dropdown_view = discord.ui.View(timeout=None)
+            top_up_dropdown_view.add_item(top_up_dropdown)
             await send_interaction_message(
                 interaction=interaction,
                 embed=discord.Embed(
@@ -50,11 +53,7 @@ class SendAcceptRejectButton(BaseButton):
                     title="🔴 Not enough balance",
                     colour=discord.Colour.gold()
                 ),
-                view=TopUpView(
-                    amount=float(self.view.service["service_price"]) - float(balance),
-                    guild=bot.get_guild(int(self.discord_server_id)),
-                    lang=self.lang
-                )
+                view=top_up_dropdown_view
             )
             return
         try:
@@ -86,8 +85,10 @@ class SendAcceptRejectButton(BaseButton):
             colour=discord.Colour.dark_blue(),
             title=translations["service_purchased_title"][self.lang],
             description=translations["service_details"][self.lang].format(
+                customer_name=interaction.user.name,
+                customer_id=interaction.user.id,
                 service_name=service['tag'] if service else 'Not found',
-                service_price=service['service_price'] if service else 'Not found'
+                service_price=service['service_price'] if service else 'Not found',
             )       
         )
         message = await kicker.send(embed=message_embed, view=view)

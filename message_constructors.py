@@ -120,13 +120,13 @@ def _build_embed_message_order(
 
     guild = bot.get_guild(guild_id)
     if customer:
-        customer_discord_id: str = hide_half_string(str(customer.id))
+        customer_username: str = hide_half_string(str(customer.name))
     else:
-        customer_discord_id: str = translations["order_from_webapp"][lang],
+        customer_username: str = translations["order_from_webapp"][lang],
     embed = discord.Embed(
         title=translations["order_alert_title"][lang],
         description=translations["order_new_alert_new"][lang].format(
-            customer_discord_id=customer_discord_id,
+            customer_username=customer_username,
             choice=service_title,
             server_name=guild.name,
             language=language,

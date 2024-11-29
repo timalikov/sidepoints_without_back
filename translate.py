@@ -27,8 +27,8 @@ translations = {
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
     'order_new_alert_new':{
-        'ru': 'Юзер: ** {customer_discord_id} **\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
-        'en': 'Customer: ** {customer_discord_id} **\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+        'ru': 'Юзер: ** {customer_username} **\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': 'Customer: ** {customer_username} **\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
     },
     'order_alert_title': {
         'ru': 'Новый заказ!',
@@ -405,8 +405,8 @@ translations = {
         "ru": "Ваша услуга была куплена:"
     },
     "service_details": {
-        "en": "Service: {service_name}\nPrice: {service_price}\nPlease Accept or Reject the session",
-        "ru": "Услуга: {service_name}\nЦена: {service_price}\nПожалуйста, примите или отклоните сессию"
+        "en": "Customer: <@!{customer_id}> + {customer_name}\nService: {service_name}\nPrice: {service_price}\Please Accept or Reject the session and DM the user directly.",
+        "ru": "Заказчик: <@!{customer_id}> + {customer_name}\nУслуга: {service_name}\nЦена: {service_price}\nПожалуйста, примите или отклоните сессию и напишите заказчику напрямую"
     },
     "failed_to_send_message": {
         "en": "Failed to send message: {error}",

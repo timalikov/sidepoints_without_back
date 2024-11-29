@@ -11,7 +11,7 @@ from translate import translations
 from bot_instance import get_bot
 
 from services.messages.interaction import send_interaction_message
-from views.top_up_view import TopUpView
+from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.enums import PaymentStatusCodes
 from models.payment import send_boost
@@ -89,6 +89,9 @@ class BoostDropdownMenu(discord.ui.Select):
             channel_name=BOOST_KICKER_CHANNEL_NAME,
             guild=bot.get_guild(MAIN_GUILD_ID)
         )
+        top_up_dropdown = TopUpDropdownMenu(lang=lang)
+        top_up_dropdown_view = discord.ui.View(timeout=None)
+        top_up_dropdown_view.add_item(top_up_dropdown)
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
@@ -109,11 +112,7 @@ class BoostDropdownMenu(discord.ui.Select):
                     title="🔴 Not enough balance",
                     colour=discord.Colour.gold()
                 ),
-                "view": TopUpView(
-                    amount=amount,
-                    guild=guild,
-                    lang=lang
-                ),
+                "view": top_up_dropdown_view,
                 "ephemeral": True
             },
             PaymentStatusCodes.SERVER_PROBLEM: {
