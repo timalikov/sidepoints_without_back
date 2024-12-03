@@ -7,6 +7,9 @@ from serializers.profile_serializer import serialize_profile_data
 from database.fact_list import facts
 from database.dto.base import BasePsqlDTO
 from models.enums import Genders, Languages
+from services.logger.client import CustomLogger
+
+logger = CustomLogger
 
 
 APP_CHOICES = {
@@ -59,7 +62,7 @@ class Services_Database(BasePsqlDTO):
             try:
                 kickers_ids_int.append(int(kicker_id["discord_id"]))
             except ValueError as e:
-                print(f"GET KICKERS ERROR: {e}")
+                await logger.error_discord(f"GET KICKERS ERROR: {e}")
                 continue
         return set(kickers_ids_int)
     
@@ -77,7 +80,7 @@ class Services_Database(BasePsqlDTO):
                     }
                 )
             except ValueError as e:
-                print(f"GET KICKERS ERROR: {e}")
+                await logger.error_discord(f"GET KICKERS ERROR: {e}")
                 continue
         return kickers_ids_int
     
@@ -94,7 +97,7 @@ class Services_Database(BasePsqlDTO):
             try:
                 kickers_ids_int.append(int(kicker_id["discord_id"]))
             except ValueError as e:
-                print(f"GET KICKERS ERROR: {e}")
+                await logger.error_discord(f"GET KICKERS ERROR: {e}")
                 continue
         return set(kickers_ids_int)
     
@@ -141,7 +144,7 @@ class Services_Database(BasePsqlDTO):
             try:
                 kickers_ids_int.append(int(kicker_id["discord_id"]))
             except ValueError as e:
-                print(f"GET KICKERS ERROR: {e}")
+                await logger.error_discord(f"GET KICKERS ERROR: {e}")
                 continue
         return set(kickers_ids_int)
     
@@ -275,10 +278,21 @@ class Services_Database(BasePsqlDTO):
         return records
 
     async def get_all_active_tags(self):
-        default_query = "SELECT name FROM discord_service_types"
+        default_query = "SELECT tag FROM discord_services_all GROUP BY tag"
         async with self.get_connection() as conn:
             tags = await conn.fetch(default_query)
-        return [tag["name"] for tag in tags]
+        return [tag["tag"] for tag in tags]
+    
+    async def get_all_active_languages(self):
+        default_query = "SELECT profile_languages FROM discord_services_all GROUP BY profile_languages"
+        async with self.get_connection() as conn:
+            languages = await conn.fetch(default_query)
+        languages_lists: List[List[str] | None] = [language["profile_languages"] for language in languages]
+        languages_lists: List[List[str]] = list(filter(None, languages_lists))
+        languages: List[str] = []
+        for i in languages_lists:
+            languages.extend(i)
+        return set(languages)
     
     async def get_managers(self):
         return managers

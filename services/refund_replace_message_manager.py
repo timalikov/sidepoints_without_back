@@ -8,9 +8,10 @@ from translate import translations
 from bot_instance import get_bot
 from config import MAIN_GUILD_ID
 
-from services.sqs_client import SQSClient
+from services.logger.client import CustomLogger
 from views.refund_replace import ReplaceView
 
+logger = CustomLogger
 bot = get_bot()
 
 class RefundReplaceManager:
@@ -45,7 +46,7 @@ class RefundReplaceManager:
             try:
                 await self.previous_message.edit(view=self.previous_view)
             except Exception as e:
-                print(translations["failed_to_edit_message"][self.lang].format(error=e))
+                await logger.error_discord(translations["failed_to_edit_message"][self.lang].format(error=e))
 
         timeout = 60 * 5 if start_timer else None
 
@@ -108,4 +109,4 @@ class RefundReplaceManager:
             try:
                 await self.previous_message.edit(view=self.previous_view)
             except Exception as e:
-                print(translations["failed_to_edit_message"][self.lang].format(error=e))
+                await logger.error_discord(translations["failed_to_edit_message"][self.lang].format(error=e))

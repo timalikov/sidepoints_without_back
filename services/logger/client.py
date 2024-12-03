@@ -3,13 +3,13 @@ import discord
 from logging import getLogger
 
 from bot_instance import get_bot
-from config import LOGGER_DISCORD_USERS_LOGS, LOGGER_SEND_DISCORD_DM_LOGS
+from config import LOGGER_DISCORD_USERS_LOGS, LOGGER_SEND_DISCORD_DM_LOGS, TEST
 
 from requests import Response
 
 logger = getLogger("")
 bot = get_bot()
-
+error_count = 0
 
 class CustomLogger:
     """
@@ -34,6 +34,26 @@ class CustomLogger:
             if not user:
                 continue
             await user.send(embed=test_embed)
+
+    @staticmethod
+    async def error_discord(text: str) -> None:
+        global error_count
+        error_count += 1
+        print(text, "||", error_count)
+        return
+        error_embed = discord.Embed(
+            title="SideKick Error",
+            description=text,
+            colour=discord.Colour.red()
+        )
+        for user_id in LOGGER_DISCORD_USERS_LOGS:
+            user = bot.get_user(user_id)
+            if not user:
+                continue
+            try:
+                await user.send(embed=error_embed)
+            except discord.DiscordException:
+                continue
 
     @staticmethod
     def _get_http_message(

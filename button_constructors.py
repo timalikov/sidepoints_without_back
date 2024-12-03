@@ -9,9 +9,9 @@ from translate import get_lang_prefix, translations
 
 from message_constructors import create_profile_embed
 from serializers.profile_serializer import serialize_profile_data
-from database.dto.sql_forum_posted import ForumUserPostDatabase
-from models.forum import find_forum
+from services.logger.client import CustomLogger
 
+logger = CustomLogger
 bot = get_bot()
 
 class AcceptView(discord.ui.View):
@@ -51,9 +51,9 @@ class AcceptView(discord.ui.View):
                     ephemeral=True
                 )
             except discord.errors.HTTPException as e:
-                print(f"HTTPException: {e}")
+                await logger.error_discord(f"HTTPException: {e}")
             except Exception as e:
-                print(f"Unhandled exception: {e}")
+                await logger.error_discord(f"Unhandled exception: {e}")
 
 class ButtonAcceptView(discord.ui.View):
     def __init__(
@@ -103,7 +103,7 @@ class GoButton(discord.ui.Button):
                     translations["payment_link"][self.lang].format(payment_link=payment_link), ephemeral=False
                 )
         except discord.errors.NotFound:
-            print("Failed to send follow-up message. Interaction webhook not found.")
+            await logger.error_discord("Failed to send follow-up message. Interaction webhook not found.")
 
 class StopButton(discord.ui.View):
     def __init__(self, stop_callback, lang: Literal["ru", "en"] = "en"):
@@ -120,7 +120,7 @@ class StopButton(discord.ui.View):
             else:
                 await interaction.response.send_message(message, ephemeral=False)
         else:
-            print("Failed to stop all notifications")
+            await logger.error_discord("Failed to stop all notifications")
 
 class InformKickerButton(discord.ui.View):
     def __init__(self, kicker: discord.User, lang: Literal["ru", "en"] = "en"):

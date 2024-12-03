@@ -1,11 +1,16 @@
 import asyncio
-from bot_instance import get_bot
-from database.dto.sql_order import Order_Database
 import random
-from database.dto.sql_subscriber import Subscribers_Database
-from button_constructors import ButtonAcceptView
+
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
+from bot_instance import get_bot
+
+from button_constructors import ButtonAcceptView
+from database.dto.sql_order import Order_Database
+from database.dto.sql_subscriber import Subscribers_Database
 from services.utils import get_guild_invite_link
+from services.logger.client import CustomLogger
+
+logger = CustomLogger
 bot = get_bot()
 
 
@@ -47,7 +52,7 @@ async def process_user_push(order_id, user_id):
                 await Order_Database.update_column(order_id, 'status', 0)
 
     except Exception as e:
-        print(f"Failed to send message to user {user_id}: {e}")
+        await logger.error_discord(f"Failed to send message to user {user_id}: {e}")
 
 async def update_push_count(order_id):
     # Fetch the current push_count
@@ -64,7 +69,6 @@ async def iterative_push_notifications():
         active_order_ids = await Order_Database.get_active_order_ids()
         # Send push notifications for each active order ID
         for order_id in active_order_ids:
-            # print(f"The order to be checked: {order_id}")
             await send_push_notifications(order_id)
 
 def start_push_notifications():

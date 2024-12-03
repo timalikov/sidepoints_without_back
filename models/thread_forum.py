@@ -4,9 +4,11 @@ import asyncio
 import discord
 
 from models.post_forum import Post_FORUM
-
+from services.logger.client import CustomLogger
 from database.dto.sql_forum_posted import ForumUserPostDatabase 
 from database.dto.psql_services import Services_Database
+
+logger = CustomLogger
 
 
 async def find_thread_in_forum(
@@ -70,7 +72,7 @@ async def start_posting(
         try:
             kicker_int_id = int(service["discord_id"])
         except ValueError as e:
-            print(f"START POSTING ERROR: {e}")
+            await logger.error_discord(f"START POSTING ERROR: {e}")
             continue
         if guild.get_member(kicker_int_id):
             guild_members.append(service)

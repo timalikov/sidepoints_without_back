@@ -7,6 +7,9 @@ from typing import Literal
 from translate import translations
 
 from views.base_view import BaseView
+from services.logger.client import CustomLogger
+
+logger = CustomLogger
 
 
 class ShareCommandView(BaseView):
@@ -66,7 +69,7 @@ class ShareCommandView(BaseView):
                 try:
                     await channel.send(embed=embed, view=self)
                 except Exception as e:
-                    print(f"Failed to send message to channel {channel_id}: {e}")
+                    await logger.error_discord(f"Failed to send message to channel {channel_id}: {e}")
 
         message = translations["message_shared"][self.lang]
         if interaction.response.is_done():

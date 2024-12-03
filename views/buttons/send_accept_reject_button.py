@@ -5,6 +5,7 @@ from translate import translations
 
 from bot_instance import get_bot
 from services.messages.interaction import send_interaction_message
+from services.logger.client import CustomLogger
 from models.payment import (
     check_user_wallet,
     get_usdt_balance_by_discord_user
@@ -15,6 +16,7 @@ from views.access_reject import AccessRejectView
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 
 bot = get_bot()
+logger = CustomLogger
 
 
 class SendAcceptRejectButton(BaseButton):
@@ -60,7 +62,7 @@ class SendAcceptRejectButton(BaseButton):
             kicker_id = int(self.view.service["discord_id"])
             kicker = bot.get_user(kicker_id)
         except (ValueError, TypeError) as e:
-            print(f"ERROR IN SEND ACCEPT REJECT BUTTON: {e}")
+            await logger.error_discord(f"ERROR IN SEND ACCEPT REJECT BUTTON: {e}")
             await send_interaction_message(
                 interaction=interaction,
                 embed=discord.Embed(

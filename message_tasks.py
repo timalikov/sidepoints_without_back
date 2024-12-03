@@ -6,6 +6,10 @@ import discord
 from discord.ext import tasks
 from database.dto.psql_services import Services_Database
 
+from services.logger.client import CustomLogger
+
+logger = CustomLogger
+
 
 async def choose_random_fact():
     services_db = Services_Database()
@@ -23,7 +27,7 @@ async def send_scheduled_messages(channel):
                 message = f"__Fun fact:__ \n{message}"
             await channel.send(message)
         except discord.HTTPException as e:
-            print(f"Failed to send message to channel {channel}: {e}")
+            await logger.error_discord(f"Failed to send message to channel {channel}: {e}")
 
 
 @tasks.loop(count=1)

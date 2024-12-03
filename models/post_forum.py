@@ -1,11 +1,15 @@
-from typing import Union
+from typing import Union, List
 import discord
 
-from message_constructors import create_profile_embed
-from database.dto.sql_forum_posted import ForumUserPostDatabase
-from serializers.profile_serializer import serialize_profile_data
-from views.order_access_reject_view import OrderPlayView
 from translate import get_lang_prefix, translations
+
+from database.dto.sql_forum_posted import ForumUserPostDatabase
+from message_constructors import create_profile_embed
+from serializers.profile_serializer import serialize_profile_data
+from services.logger.client import CustomLogger
+from views.order_access_reject_view import OrderPlayView
+
+logger = CustomLogger
 
 
 class Post_FORUM:
@@ -18,10 +22,36 @@ class Post_FORUM:
         self.thread: Union[discord.Thread, bool] = thread
         self.lang = get_lang_prefix(int(self.guild_id))
 
-    async def post_user_profile(self):
+    async def _create_new_tag(self, tag_name: str) -> discord.ForumTag:
+        new_tags = list(self.forum_channel.available_tags)
+        new_tag = discord.ForumTag(name=tag_name)
+        new_tags.append(new_tag)
+        try:
+            await self.forum_channel.edit(available_tags=new_tags)
+        except discord.DiscordException:
+            await logger.error_discord(
+                f"Tag: {tag_name} already has in {self.guild_id}! {new_tag in self.forum_channel.available_tags}"
+            )
+
+    async def _get_tags(self) -> List[discord.ForumTag]:
         tag_name: str = self.profile_data["tag"]
+        languages: List[str] = self.profile_data["profile_languages"]
+        gender: str = self.profile_data["profile_gender"]
+        gender_list: List[str] = [gender] if gender != "OTHER" else ["Male", "Female"]
+        tags: List[discord.ForumTag] = [] 
+        for forum_tag in self.forum_channel.available_tags:
+            if (
+                forum_tag.name.lower() == tag_name.lower()
+            ) or (
+                forum_tag.name.lower() in [i.lower() for i in languages]
+            ) or (
+                forum_tag.name.lower() in [i.lower() for i in gender_list]
+            ):
+                tags.append(forum_tag)
+        return tags
+
+    async def post_user_profile(self):
         username: str = self.profile_data['profile_username']
-        service_id: str = self.profile_data['service_id']
 
         embed = create_profile_embed(self.profile_data, lang=self.lang)
         embed.description = translations["profile_description"][self.lang].format(
@@ -37,20 +67,7 @@ class Post_FORUM:
             timeout=None
         )
 
-        tag: discord.ForumTag = None
-        for forum_tag in self.forum_channel.available_tags:
-            if tag_name.lower() == forum_tag.name.lower():
-                tag = forum_tag
-        if not tag:
-            new_tags = list(self.forum_channel.available_tags)
-            new_tag = discord.ForumTag(name=tag_name)
-            new_tags.append(new_tag)
-            try:
-                await self.forum_channel.edit(available_tags=new_tags)
-            except discord.DiscordException:
-                print(
-                    f"Tag: {tag_name} already has in {self.guild_id}! {new_tag in self.forum_channel.available_tags}"
-                )
+        tags: List[discord.ForumTag] = await self._get_tags()
 
         if self.thread:
             first_message = await self.thread.fetch_message(self.thread.id)
@@ -61,7 +78,7 @@ class Post_FORUM:
                 content=translations["interaction_prompt"][self.lang],
                 embed=embed,
                 reason="Automated individual profile showcase",
-                applied_tags=[tag] if tag else [],
+                applied_tags=tags,
                 auto_archive_duration=60,
                 allowed_mentions=discord.AllowedMentions.none(),
                 view=view
