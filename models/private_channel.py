@@ -12,12 +12,13 @@ from message_tasks import start_all_messages
 from database.dto.psql_services import Services_Database
 from database.dto.sql_profile import Profile_Database
 from services.schedule_tasks.session_delivery_check import session_delivery_check
-
+from services.logger.client import CustomLogger
 from services.messages.customer_support_messenger import send_message_to_customer_support, send_message_to_team_channel
 from views.buttons.done_button import DoneButton
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
+logger = CustomLogger
 
 
 async def send_connect_message_between_kicker_and_customer(
@@ -62,7 +63,7 @@ async def send_connect_message_between_kicker_and_customer(
         if challenged.id != 1208433940050874429:
             await challenged.send(embed=kicker_embed)
     except discord.HTTPException:
-        print("Failed to send invite links to one or more participants.")
+        await logger.error_discord("Failed to send invite links to one or more participants.")
 
 async def manage_connection_messages(
     guild, challenger, challenged, serviceName, invite_url, channel_name, guild_id, lang
@@ -173,7 +174,7 @@ async def create_private_discord_channel(
                 manager_members.append(manager)
                 await manager.send(manager_message)
             except discord.HTTPException:
-                print("Failed to send invite links to one or more participants.")
+                await logger.error_discord("Failed to send invite links to one or more participants.")
 
     if challenged.id not in TEST_ACCOUNTS and challenger.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, manager_message)

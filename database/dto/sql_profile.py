@@ -6,6 +6,9 @@ import discord
 from dotenv import load_dotenv
 import os
 
+from services.logger.client import CustomLogger
+
+logger = CustomLogger
 load_dotenv()
 
 class Profile_Database:
@@ -198,18 +201,6 @@ class Profile_Database:
         pool.close()
         await pool.wait_closed()
 
-    # @staticmethod
-    # async def get_all_users_with_priority():
-    #     pool = await Profile_Database.get_pool()
-    #     async with pool.acquire() as conn:
-    #         async with conn.cursor(aiomysql.DictCursor) as cursor:
-    #             query = "SELECT user_id FROM profiles ORDER BY priority;"
-    #             await cursor.execute(query)
-    #             result = await cursor.fetchall()
-    #     pool.close()
-    #     await pool.wait_closed()
-    #     return [row['user_id'] for row in result]
-
     @staticmethod
     async def get_all_users_with_priority():
         pool = await Profile_Database.get_pool()
@@ -238,7 +229,7 @@ class Profile_Database:
 
 # Function to log interactions to the database asynchronously
 async def log_to_database(user_id, command_type):
-    print("The user id to be recorded: ", user_id)
+    await logger.error_discord("The user id to be recorded: ", user_id)
     conn = await aiomysql.connect(
             host=os.getenv('HOST').strip(),
             user=os.getenv('USER_AWS').strip(),

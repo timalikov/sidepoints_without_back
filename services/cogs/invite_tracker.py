@@ -1,17 +1,18 @@
 import asyncio
-from bot_instance import get_bot
-from database.dto.psql_services import Services_Database
 import discord
-from discord.ext import commands, tasks
 from discord import Embed
-import json
+from discord.ext import commands, tasks
+
+from bot_instance import get_bot
 from config import IGNORE_INVITE_CODES, INVITE_LOGS_CHANNEL_ID, MAIN_GUILD_ID
-from services.sqs_client import SQSClient
 from translate import get_lang_prefix, translations
-from logging import getLogger
+
+from database.dto.psql_services import Services_Database
+from services.sqs_client import SQSClient
+from services.logger.client import CustomLogger
 
 bot = get_bot()
-logger = getLogger("")   
+logger = CustomLogger   
 
 
 class InviteTracker(commands.Cog):
@@ -110,7 +111,7 @@ class InviteTracker(commands.Cog):
                 logger.warning(f"Couldn't find the invite used by {member.name}")
 
         except Exception as e:
-            print(f"Error tracking invite on member join: {e}")
+            await logger.error_discord(f"Error tracking invite on member join: {e}")
             embed.add_field(
                 name=translations["task_records_error_name"][lang],
                 value=translations ["task_records_error_value"][lang],
@@ -169,9 +170,9 @@ class InviteTracker(commands.Cog):
 
                     await self.services_db.save_user_reward(discord_id=inviter.id, reward_type="DISCORD_BOT_INTEGRATION", server_id=guild.id, invited_discord_id=0)
             else:
-                print(f"Couldn't find the inviter for {guild.name}")
+                await logger.error_discord(f"Couldn't find the inviter for {guild.name}")
         except Exception as e:
-            print(f"Error loading invites for new guild {guild.name}: {e}")
+            await logger.error_discord(f"Error loading invites for new guild {guild.name}: {e}")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):

@@ -10,10 +10,12 @@ from config import (
 )
 
 from bot_instance import get_bot
+from services.logger.client import CustomLogger
 from models.public_channel import get_or_create_channel_by_category_and_name
 from message_constructors import _build_embed_message_order
 
 bot = get_bot()
+logger = CustomLogger
 
 
 class OrderMessageManager:
@@ -54,9 +56,9 @@ class OrderMessageManager:
         try:
             await channel.send(embed=self.embed_message)
         except discord.errors.Forbidden:
-            print(f"Cannot send message to channel: {channel.id}")
+            await logger.error_discord(f"Cannot send message to channel: {channel.id}")
         except discord.DiscordException:
-            print(f"Failed to send message to channel: {channel.id}")
+            await logger.error_discord(f"Failed to send message to channel: {channel.id}")
 
     async def send_channel_message(self) -> None:
         channel = await get_or_create_channel_by_category_and_name(
@@ -72,9 +74,9 @@ class OrderMessageManager:
             )
             self.messages.append(sent_message)
         except discord.errors.Forbidden:
-            print(f"Cannot send message to channel: {channel.id}")
+            await logger.error_discord(f"Cannot send message to channel: {channel.id}")
         except discord.DiscordException:
-            print(f"Failed to send message to channel: {channel.id}")
+            await logger.error_discord(f"Failed to send message to channel: {channel.id}")
 
     async def send_kickers_message(self) -> None:
         kicker_ids = await self.services_db.get_kickers_by_service_title()
@@ -82,7 +84,7 @@ class OrderMessageManager:
             try:
                 kicker_id = int(kicker_id)
             except ValueError:
-                print(f"ID: {kicker_id} is not int")
+                await logger.error_discord(f"ID: {kicker_id} is not int")
                 continue
             try:
                 kicker = await bot.fetch_user(kicker_id)
@@ -90,12 +92,12 @@ class OrderMessageManager:
             except discord.HTTPException as e:
                 if e.status == 429:
                     retry_after = float(e.response.headers.get('Retry-After', 5))
-                    print(f"Rate limited while fetching user. Retrying in {retry_after} seconds.")
+                    await logger.error_discord(f"Rate limited while fetching user. Retrying in {retry_after} seconds.")
                     await asyncio.sleep(retry_after)
                     try:
                         kicker = await bot.fetch_user(kicker_id)  
                     except discord.DiscordException as e:
-                        print(f"Failed to fetch user {kicker_id} after retry: {e}")
+                        await logger.error_discord(f"Failed to fetch user {kicker_id} after retry: {e}")
                         continue
             if not kicker:
                 continue
@@ -109,7 +111,7 @@ class OrderMessageManager:
             except discord.HTTPException as e:
                 if e.status == 429:
                     retry_after = float(e.response.headers.get('Retry-After', 5))
-                    print(f"Rate limited. Retrying in {retry_after} seconds.")
+                    await logger.error_discord(f"Rate limited. Retrying in {retry_after} seconds.")
                     await asyncio.sleep(retry_after)
                     try:
                         sent_message = await kicker.send(
@@ -118,12 +120,12 @@ class OrderMessageManager:
                         )
                         self.messages.append(sent_message)
                     except discord.DiscordException as e:
-                        print(f"Failed to send message to {kicker_id}: {e}")
+                        await logger.error_discord(f"Failed to send message to {kicker_id}: {e}")
                 else:
-                    print(f"Failed to send message to {kicker_id}: {e}")
+                    await logger.error_discord(f"Failed to send message to {kicker_id}: {e}")
                     continue
             except discord.DiscordException as e:
-                print(f"General Discord error for user {kicker_id}: {e}")
+                await logger.error_discord(f"General Discord error for user {kicker_id}: {e}")
                 continue
 
     async def send_current_kickers_message(
@@ -139,6 +141,6 @@ class OrderMessageManager:
                 )
                 self.messages.append(sent_message)
             except discord.errors.Forbidden:
-                print(f"Cannot send message to user: {kicker.id}")
+                await logger.error_discord(f"Cannot send message to user: {kicker.id}")
             except discord.DiscordException:
-                print(f"Failed to send message to user: {kicker.id}")
+                await logger.error_discord(f"Failed to send message to user: {kicker.id}")

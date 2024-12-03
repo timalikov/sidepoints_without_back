@@ -1,9 +1,13 @@
-from database.dto.psql_services import Services_Database
-from bot_instance import get_bot
 import discord
+
+from bot_instance import get_bot
 from config import MAIN_GUILD_ID
 
+from database.dto.psql_services import Services_Database
+from services.logger.client import CustomLogger
+
 bot = get_bot()
+logger = CustomLogger
 
 class KickerSortingService:
     def __init__(self, services_db: Services_Database):
@@ -40,7 +44,7 @@ class KickerSortingService:
         try:
             member = main_guild.get_member(int(user_id))
         except ValueError as e:
-            print(f"IS USER ONLINE ERROR: {e}")
+            await logger.error_discord(f"IS USER ONLINE ERROR: {e}")
             member = None
         return member is not None and member.status == discord.Status.online
 

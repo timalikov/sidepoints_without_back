@@ -5,16 +5,30 @@ from discord import ForumTag
 
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 from database.dto.psql_services import Services_Database
+from database.dto.psql_guild_channels import DiscordGuildChannelsDTO
 from config import FORUM_NAME, FORUM_CATEGORY_NAME
 from models.category import get_or_create_category_by_name
+from models.public_channel import (
+    _get_channel_from_db,
+    _get_or_delete_channel_by_id,
+)
 
 
-async def find_forum(guild: discord.Guild, forum_name: str) -> Optional[discord.ForumChannel]:
-    forum_channels = guild.channels
-    forum_channel: discord.channel.ForumChannel = None
-    for channel in forum_channels:
+async def find_forum(
+    guild: discord.Guild,
+    forum_name: str
+) -> Optional[discord.ForumChannel]:
+    forum_channel = await _get_channel_from_db(
+        guild=guild,
+        channel_name=forum_name
+    )
+    if forum_channel:
+        return forum_channel
+    dto = DiscordGuildChannelsDTO()
+    for channel in guild.channels:
         if channel.name == forum_name and isinstance(channel, discord.channel.ForumChannel):
             forum_channel = channel
+            await dto.create(guild.id, forum_channel.name, forum_channel.id)
     return forum_channel
 
 
@@ -25,7 +39,8 @@ async def find_sidekick_forum(guild: discord.Guild) -> Optional[discord.ForumCha
 async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
     category = await get_or_create_category_by_name(guild=guild, category_name=FORUM_CATEGORY_NAME)
     services_db = Services_Database()
-    values_list = await services_db.get_all_active_tags()
+    tags = await services_db.get_all_active_tags()
+    values_list = list(tags) + ["Male", "Female"]
     available_tags = [ForumTag(name=tag) for tag in values_list]
     permissions = discord.PermissionOverwrite(
         create_instant_invite=True,
@@ -86,6 +101,8 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
         overwrites={guild.default_role: permissions},
         default_layout=discord.ForumLayoutType.gallery_view
     )
+    dto = DiscordGuildChannelsDTO()
+    await dto.create(guild.id, FORUM_NAME, new_forum_channel.id)
     return new_forum_channel
 
 
@@ -102,6 +119,11 @@ async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
         dto = ForumUserPostDatabase()
         _ = [await thread.delete() for thread in forum_channel.threads]
         await dto.delete_by_forum_id(forum_channel.id)
+        services_db = Services_Database()
+        tags = await services_db.get_all_active_tags()
+        values_list = list(tags) + ["Male", "Female"]
+        available_tags = [ForumTag(name=tag) for tag in values_list[:20]]
+        await forum_channel.edit(available_tags=available_tags)
         return forum_channel
     forum_channel = await create_base_forum(guild)
     return forum_channel

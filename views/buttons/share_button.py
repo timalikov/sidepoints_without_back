@@ -1,4 +1,4 @@
-from typing import Literal, Dict
+from typing import Literal
 
 import discord
 
@@ -6,11 +6,13 @@ from bot_instance import get_bot
 from translate import translations
 from config import FORUM_NAME
 
-from models.forum import find_forum
 from database.dto.psql_services import Services_Database
 from database.dto.sql_forum_posted import ForumUserPostDatabase
+from services.logger.client import CustomLogger
+from models.forum import find_forum
 from views.buttons.base_button import BaseButton
 
+logger = CustomLogger
 bot = get_bot()
 
 
@@ -42,7 +44,7 @@ class ShareButton(BaseButton):
             try:
                 thread = forum.get_thread(int(thread_id))
             except ValueError as e:
-                print("Play View SHARE ERROR: {e}")
+                await logger.error_discord("Play View SHARE ERROR: {e}")
                 thread = None
             if not thread:
                 message = translations["profile_not_found"][self.lang]

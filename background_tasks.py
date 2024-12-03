@@ -3,7 +3,7 @@ import csv
 from logging import getLogger
 
 from datetime import datetime, timezone, timedelta
-from typing import Any, List, Literal, Dict, Optional, Set
+from typing import List, Dict, Optional, Set
 from database.dto.psql_roles import RolesDTO
 import discord
 from bot_instance import get_bot
@@ -23,20 +23,21 @@ from models.thread_forum import start_posting
 from models.payment import get_server_wallet_by_discord_id
 from services.storage.bucket import ImageS3Bucket
 from services.cache.client import custom_cache
+from services.logger.client import CustomLogger
 from web3_interaction.balance_checker import get_usdt_balance
 from database.dto.psql_leaderboard import LeaderboardDatabase
 from database.dto.psql_services import Services_Database
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
-logger = getLogger("")
+logger = CustomLogger
 
 
 @tasks.loop(count=1)  # Ensure this runs only once
 async def revoke_channel_access(channel, member):
     await asyncio.sleep(3600)  # Sleep for one hour (3600 seconds)
     await channel.set_permissions(member, overwrite=None)  # Remove specific permissions for this member
-    # print(f"Permissions revoked for {member.display_name} in channel {channel.name}.")
+
 
 ###########################################################################################################################
 ###########################################################################################################################
@@ -52,7 +53,6 @@ async def delete_old_channels():
             for channel in category.text_channels:
                 time_diff = current_time - channel.created_at
                 if time_diff > timedelta(hours=12):
-                    # print(f"Deleting channel {channel.name} from guild {guild.name} as it is older than 24 hours.")
                     await channel.delete(reason="Cleanup: Channel older than 24 hours.")
 
 
@@ -64,10 +64,8 @@ async def delete_all_threads_and_clear_csv():
         if isinstance(forum_channel, discord.ForumChannel):
             for thread in forum_channel.threads:
                 await thread.delete()
-            # print("All threads deleted successfully.")
         else:
             pass
-            # print("Forum channel not found or not a forum.")
 
     # Clear the CSV file
     with open(posted_user_ids_file, mode='w', newline='') as file:
@@ -89,9 +87,9 @@ async def assign_roles_to_kickers() -> None:
     
     try:
         super_kicker_ids: Set[int] = await dto.get_super_kickers()
-    except Exception as e:
-        logger.exception("Failed to fetch super kickers from database.")
-        return
+    except Exception:
+        await logger.error_discord("Failed to fetch super kickers from database.")
+        raise
 
     for super_kicker_id in super_kicker_ids:
         member: Optional[discord.Member] = guild.get_member(super_kicker_id)
@@ -101,7 +99,7 @@ async def assign_roles_to_kickers() -> None:
         try:
             services: List[Dict[str, str]] = await dto.get_services_by_discordId(super_kicker_id)
         except Exception as e:
-            logger.exception(f"Failed to fetch services for discord ID {super_kicker_id}.")
+            await logger.error_discord(f"Failed to fetch services for discord ID {super_kicker_id}.")
             continue
         
         if not services:
@@ -142,7 +140,7 @@ async def get_or_create_role(guild: discord.Guild, tag: str) -> Optional[discord
     except discord.Forbidden:
         logger.error(f"Missing permissions to create role '{tag}' in guild '{guild.name}'.")
     except discord.HTTPException as e:
-        logger.exception(f"Failed to create role '{tag}' in guild '{guild.name}': {e}")
+        await logger.error_discord(f"Failed to create role '{tag}' in guild '{guild.name}': {e}")
     return None
 
 async def assign_role(member: discord.Member, role: Optional[discord.Role]) -> None:
@@ -158,7 +156,7 @@ async def assign_role(member: discord.Member, role: Optional[discord.Role]) -> N
     except discord.Forbidden:
         logger.error(f"Missing permissions to add role '{role.name}' to member {member.display_name} ({member.id}).")
     except discord.HTTPException as e:
-        logger.exception(f"Failed to add role '{role.name}' to member {member.display_name} ({member.id}): {e}")
+        await logger.error_discord(f"Failed to add role '{role.name}' to member {member.display_name} ({member.id}): {e}")
 
 
 @tasks.loop(hours=12)
@@ -196,8 +194,8 @@ async def post_user_profiles():
         try:
             forum_channel: discord.channel.ForumChannel = await get_and_recreate_forum(guild)
         except discord.DiscordException as e:
-            print(e)
-            return
+            await logger.error_discord(str(e))
+            continue
         task = asyncio.create_task(
             start_posting(
                 forum_channel=forum_channel, guild=guild, bot=bot, order_type="ASC"
@@ -292,8 +290,8 @@ async def create_leaderboard():
                     leaderboard_url="https://app.sidekick.fans/leaderboard/points"
                 )
             )
-        except discord.DiscordException:
-            print("No permissions!")
+        except discord.DiscordException as e:
+            await logger.error_discord(f"No permissions! {e}")
             continue
         for role in guild.roles:
             if role.name != "@everyone":
@@ -331,6 +329,10 @@ async def on_member_join(member):
                 await private_channel.set_permissions(member, read_messages=True)
                 await member.send(translations["private_channel_invite"][lang].format(invite_link=invite_link))
             except discord.Forbidden:
-                print(f"Error: Bot does not have permission to set permissions for the channel '{channel_name}' in guild '{guild.name}' or Unable to send a DM to {member.name}")
+                await logger.error_discord(
+                    f"Error: Bot does not have permission to set permissions for the channel '{channel_name}' in guild '{guild.name}' or Unable to send a DM to {member.name}"
+                )
             except discord.HTTPException as http_error:
-                print(f"HTTPException: Failed to set permissions for the member in '{channel_name}' due to an HTTP error: {http_error} or Failed to send a message to {member.name}")
+                await logger.error_discord(
+                    f"HTTPException: Failed to set permissions for the member in '{channel_name}' due to an HTTP error: {http_error} or Failed to send a message to {member.name}"
+                )

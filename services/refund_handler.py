@@ -6,6 +6,9 @@ from translate import translations
 
 from message_tasks import stop_all_messages
 from services.messages.interaction import send_interaction_message
+from services.logger.client import CustomLogger
+
+logger = CustomLogger
 
 class RefundHandler:
     def __init__(
@@ -37,7 +40,7 @@ class RefundHandler:
                     await stop_all_messages(channel)
 
             except discord.HTTPException:
-                print(f"Failed to send message to kicker {self.kicker.id}")
+                await logger.error_discord(f"Failed to send message to kicker {self.kicker.id}")
         else:
             await send_interaction_message(
                 interaction=interaction,

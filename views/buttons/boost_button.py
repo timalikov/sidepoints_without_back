@@ -7,10 +7,12 @@ from config import MAIN_GUILD_ID
 from translate import translations
 
 from services.messages.interaction import send_interaction_message
+from services.logger.client import CustomLogger
 from views.buttons.base_button import BaseButton
 from views.dropdown.boost_dropdown import BoostDropdownMenu
 from database.dto.psql_services import Services_Database
 
+logger = CustomLogger
 bot = get_bot()
 
 
@@ -47,7 +49,7 @@ class BoostButton(BaseButton):
                 interaction=interaction,
                 message=translations["no_user_found_to_boost"][self.lang]
             )
-            print(f"Boost button clicked, but no service found for user {interaction.user.id}")
+            await logger.error_discord(f"Boost button clicked, but no service found for user {interaction.user.id}")
 
     async def without_dropdown(self, interaction: discord.Interaction) -> None:
         if not self.view.boost_amount:
