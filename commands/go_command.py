@@ -26,7 +26,7 @@ class GoCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="go", description="Use this command to post your service request and summon ALL Kickers to take the order.")
+    @app_commands.command(name="go", description="Summon ALL kickers to take your order in one click.")
     async def order_all(self, interaction: discord.Interaction):
         guild_id: int = interaction.guild_id if interaction.guild_id else None
         interaction_user: discord.User = interaction.user

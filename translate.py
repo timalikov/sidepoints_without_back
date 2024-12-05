@@ -397,12 +397,12 @@ translations = {
         "ru": "✅ Заказ подтвержден"
     },
     "service_purchased_title": {
-        "en": "Your service has been purchased:",
-        "ru": "Ваша услуга была куплена:"
+        "en": "Your service has been purchased: ",
+        "ru": "Ваша услуга была куплена: "
     },
     "service_details": {
-        "en": "Customer: <@!{customer_id}> + {customer_name}\nService: {service_name}\nPrice: {service_price}\nPlease Accept or Reject the session and DM the user directly.",
-        "ru": "Заказчик: <@!{customer_id}> + {customer_name}\nУслуга: {service_name}\nЦена: {service_price}\nПожалуйста, примите или отклоните сессию и напишите заказчику напрямую"
+        "en": "Customer: <@!{customer_id}> **{customer_name}**\nService: {service_name}\nPrice: {service_price}\nPlease Accept or Reject the session and DM the user directly.",
+        "ru": "Заказчик: <@!{customer_id}> {customer_name}\nУслуга: {service_name}\nЦена: {service_price}\nПожалуйста, примите или отклоните сессию и напишите заказчику напрямую"
     },
     "failed_to_send_message": {
         "en": "Failed to send message: {error}",

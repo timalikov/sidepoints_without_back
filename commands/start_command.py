@@ -18,7 +18,7 @@ class StartCommand(commands.Cog):
 
     @app_commands.command(
         name="start",
-        description="Use this command and start looking for playmates!"
+        description="Browse through the Kicker profiles and find your favourite to place an order."
     )
     async def play(self, interaction: discord.Interaction):
         guild_id = interaction.guild_id if interaction.guild_id else None
