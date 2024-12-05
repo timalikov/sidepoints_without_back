@@ -33,36 +33,6 @@ PORT_ID = int(os.getenv('PORT_ID'))
 FORUM_ID_LIST = [1237300150301360138, 1244598037758738553]
 CUSTOMER_SUPPORT_TEAM_IDS = [713830377189277845, 1050451653070950503, 585751002167115806, 412607075622060032, 1120088026828242976, 517856669338959881, 388031483924840460, 419205987895869440, 11728720708042834, 1172872070804283405]
 TEST=os.getenv('RECEIVER_TEST')
-SUPER_KICKER_IDS = [
-    1114614606128758905,
-    791593422443380746,
-    713830377189277845,
-    969254956236439576,
-    1266407300621406262,
-    490286834262474752,
-    1258498409002959012,
-    402439815360020491,
-    865273967093481512,
-    910723966434414613,
-    520191900112650240,
-    517856669338959881,
-    988852690673082438,
-    945831155498909706,
-    1118045871490215996,
-    794680426383278101,
-    1066111649909584025,
-    928934711319986206,
-    1092908429032554517,
-    920087530701991987,
-    817651476092026882,
-    1023013457634807838,
-    852549260851675156,
-    1036053462665932810,
-    570147064315379713,
-    894115303766765599,
-    667375351394992150,
-    824225621961867336
-]
 TEAM_CHANNEL_ID = 1283327337777074177
 INVITE_LOGS_CHANNEL_ID = 1301798774259318805
 IGNORE_INVITE_CODES = ["EYJFZTvz", "WGWGMtth2b", "KsTQ9pF5QT"]
@@ -73,30 +43,10 @@ SERVER_ID_LIST = []
 
 LEADER_BOT_CHANNEL_LIST = [1242448780801081475, 1240912296981561405, 1242449117461086290]
 
-APP_CHOICES = {
-    "BUDDY": "57c86488-8935-4a13-bae0-5ca8783e205d",
-    "COACHING": "88169d78-85b4-4fa3-8298-3df020f13a6f",
-    "JUST_CHATTING": "2974b0e8-69de-4d7c-aa4d-d5aa8e05d360",
-    "MOBILE": "439d8a72-8b8b-4a56-bb32-32c6e5d918ec",
-    "Watch Youtube": "d3ae39d2-fd86-41d7-bc38-0b582ce338b5",
-    "Play Games": "79bf303a-318b-4815-bd56-7b0b49ae7bff",
-    "Virtual Date": "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9"
-}
-
 TASK_DESCRIPTIONS = {
     "57c86488-8935-4a13-bae0-5ca8783e205d": "BUDDY",
     "88169d78-85b4-4fa3-8298-3df020f13a6f": "COACHING",
     "2974b0e8-69de-4d7c-aa4d-d5aa8e05d360": "JUST_CHATTING",
-    "439d8a72-8b8b-4a56-bb32-32c6e5d918ec": "MOBILE",
-    "d3ae39d2-fd86-41d7-bc38-0b582ce338b5": "Watch Youtube",
-    "79bf303a-318b-4815-bd56-7b0b49ae7bff": "Play Games",
-    "d6b9fc04-bfb2-46df-88eb-6e8c149e34d9": "Virtual Date"
-}
-
-CATEGORY_TO_TAG = {
-    "57c86488-8935-4a13-bae0-5ca8783e205d": "BUDDY",
-    "88169d78-85b4-4fa3-8298-3df020f13a6f": "COACHING",
-    "2974b0e8-69de-4d7c-aa4d-d5aa8e05d360": "JUST CHATTING",
     "439d8a72-8b8b-4a56-bb32-32c6e5d918ec": "MOBILE",
     "d3ae39d2-fd86-41d7-bc38-0b582ce338b5": "Watch Youtube",
     "79bf303a-318b-4815-bd56-7b0b49ae7bff": "Play Games",
@@ -132,6 +82,8 @@ ORDER_CHANNEL_ID = 1284079837941731379
 FIRST_LIMIT_CHECK_MINUTES = 5
 SECOND_LIMIT_CHECK_MINUTES = 30
 
+CHATTING_CHANNELS = ["web3", "just chatting", "virtual date", "watch youtube"]
+
 FORUM_CATEGORY_NAME = "Sidekick: Match to Play"
 FORUM_NAME = "🔎find-your-kickers"
 
@@ -139,7 +91,8 @@ ORDER_CATEGORY_NAME = "Kickers"
 ORDER_CHANNEL_NAME = "🔔order-dispatch"
 
 GUIDE_CATEGORY_NAME = "Sidekick: Match to Play"
-GUIDE_CHANNEL_NAME = "📥order-lobby"
+GUIDE_CHANNEL_NAME = "🎮order-game"
+WEB3_CHATTING_CHANNEL_NAME = "💬web3-chatting"
 
 ANNOUNCEMENTS_CATEGORY_NAME = "Sidekick: Match to Play"
 ANNOUNCEMENTS_CHANNEL_NAME = "sidekick-announcement"
@@ -156,6 +109,25 @@ LEADERBOARD_CATEGORY_NAME = "Community 😎"
 POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Earn+points+2_2.png"
 
 YELLOW_LOGO_COLOR = [255, 211, 14]
+
+GIFS_BY_TAGS = {
+    "apex legends": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-apex.gif",
+    "just chatting": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-chatting.gif",
+    "cs:go": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-cs2.gif",
+    "dota2": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-dota2.gif",
+    "fortnite": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-fortnite.gif",
+    "league of legends": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-lol.gif",
+    "naraka: bladepoint": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-naraka.gif",
+    "overwatch2": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-overwatch2.gif",
+    "pubg": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-pubg.gif",
+    "steam": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-steam.gif",
+    "world of tanks": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-tank.gif",
+    "teamfight tactic": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-tft.gif",
+    "valorant": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-valorant.gif",
+    "virtual date": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-virtur-date.gif",
+    "watch youtube": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-youtube.gif",
+}
+
 
 TEST_ACCOUNTS = [
     944953902015590410,

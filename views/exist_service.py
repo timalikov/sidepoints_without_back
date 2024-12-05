@@ -6,7 +6,6 @@ import discord
 
 from services.messages.interaction import send_interaction_message
 from translate import translations
-from config import APP_CHOICES
 from bot_instance import get_bot
 
 from message_constructors import create_profile_embed
@@ -19,8 +18,6 @@ bot = get_bot()
 load_dotenv()
 
 main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
-
-app_choices = APP_CHOICES
 
 
 class Profile_Exist(BaseView):

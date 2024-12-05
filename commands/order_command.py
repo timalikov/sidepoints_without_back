@@ -15,7 +15,7 @@ from core_command_choices import (
     gender_options
 )
 from services.messages.interaction import send_interaction_message
-from services.utils import save_user_id
+from services.utils import get_gif_url_by_tag, save_user_id
 from services.utils import get_guild_invite_link
 from views.order_dm_view import OrderDMView
 from views.order_view import OrderView
@@ -104,19 +104,16 @@ class OrderCommand(commands.Cog):
             view=user_dm_view,
             embed=user_dm_view.embed_message
         )
+
+        gif_url: str = get_gif_url_by_tag(choices)
+
         order_dispathing_embed = discord.Embed(
             title=translations["order_dispatching_title"][lang],
             description=translations["order_dispatching"][lang].format(link=main_link),
             color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
         )
-        if interaction.response.is_done():
-            await interaction.followup.send(
-                embed=order_dispathing_embed,
-                ephemeral=False
-            )
-        else:
-            await interaction.response.send_message(
-                embed=order_dispathing_embed,
-                ephemeral=False
-            )
+        if gif_url:
+            order_dispathing_embed.set_image(url=gif_url)
+
+        await send_interaction_message(interaction=interaction, embed=order_dispathing_embed, ephemeral=False)
         await view.message_manager.send_all_messages()

@@ -37,7 +37,7 @@ async def servers_autocomplete(
         "overwatch2": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
         "pubg": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
         "fortnite": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
-        "teamfight Tactic": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
+        "teamfight tactic": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
         "dota2": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"],
         "world of tanks": ["All Servers", "EU", "NA", "KR", "CN", "ASIA"]
     }

@@ -4,7 +4,6 @@ from typing import List, Literal, Optional, Tuple
 from database.core_kicker_list import managers
 
 from serializers.profile_serializer import serialize_profile_data
-from database.fact_list import facts
 from database.dto.base import BasePsqlDTO
 from models.enums import Genders, Languages
 from services.logger.client import CustomLogger
@@ -298,7 +297,11 @@ class Services_Database(BasePsqlDTO):
         return managers
 
     async def get_facts(self):
-        return facts
+        async with self.get_connection() as conn:
+            query = "SELECT fact_text FROM discord_bot.entertainment_facts;"
+            facts = await conn.fetch(query)
+        return [fact['fact_text'] for fact in facts]
+
     
     async def save_order(self, timestamp: str, order_id: str, user_discord_id: int, kicker_discord_id: int, order_category: str, respond_time: str, service_price: float):
         async with self.get_connection() as conn:

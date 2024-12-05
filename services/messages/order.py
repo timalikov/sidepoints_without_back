@@ -3,10 +3,12 @@ import asyncio
 import discord
 
 from config import (
+    CHATTING_CHANNELS,
     ORDER_CATEGORY_NAME,
     ORDER_CHANNEL_NAME,
     GUIDE_CATEGORY_NAME,
-    GUIDE_CHANNEL_NAME
+    GUIDE_CHANNEL_NAME,
+    WEB3_CHATTING_CHANNEL_NAME
 )
 
 from bot_instance import get_bot
@@ -48,17 +50,28 @@ class OrderMessageManager:
         """
         Without @everyone and buttons.
         """
-        channel = await get_or_create_channel_by_category_and_name(
+        game_channel = await get_or_create_channel_by_category_and_name(
             category_name=GUIDE_CATEGORY_NAME,
             channel_name=GUIDE_CHANNEL_NAME,
             guild=bot.get_guild(self.guild_id)
         )
+        chatting_channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=WEB3_CHATTING_CHANNEL_NAME,
+            guild=bot.get_guild(self.guild_id)
+        )
         try:
-            await channel.send(embed=self.embed_message)
+            if self.services_db.app_choice == "ALL":
+                await game_channel.send(embed=self.embed_message)
+                await chatting_channel.send(embed=self.embed_message)
+            elif self.services_db.app_choice.lower() in CHATTING_CHANNELS:
+                await chatting_channel.send(embed=self.embed_message)
+            else:
+                await game_channel.send(embed=self.embed_message)
         except discord.errors.Forbidden:
-            await logger.error_discord(f"Cannot send message to channel: {channel.id}")
+            await logger.error_discord(f"Cannot send message to channel: {game_channel.id}")
         except discord.DiscordException:
-            await logger.error_discord(f"Failed to send message to channel: {channel.id}")
+            await logger.error_discord(f"Failed to send message to channel: {game_channel.id}")
 
     async def send_channel_message(self) -> None:
         channel = await get_or_create_channel_by_category_and_name(

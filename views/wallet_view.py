@@ -5,7 +5,6 @@ from database.dto.psql_wallets import Wallets_Database
 from dotenv import load_dotenv
 import os
 
-from config import APP_CHOICES
 from bot_instance import get_bot
 from database.dto.psql_services import Services_Database
 from views.base_view import BaseView
@@ -17,7 +16,6 @@ load_dotenv()
 
 main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
-app_choices = APP_CHOICES
 
 class Wallet_exist(BaseView):
     def __init__(self, discord_id="random id", wallet_id="random id", lang="en"):

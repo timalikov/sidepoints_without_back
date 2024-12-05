@@ -1,9 +1,11 @@
 import asyncio
+from typing import List, Union
 import uuid
 import discord
 
 from bot_instance import get_bot
-from config import BOOST_CHANNEL_ID, GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME, MAIN_GUILD_ID, TEST_ACCOUNTS, YELLOW_LOGO_COLOR
+from config import BOOST_CHANNEL_ID, GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME, MAIN_GUILD_ID, TEST_ACCOUNTS, WEB3_CHATTING_CHANNEL_NAME, YELLOW_LOGO_COLOR
+from services.storage.bucket import ImageS3Bucket
 from translate import translations, get_lang_prefix
 
 from services.messages.customer_support_messenger import send_message_to_customer_support
@@ -91,12 +93,13 @@ async def send_confirm_order_message(
         colour=discord.Colour.from_rgb(*YELLOW_LOGO_COLOR)
     )
     guild = bot.get_guild(discord_server_id)
-    channel = await get_or_create_channel_by_category_and_name(
+    
+    await send_to_channels(
         guild=guild,
         category_name=GUIDE_CATEGORY_NAME,
-        channel_name=GUIDE_CHANNEL_NAME
+        channels=[GUIDE_CHANNEL_NAME, WEB3_CHATTING_CHANNEL_NAME],
+        embed=order_successful_message_embed
     )
-    await channel.send(embed=order_successful_message_embed)
 
     channel: discord.VoiceChannel = None
     if guild.get_member(customer.id):
@@ -149,3 +152,23 @@ async def send_order_message(
     )
     await view.message_manager.send_kickers_message()
     return True
+
+async def send_to_channels(
+    guild: discord.Guild,
+    category_name: str,
+    channels: List[str],
+    message: Union[str, None] = None,
+    embed: Union[discord.Embed, None] = None,
+    image_url: Union[str, None] = None
+) -> None:
+    for channel_name in channels:
+        channel = await get_or_create_channel_by_category_and_name(
+            guild=guild,
+            category_name=category_name,
+            channel_name=channel_name
+        )
+        image = await ImageS3Bucket.get_image_by_url(image_url)
+        if image:
+            await channel.send(content=message, embed=embed, file=discord.File(image, "guild_join.png"))
+        else:
+            await channel.send(content=message, embed=embed)

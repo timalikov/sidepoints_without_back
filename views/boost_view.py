@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 
 from bot_instance import get_bot
-from config import APP_CHOICES
 
 from message_constructors import create_boost_embed
 from views.buttons.boost_button import BoostButton
@@ -17,7 +16,6 @@ load_dotenv()
 
 main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
-app_choices = APP_CHOICES
 
 
 class BoostView(BaseView):

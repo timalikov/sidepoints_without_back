@@ -1,3 +1,4 @@
+from config import GIFS_BY_TAGS
 import discord
 from database.dto.psql_services import Services_Database
 from bot_instance import get_bot
@@ -47,3 +48,5 @@ async def list_all_users_with_online_status(guild):
     all_member_ids = [member.id for member in guild.members]
     return all_member_ids
 
+def get_gif_url_by_tag(tag: str) -> str:
+    return GIFS_BY_TAGS.get(tag.lower(), None)

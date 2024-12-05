@@ -7,6 +7,7 @@ from typing import List, Dict, Optional, Set
 from database.dto.psql_roles import RolesDTO
 import discord
 from bot_instance import get_bot
+from services.messages.base import send_to_channels
 from translate import translations, get_lang_prefix
 from discord.ext import tasks
 from config import (
@@ -15,13 +16,13 @@ from config import (
     LEADERBOARD_CHANNEL_NAME,
     GUILDS_FOR_TASKS,
     GUIDE_CATEGORY_NAME,
-    GUIDE_CHANNEL_NAME
+    GUIDE_CHANNEL_NAME,
+    WEB3_CHATTING_CHANNEL_NAME
 )
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
 from models.thread_forum import start_posting
 from models.payment import get_server_wallet_by_discord_id
-from services.storage.bucket import ImageS3Bucket
 from services.cache.client import custom_cache
 from services.logger.client import CustomLogger
 from web3_interaction.balance_checker import get_usdt_balance
@@ -171,16 +172,14 @@ async def send_random_guide_message() -> None:
     for guild in bot.guilds:
         lang = get_lang_prefix(guild.id)
         message = messages[guide_message_count][lang]
-        image = await ImageS3Bucket.get_image_by_url(
-            "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
-        )
         try:
-            channel = await get_or_create_channel_by_category_and_name(
+            await send_to_channels(
+                guild=guild,
                 category_name=GUIDE_CATEGORY_NAME,
-                channel_name=GUIDE_CHANNEL_NAME,
-                guild=guild
+                channels=[GUIDE_CHANNEL_NAME, WEB3_CHATTING_CHANNEL_NAME],
+                message=message,
+                image_url="https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
             )
-            await channel.send(message, file=discord.File(image, "guild_join.png"))
         except discord.DiscordException as e:
             logger.error(str(e))
 

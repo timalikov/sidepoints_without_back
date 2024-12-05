@@ -27,12 +27,12 @@ translations = {
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
     'order_new_alert_new':{
+        'en': '**User: {customer_username} **\n**Info:** {choice}\n**Server:** {server_name}\n**Game server:** {game_server}\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
         'ru': 'Юзер: ** {customer_username} **\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
-        'en': 'Customer: ** {customer_username} **\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
     },
     'order_alert_title': {
-        'ru': 'Новый заказ!',
-        'en': 'New Order!',
+        'en': 'User is ordering, Kickers Please Click the Button to get order',
+        'ru': 'Пользователь заказывает, Кикеры, пожалуйста, нажмите кнопку, чтобы получить заказ',
     },
     'top_up_balance': {
         'en': 'Top up balance!',
