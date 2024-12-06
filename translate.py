@@ -27,8 +27,8 @@ translations = {
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
     'order_new_alert_new':{
-        'en': '**User: {customer_username} **\n**Info:** {choice}\n**Server:** {server_name}\n**Game server:** {game_server}\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
-        'ru': 'Юзер: ** {customer_username} **\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': '<a:announce:1308099576770854932> **User: {customer_username} **\n:arrowgreen: **Info:** {choice}\n:arrowgreen: **Server:** {server_name}\n:arrowgreen: **Game server:** {game_server}\n:arrowgreen: **Language:** {language}\n:arrowgreen: **Gender:** {gender}\n:arrow_yellow: **Customer request:** {extra_text}',
+        'ru': '<a:announce:1308099576770854932> **Пользователь: {customer_username} **\n:arrowgreen: **Инфо:** {choice}\n:arrowgreen: **Сервер:** {server_name}\n:arrowgreen: **Игровой сервер:** {game_server}\n:arrowgreen: **Язык:** {language}\n:arrowgreen: **Пол:** {gender}\n:arrow_yellow: **Комментарий заказчика:** {extra_text}',
     },
     'order_alert_title': {
         'en': 'User is ordering, Kickers Please Click the Button to get order',
