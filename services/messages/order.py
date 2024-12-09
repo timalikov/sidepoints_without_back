@@ -3,16 +3,19 @@ import asyncio
 import discord
 
 from config import (
+    CHATTING_CHANNELS,
     ORDER_CATEGORY_NAME,
     ORDER_CHANNEL_NAME,
     GUIDE_CATEGORY_NAME,
-    GUIDE_CHANNEL_NAME
+    GUIDE_CHANNEL_NAME,
+    WEB3_CHATTING_CHANNEL_NAME
 )
 
 from bot_instance import get_bot
 from services.logger.client import CustomLogger
 from models.public_channel import get_or_create_channel_by_category_and_name
-from message_constructors import _build_embed_message_order
+from message_constructors import _build_embed_message_order, _build_embed_message_order_2
+from services.utils import get_gif_url_by_tag
 
 bot = get_bot()
 logger = CustomLogger
@@ -30,13 +33,24 @@ class OrderMessageManager:
         self.guild_id = guild_id
         self.messages = []
         self.services_db = services_db
-        self.embed_message = _build_embed_message_order(
+        self.public_channel_embed_message = _build_embed_message_order(
             services_db=self.services_db,
             extra_text=extra_text,
             lang=view.lang,
             guild_id=self.guild_id,
             customer=customer
         )
+        gif_url: str = get_gif_url_by_tag(self.services_db.app_choice)
+        self.channel_embed_message = _build_embed_message_order_2(
+            services_db=self.services_db,
+            extra_text=extra_text,
+            lang=view.lang,
+            guild_id=self.guild_id,
+            customer=customer
+        )
+        if gif_url:
+            self.public_channel_embed_message.set_image(url=gif_url)
+            self.channel_embed_message.set_image(url=gif_url)
         self.view = view
         
     async def send_all_messages(self) -> None:
@@ -48,17 +62,28 @@ class OrderMessageManager:
         """
         Without @everyone and buttons.
         """
-        channel = await get_or_create_channel_by_category_and_name(
+        game_channel = await get_or_create_channel_by_category_and_name(
             category_name=GUIDE_CATEGORY_NAME,
             channel_name=GUIDE_CHANNEL_NAME,
             guild=bot.get_guild(self.guild_id)
         )
+        chatting_channel = await get_or_create_channel_by_category_and_name(
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=WEB3_CHATTING_CHANNEL_NAME,
+            guild=bot.get_guild(self.guild_id)
+        )
         try:
-            await channel.send(embed=self.embed_message)
+            if self.services_db.app_choice == "ALL":
+                await game_channel.send(embed=self.public_channel_embed_message)
+                await chatting_channel.send(embed=self.public_channel_embed_message)
+            elif self.services_db.app_choice.lower() in CHATTING_CHANNELS:
+                await chatting_channel.send(embed=self.public_channel_embed_message)
+            else:
+                await game_channel.send(embed=self.public_channel_embed_message)
         except discord.errors.Forbidden:
-            await logger.error_discord(f"Cannot send message to channel: {channel.id}")
+            await logger.error_discord(f"Cannot send message to channel: {game_channel.id}")
         except discord.DiscordException:
-            await logger.error_discord(f"Failed to send message to channel: {channel.id}")
+            await logger.error_discord(f"Failed to send message to channel: {game_channel.id}")
 
     async def send_channel_message(self) -> None:
         channel = await get_or_create_channel_by_category_and_name(
@@ -69,7 +94,7 @@ class OrderMessageManager:
         try:
             sent_message = await channel.send(
                 content="@everyone",
-                embed=self.embed_message,
+                embed=self.channel_embed_message,
                 view=self.view
             )
             self.messages.append(sent_message)
@@ -104,7 +129,7 @@ class OrderMessageManager:
             try:
                 sent_message = await kicker.send(
                     view=self.view,
-                    embed=self.embed_message
+                    embed=self.channel_embed_message
                 )
                 self.messages.append(sent_message)
                 await asyncio.sleep(1)
@@ -116,7 +141,7 @@ class OrderMessageManager:
                     try:
                         sent_message = await kicker.send(
                             view=self.view,
-                            embed=self.embed_message
+                            embed=self.channel_embed_message
                         )
                         self.messages.append(sent_message)
                     except discord.DiscordException as e:
@@ -136,7 +161,7 @@ class OrderMessageManager:
         for kicker in kickers:
             try:
                 sent_message = await kicker.send(
-                    embed=self.embed_message,
+                    embed=self.channel_embed_message,
                     view=self.view
                 )
                 self.messages.append(sent_message)

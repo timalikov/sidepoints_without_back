@@ -30,4 +30,5 @@ class OrderDMView(BaseView):
             description=translations["thanks_for_placing_order_description"][self.lang].format(balance=self.balance),    
             color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
         )
+        embed.set_image(url="https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/Order-complete.png")
         return embed

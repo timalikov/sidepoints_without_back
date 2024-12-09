@@ -5,7 +5,6 @@ from discord.ui import View
 import os
 from dotenv import load_dotenv
 
-from config import APP_CHOICES
 from services.kicker_sort_service import KickerSortingService
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
@@ -23,7 +22,6 @@ load_dotenv()
 
 main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
-app_choices = APP_CHOICES
 
 class PlayView(BaseView):
     @classmethod
