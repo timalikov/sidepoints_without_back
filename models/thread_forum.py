@@ -37,8 +37,7 @@ async def _hide_forum(
     forum_channel: discord.ForumChannel
 ) -> None:
     overwrites = {
-        role: discord.PermissionOverwrite(view_channel=False) for role in guild.roles
-        if not role.permissions.administrator
+        guild.default_role: discord.PermissionOverwrite(view_channel=False)
     }
     overwrites.update({
         role: discord.PermissionOverwrite(view_channel=True) for role in guild.roles
@@ -52,7 +51,7 @@ async def _show_forum(
     forum_channel: discord.ForumChannel
 ) -> None:
     overwrites = {
-        role: discord.PermissionOverwrite(view_channel=True) for role in guild.roles
+        guild.default_role: discord.PermissionOverwrite(view_channel=True)
     }
     await forum_channel.edit(overwrites=overwrites)
 

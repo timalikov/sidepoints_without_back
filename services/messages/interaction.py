@@ -8,7 +8,7 @@ async def send_interaction_message(
     view: discord.ui.View = None,
     embed: discord.Embed = None,
     ephemeral: bool = True
-) -> None:
+) -> discord.Message:
     kwargs: dict = {}
     if ephemeral:
         kwargs["ephemeral"] = ephemeral
@@ -20,8 +20,9 @@ async def send_interaction_message(
         kwargs["embed"] = embed
     try:
         if interaction.response.is_done():
-            await interaction.followup.send(**kwargs)
+            message = await interaction.followup.send(**kwargs)
         else:
-            await interaction.response.send_message(**kwargs)
+            message = await interaction.response.send_message(**kwargs)
     except (discord.errors.InteractionResponded, discord.DiscordException):
-        await interaction.followup.send(**kwargs)
+        message = await interaction.followup.send(**kwargs)
+    return message

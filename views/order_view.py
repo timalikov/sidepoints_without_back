@@ -40,7 +40,6 @@ class OrderView(BaseView):
         self.is_pressed = False
         self.services_db = services_db
         self.go_command = go_command
-        self.messages = []  # for drop button after timeout
         self.created_at = datetime.now()
         self.guild_id = int(guild_id) if guild_id else None
         self.lang = lang
@@ -68,7 +67,9 @@ class OrderView(BaseView):
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
-        for message_instance in self.messages:
+            if isinstance(child, OrderGoButton):
+                child.label = "Order cancelled"
+        for message_instance in self.message_manager.messages:
             await message_instance.edit(view=self)
         if stop_button_pressed:
             stopped_message_embed = discord.Embed(

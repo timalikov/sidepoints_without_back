@@ -67,20 +67,15 @@ class GoCommand(commands.Cog):
             view=user_dm_view,
             embed=user_dm_view.embed_message
         )
-        order_dispathing_embed = discord.Embed(
+        order_dispatching_embed = discord.Embed(
             title=translations["order_dispatching_title"][lang],
             description=translations["order_dispatching"][lang].format(link=main_link),
             color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
         )
-        if interaction.response.is_done():
-            await interaction.followup.send(
-                embed=order_dispathing_embed,
-                ephemeral=False
-            )
-        else:
-            await interaction.response.send_message(
-                embed=order_dispathing_embed,
-                ephemeral=False
-            )
+        await send_interaction_message(
+            interaction=interaction,
+            embed=order_dispatching_embed,
+            ephemeral=False
+        )
         await view.message_manager.send_all_messages()
 

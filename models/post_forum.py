@@ -35,8 +35,8 @@ class Post_FORUM:
 
     async def _get_tags(self) -> List[discord.ForumTag]:
         tag_name: str = self.profile_data["tag"]
-        languages: List[str] = self.profile_data["profile_languages"]
-        gender: str = self.profile_data["profile_gender"]
+        languages: List[str] = self.profile_data["profile_languages"] or []
+        gender: str = self.profile_data["profile_gender"] or "OTHER"
         gender_list: List[str] = [gender] if gender != "OTHER" else ["Male", "Female"]
         tags: List[discord.ForumTag] = [] 
         for forum_tag in self.forum_channel.available_tags:

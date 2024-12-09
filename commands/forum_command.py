@@ -8,7 +8,7 @@ from services.utils import is_admin
 from database.dto.psql_services import Services_Database
 from services.messages.interaction import send_interaction_message
 from models.thread_forum import start_posting
-from models.forum import get_or_create_forum
+from models.forum import get_or_create_forum, get_and_recreate_forum
 
 bot = get_bot()
 
@@ -32,7 +32,7 @@ class ForumCommand(commands.Cog):
             await send_interaction_message(interaction=interaction, message=translations["not_dm"][lang])
             return
         try:
-            forum_channel: discord.channel.ForumChannel = await get_or_create_forum(guild)
+            forum_channel: discord.channel.ForumChannel = await get_and_recreate_forum(guild)
         except discord.DiscordException:
             await interaction.response.send_message(
                 content=translations["not_community"][lang],
