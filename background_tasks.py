@@ -17,7 +17,7 @@ from config import (
     GUILDS_FOR_TASKS,
     GUIDE_CATEGORY_NAME,
     GUIDE_CHANNEL_NAME,
-    WEB3_CHATTING_CHANNEL_NAME
+    ORDER_CHANNEL_NAME,
 )
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.forum import get_and_recreate_forum
@@ -176,7 +176,7 @@ async def send_random_guide_message() -> None:
             await send_to_channels(
                 guild=guild,
                 category_name=GUIDE_CATEGORY_NAME,
-                channels=[GUIDE_CHANNEL_NAME, WEB3_CHATTING_CHANNEL_NAME],
+                channels=[ORDER_CHANNEL_NAME], 
                 message=message,
                 image_url="https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/%3AHow+to+make+an+order.png"
             )

@@ -88,11 +88,11 @@ FORUM_CATEGORY_NAME = "Sidekick: Match to Play"
 FORUM_NAME = "🔎find-your-kickers"
 
 ORDER_CATEGORY_NAME = "Kickers"
-ORDER_CHANNEL_NAME = "🔔order-dispatch"
+ORDER_CHANNEL_NAME = "🎮order-game"
+WEB3_CHATTING_CHANNEL_NAME = "💬web3-chatting"
 
 GUIDE_CATEGORY_NAME = "Sidekick: Match to Play"
-GUIDE_CHANNEL_NAME = "🎮order-game"
-WEB3_CHATTING_CHANNEL_NAME = "💬web3-chatting"
+GUIDE_CHANNEL_NAME = "📥order-lobby"
 
 ANNOUNCEMENTS_CATEGORY_NAME = "Sidekick: Match to Play"
 ANNOUNCEMENTS_CHANNEL_NAME = "sidekick-announcement"
