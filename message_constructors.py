@@ -1,4 +1,5 @@
 import random
+from config import YELLOW_LOGO_COLOR
 import discord
 from typing import Optional, Dict, Literal
 
@@ -134,6 +135,47 @@ def _build_embed_message_order(
             game_server=server,
             extra_text=extra_text if extra_text else ""
         ),
-        color=discord.Color.blue()
+        color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
+    )
+    return embed
+
+def _build_embed_message_order_2(
+    services_db,
+    extra_text: str,
+    lang: str,
+    guild_id: int,
+    customer: discord.User = None
+) -> str:
+    service_title = services_db.app_choice
+    if not service_title:
+        service_title = "All players"
+    sex = services_db.sex_choice
+    if not sex:
+        sex = "Male/Female"
+    language = services_db.language_choice
+    if not language:
+        language = "ALL"
+    server = services_db.server_choice
+    if not server:
+        server = "Все" if lang == "ru" else "All"
+
+    guild = bot.get_guild(guild_id)
+    if customer:
+        customer_username: str = customer.name
+    else:
+        customer_username: str = translations["order_from_webapp"][lang],
+    embed = discord.Embed(
+        title=translations["order_alert_title"][lang],
+        description=translations["order_alert_for_dispatch_channel"][lang].format(
+            customer_username=customer_username,
+            customer_id=customer.id,
+            choice=service_title,
+            server_name=guild.name,
+            language=language,
+            gender=sex.capitalize(),
+            game_server=server,
+            extra_text=extra_text if extra_text else ""
+        ),
+        color=discord.Color.from_rgb(*YELLOW_LOGO_COLOR)
     )
     return embed

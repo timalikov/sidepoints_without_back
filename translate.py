@@ -26,13 +26,17 @@ translations = {
         'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\nКомментарий юзера: {extra_text}',
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
+    'order_alert_for_dispatch_channel': {
+        'ru': '**Пользователь заказывает кикеров. Пожалуйста, нажмите кнопку, чтобы продолжить заказ**\nЮзер: ** {customer_username} <@!{customer_id}>**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': '**User is ordering Kickers. Please click the button to proceed with the order**\nCustomer: ** {customer_username} <@!{customer_id}>**\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+    },
     'order_new_alert_new':{
-        'en': '<a:announce:1308099576770854932> **User: {customer_username} **\n:arrowgreen: **Info:** {choice}\n:arrowgreen: **Server:** {server_name}\n:arrowgreen: **Game server:** {game_server}\n:arrowgreen: **Language:** {language}\n:arrowgreen: **Gender:** {gender}\n:arrow_yellow: **Customer request:** {extra_text}',
-        'ru': '<a:announce:1308099576770854932> **Пользователь: {customer_username} **\n:arrowgreen: **Инфо:** {choice}\n:arrowgreen: **Сервер:** {server_name}\n:arrowgreen: **Игровой сервер:** {game_server}\n:arrowgreen: **Язык:** {language}\n:arrowgreen: **Пол:** {gender}\n:arrow_yellow: **Комментарий заказчика:** {extra_text}',
+        'en': ':loudspeaker: **User: {customer_username} **\n:arrow_right: **Info:** {choice}\n:arrow_right: **Server:** {server_name}\n:arrow_right: **Game server:** {game_server}\n:arrow_right: **Language:** {language}\n:arrow_right: **Gender:** {gender}\n:speech_balloon: **Customer request:** {extra_text}',
+        'ru': ':loudspeaker: **Пользователь: {customer_username} **\n:arrow_right: **Инфо:** {choice}\n:arrow_right: **Сервер:** {server_name}\n:arrow_right: **Игровой сервер:** {game_server}\n:arrow_right: **Язык:** {language}\n:arrow_right: **Пол:** {gender}\n:speech_balloon: **Комментарий заказчика:** {extra_text}',
     },
     'order_alert_title': {
-        'en': 'User is ordering, Kickers Please Click the Button to get order',
-        'ru': 'Пользователь заказывает, Кикеры, пожалуйста, нажмите кнопку, чтобы получить заказ',
+        'en': 'New Order!',
+        'ru': 'Новый заказ!',
     },
     'top_up_balance': {
         'en': 'Top up balance!',

@@ -111,6 +111,7 @@ POINTS_IMAGE_URL = "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekic
 YELLOW_LOGO_COLOR = [255, 211, 14]
 
 GIFS_BY_TAGS = {
+    "all": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-ALL.gif",
     "apex legends": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-apex.gif",
     "just chatting": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-chatting.gif",
     "cs:go": "https://discord-photos.s3.eu-central-1.amazonaws.com/sidekick-back-media/discord_bot/order-in-progess-cs2.gif",

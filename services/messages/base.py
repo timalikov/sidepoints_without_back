@@ -167,8 +167,11 @@ async def send_to_channels(
             category_name=category_name,
             channel_name=channel_name
         )
-        image = await ImageS3Bucket.get_image_by_url(image_url)
-        if image:
-            await channel.send(content=message, embed=embed, file=discord.File(image, "guild_join.png"))
-        else:
-            await channel.send(content=message, embed=embed)
+        
+        image = await ImageS3Bucket.get_image_by_url(image_url) if image_url else None
+        
+        await channel.send(
+            content=message,
+            embed=embed,
+            file=discord.File(image, "guild_join.png") if image else None
+        )
