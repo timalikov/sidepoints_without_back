@@ -10,6 +10,7 @@ from config import (
 from database.dto.psql_reaction import ReactionDTO
 from translate import translations
 
+from services.view_collector import ViewCollector
 from views.base_view import BaseView
 
 
@@ -18,8 +19,14 @@ class CheckReactionView(BaseView):
     Class for check kicker reaction.
     """
 
-    def __init__(self, *, kicker: discord.User, lang: Literal["ru", "en"] = "en"):
-        super().__init__(timeout=None)
+    def __init__(
+        self,
+        *,
+        kicker: discord.User,
+        lang: Literal["ru", "en"] = "en",
+        collector: ViewCollector = None
+    ) -> None:
+        super().__init__(timeout=None, collector=collector)
         self.kicker = kicker
         self.created_at = datetime.datetime.utcnow()
         self.lang = lang

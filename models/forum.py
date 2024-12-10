@@ -3,15 +3,19 @@ from typing import Optional
 import discord
 from discord import ForumTag
 
+from bot_instance import get_bot
+from config import FORUM_NAME, FORUM_CATEGORY_NAME, SERVER_TYPE
+
 from database.dto.sql_forum_posted import ForumUserPostDatabase
 from database.dto.psql_services import Services_Database
 from database.dto.psql_guild_channels import DiscordGuildChannelsDTO
-from config import FORUM_NAME, FORUM_CATEGORY_NAME
 from models.category import get_or_create_category_by_name
 from models.public_channel import (
     _get_channel_from_db,
     _get_or_delete_channel_by_id,
 )
+
+bot = get_bot()
 
 
 async def find_forum(
@@ -122,8 +126,45 @@ async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
         services_db = Services_Database()
         tags = await services_db.get_all_active_tags()
         values_list = list(tags) + ["Male", "Female"]
-        available_tags = [ForumTag(name=tag) for tag in values_list[:20]]
+        available_tags = [
+            ForumTag(name=tag)
+            for tag in values_list[:20]
+        ]
         await forum_channel.edit(available_tags=available_tags)
         return forum_channel
     forum_channel = await create_base_forum(guild)
     return forum_channel
+
+
+def get_tag_emoji(tag_name: str) -> discord.Emoji:
+    emojis = {
+        "LOCAL": {
+            "league of legends": ("lol", 1315594937269620786),
+            "valorant": ("valorant", 1315594911268995113),
+            "cs:go": ("csgo2", 1315594879186894919),
+            "apex legends": ("apex", 1315594838447489105),
+            "world of tanks": ("tankworld", 1315594806139027549),
+            "dota 2": ("dota2", 1315594775151247381),
+            "pubg": ("pubg", 1315594637582274560),
+            "naraka": ("naraka", 1315594593013862411),
+            "overwatch 2": ("overwatch2", 1315594549225197598),
+            "fortnite": ("fortnite", 1315594507143614494),
+            "teamfight tactics": ("tft", 1315594477091553311),
+            "steam": ("steam", 1315594425325457418),
+            "youtube": ("youtube", 1315594398939222028),
+            "gta 5": ("gta5", 1315594377896263751),
+            "arena": ("arena", 1315594357906210828),
+            "just chatting": ("chatting", 1315594334443147274),
+            "virtual dating": ("virturdate", 1315594301161345075),
+            "male": ("male", 1315594246337859625),
+            "female": ("female", 1315594210241413120)
+        },
+        "TEST": {},
+        "PRODUCTION": {}
+    }
+    emoji = emojis[SERVER_TYPE].get(tag_name.lower())
+    emoji_format = "<:{emoji_name}:{emoji_id}>"
+    return emoji_format.format(
+        emoji_name=emoji[0],
+        emoji_id=emoji[1]
+    ) if emoji else None

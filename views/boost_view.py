@@ -5,11 +5,12 @@ from dotenv import load_dotenv
 
 from bot_instance import get_bot
 
+from database.dto.psql_services import Services_Database
 from message_constructors import create_boost_embed
+from services.view_collector import ViewCollector
 from views.buttons.boost_button import BoostButton
 from views.base_view import BaseView
 from views.buttons.next_button import NextButton
-from database.dto.psql_services import Services_Database
 
 bot = get_bot()
 load_dotenv()
@@ -24,9 +25,10 @@ class BoostView(BaseView):
         amount: float,
         user_name: str = None,
         user_id: int = None,
-        lang: Literal["ru", "en"] = "en"
+        lang: Literal["ru", "en"] = "en",
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=None)
+        super().__init__(timeout=None, collector=collector)
         self.user_name = user_name
         self.user_id = user_id
         self.no_user = False

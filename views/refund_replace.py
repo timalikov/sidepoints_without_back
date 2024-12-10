@@ -5,6 +5,7 @@ from bot_instance import get_bot
 from config import MAIN_GUILD_ID
 
 from views.base_view import BaseView
+from services.view_collector import ViewCollector
 from views.buttons.replace_button import ReplaceButton
 
 bot = get_bot()
@@ -19,9 +20,10 @@ class ReplaceView(BaseView):
         discord_server_id: int = int(MAIN_GUILD_ID),
         replace_manager = None,
         lang: Literal["en", "ru"] = "en",
-        timeout: Optional[int] = 60 * 10
+        timeout: Optional[int] = 60 * 10,
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=timeout)
+        super().__init__(timeout=timeout, collector=collector)
         self.customer = customer
         self.kicker = kicker
         self.access_reject_view = access_reject_view

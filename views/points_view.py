@@ -6,12 +6,11 @@ from config import (
     POINTS_IMAGE_URL,
     LINK_LEADERBOARD,
     YELLOW_LOGO_COLOR,
-    INVITE_BOT_URL
 )
-from discord.ui import Button
 from views.buttons.check_in_button import CheckInButton
 from views.buttons.invite_user_button import InviteUserButton
 from views.base_view import BaseView
+from services.view_collector import ViewCollector
 from services.logger.client import CustomLogger
 from bot_instance import get_bot
 
@@ -28,8 +27,9 @@ class PointsView(BaseView):
         total_points: int,
         rank: int,
         lang: Literal["en", "ru"] = "en",
+        collector: ViewCollector = None
     ):
-        super().__init__(timeout=60 * 60)
+        super().__init__(timeout=60 * 60, collector=collector)
         self.username = username
         self.user = user
         self.total_points = total_points

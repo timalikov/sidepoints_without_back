@@ -4,6 +4,7 @@ import discord
 from bot_instance import get_bot
 from translate import translations
 
+from services.view_collector import ViewCollector
 from services.refund_replace_message_manager import RefundReplaceManager
 from views.buttons.payment_button import PaymentButton
 from views.buttons.reject_button import RejectButton
@@ -24,9 +25,10 @@ class AccessRejectView(BaseView):
         service: dict,
         discord_server_id: int,
         purchase_id: int = None,
-        lang: Literal["en", "ru"] = "en"
+        lang: Literal["en", "ru"] = "en",
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=60 * 5)
+        super().__init__(timeout=60 * 5, collector=collector)
         self.kicker = kicker
         self.customer = customer
         self.discord_server_id = discord_server_id
