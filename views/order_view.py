@@ -8,6 +8,7 @@ from views.buttons.order_go_button import OrderGoButton
 from views.base_view import BaseView
 from views.buttons.count_button import CountButton
 from services.messages.order import OrderMessageManager
+from services.view_collector import ViewCollector
 from translate import translations
 
 from bot_instance import get_bot
@@ -32,9 +33,10 @@ class OrderView(BaseView):
         extra_text: str = "",
         lang: Literal["en", "ru"] = "en",
         services_db: Services_Database = None,
-        go_command: bool = False
+        go_command: bool = False,
+        collector: ViewCollector = None
     ):
-        super().__init__(timeout=15 * 60)
+        super().__init__(timeout=15 * 60, collector=collector)
         self.customer: discord.User = customer
         self.pressed_kickers: List[discord.User] = []
         self.is_pressed = False

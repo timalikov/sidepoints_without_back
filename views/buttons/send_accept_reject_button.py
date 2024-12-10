@@ -88,7 +88,8 @@ class SendAcceptRejectButton(BaseButton):
             customer=interaction.user,
             service=self.view.service,
             discord_server_id=self.discord_server_id,
-            lang=self.lang
+            lang=self.lang,
+            collector=self.view.collector
         )
         service = self.view.service
         kicker_embed = discord.Embed(

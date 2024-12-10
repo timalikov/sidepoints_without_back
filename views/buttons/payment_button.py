@@ -101,6 +101,8 @@ class PaymentButton(BaseButton):
 
         if payment_status_code == PaymentStatusCodes.SUCCESS:
             custom_cache.set_purchase_id(purchase_id)
+            order_view = self.view.collector.get_view(name="OrderView")
+            await order_view.on_timeout()
             from services.messages.base import send_confirm_order_message
             try:
                 kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))

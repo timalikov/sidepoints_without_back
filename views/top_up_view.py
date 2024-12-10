@@ -14,6 +14,7 @@ from bot_instance import get_bot
 
 from models.payment import get_server_wallet_by_discord_id, get_usdt_balance_by_discord_user
 from models.public_channel import get_or_create_channel_by_category_and_name
+from services.view_collector import ViewCollector
 from services.messages.interaction import send_interaction_message
 from services.logger.client import CustomLogger
 from services.cache.client import custom_cache
@@ -32,9 +33,10 @@ class TopUpView(BaseView):
         self, 
         amount: float,
         guild: discord.Guild = None,
-        lang: Literal["en", "ru"] = "en"
+        lang: Literal["en", "ru"] = "en",
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=180)
+        super().__init__(timeout=180, collector=collector)
         self.amount = amount
         self.guild = guild if guild else bot.get_guild(int(MAIN_GUILD_ID))
         self.lang = lang

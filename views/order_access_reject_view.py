@@ -6,6 +6,7 @@ from views.buttons.boost_button import BoostButton
 from views.buttons.reject_button import RejectButton
 from views.buttons.send_accept_reject_button import SendAcceptRejectButton
 from views.base_view import BaseView
+from services.view_collector import ViewCollector
 
 from bot_instance import get_bot
 
@@ -24,15 +25,18 @@ class OrderPlayView(BaseView):
         need_payment_button: bool = True,
         need_chat_button: bool = True,
         show_boost_dropdown: bool = False,
+        order_view: discord.ui.View = None,
         lang: Literal["en", "ru"],
-        timeout: int = 60 * 60
+        timeout: int = 60 * 60,
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=timeout)
+        super().__init__(timeout=timeout, collector=collector)
         self.service = service
         self.service_id = service['service_id']
         self.already_pressed = False
         self.discord_service_id = guild_id
         self.boost_amount = None
+        self.order_view = order_view
         self.lang = lang
         self.need_reject_button = need_reject_button
         self.need_boost_button = need_boost_button

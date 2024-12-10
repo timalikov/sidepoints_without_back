@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-TEST = os.getenv('RECEIVER_TEST')
+SERVER_TYPE = os.getenv('SERVER_TYPE')
+TEST = SERVER_TYPE == "TEST" or SERVER_TYPE == "LOCAL"
 
 
 class bcolors:

@@ -8,6 +8,7 @@ import os
 from bot_instance import get_bot
 from database.dto.psql_services import Services_Database
 from views.base_view import BaseView
+from services.view_collector import ViewCollector
 
 from web3_interaction.balance_checker import get_usdt_balance
 
@@ -18,8 +19,12 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 
 class Wallet_exist(BaseView):
-    def __init__(self, discord_id="random id", wallet_id="random id", lang="en"):
-        super().__init__(timeout=None)
+    def __init__(
+        self,
+        lang: str = "en",
+        collector: ViewCollector = None
+    ) -> None:
+        super().__init__(timeout=None, collector=collector)
         self.lang = lang
 
     @discord.ui.button(label="Wallet", style=discord.ButtonStyle.success, custom_id="wallet_button")

@@ -3,6 +3,7 @@ from typing import Literal
 import os
 from dotenv import load_dotenv
 
+from services.view_collector import ViewCollector
 from services.kicker_sort_service import KickerSortingService
 from message_constructors import create_profile_embed
 from bot_instance import get_bot
@@ -26,10 +27,11 @@ class FindView(BaseView):
         username: str = None,
         user_id: int = None,
         guild_id: int = main_guild_id,
-        lang: Literal["ru", "en"] = "en"
+        lang: Literal["ru", "en"] = "en",
+        collector: ViewCollector = None
     ):
         services_db = Services_Database(app_choice=user_choice)
-        instance = cls(None, services_db, lang=lang)
+        instance = cls(None, services_db, lang=lang, collector=collector)
         
         instance.services_db = services_db
         instance.kicker_sorting_service = KickerSortingService(services_db)
@@ -55,9 +57,10 @@ class FindView(BaseView):
         service: dict = None,
         services_db: Services_Database = None,
         guild_id: int = main_guild_id,
-        lang: Literal["ru", "en"] = "en"
+        lang: Literal["ru", "en"] = "en",
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=None)
+        super().__init__(timeout=None,  collector=collector)
         self.service = service
         self.services_db = services_db
         self.guild_id = guild_id

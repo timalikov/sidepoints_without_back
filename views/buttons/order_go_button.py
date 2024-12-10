@@ -55,7 +55,8 @@ class OrderGoButton(BaseButton):
         view = OrderPlayView(
             service=service,
             guild_id=self.view.guild_id,
-            lang=self.lang
+            lang=self.lang,
+            collector=self.view.collector
         )
         view.add_item(order_dropdown)
         view.add_item(boost_dropdown)
@@ -90,10 +91,7 @@ class OrderGoButton(BaseButton):
         kicker_score: int = await self.view.services_db.get_kicker_score(kicker.id)
         if not services or kicker_score < 100:
             return await send_interaction_message(interaction=interaction, message=translations['not_kicker'][self.lang])
-        # if not self.view.go_command:
-        #     suitable_services = await self.view.services_db.get_kicker_order_service(kicker.id)
-        #     if not suitable_services:
-        #         return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
+        
         gender_service = await self.view.services_db.get_service_by_id_and_gender(kicker.id)
         if not gender_service:
             return await send_interaction_message(interaction=interaction, message=translations['not_suitable_message'][self.lang])
@@ -115,6 +113,6 @@ class OrderGoButton(BaseButton):
             if isinstance(item, discord.ui.Button) and item.label.isdigit():
                 item.label = f"{number_of_clicks}"
         
-        for message in self.view.messages:
+        for message in self.view.message_manager.messages:
             await message.edit(view=self.view)
         await interaction.message.edit(view=self.view)

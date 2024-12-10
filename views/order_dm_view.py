@@ -1,11 +1,15 @@
-from decimal import Decimal
 from typing import Literal, Union
+from decimal import Decimal
+
+import discord
+
 from button_constructors import StopDispatchingButton
 from config import YELLOW_LOGO_COLOR
-import discord
+from translate import translations
+
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from views.base_view import BaseView
-from translate import translations
+from services.view_collector import ViewCollector
 
 class OrderDMView(BaseView):
 
@@ -15,8 +19,9 @@ class OrderDMView(BaseView):
         order_view: discord.ui.View,
         balance: Union[int, Decimal, Literal["Failed to connect to BNB Smart Chain"]],
         lang: Literal["en", "ru"] = "en",
+        collector: ViewCollector = None
     ):
-        super().__init__(timeout=None)
+        super().__init__(timeout=None, collector=collector)
         self.balance = balance
         self.lang = lang
         self.embed_message = self._build_embed_message_points()

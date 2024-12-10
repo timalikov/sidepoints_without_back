@@ -4,13 +4,14 @@ import os
 
 import discord
 
-from services.messages.interaction import send_interaction_message
 from translate import translations
 from bot_instance import get_bot
 
-from message_constructors import create_profile_embed
 from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
+from services.view_collector import ViewCollector
+from services.messages.interaction import send_interaction_message
+from message_constructors import create_profile_embed
 from views.base_view import BaseView
 from views.share_command_view import ShareCommandView
 
@@ -21,8 +22,14 @@ main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 
 class Profile_Exist(BaseView):
-    def __init__(self, discord_id, user_choice="ALL", lang: Literal["ru", "en"] = "en"):
-        super().__init__(timeout=None)
+    def __init__(
+        self,
+        discord_id,
+        user_choice="ALL",
+        lang: Literal["ru", "en"] = "en",
+        collector: ViewCollector = None
+    ):
+        super().__init__(timeout=None, collector=collector)
         self.discord_id = discord_id
         self.user_choice = user_choice
         self.no_user = False

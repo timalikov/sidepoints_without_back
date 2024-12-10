@@ -6,6 +6,7 @@ from typing import Literal
 
 from translate import translations
 
+from services.view_collector import ViewCollector
 from views.base_view import BaseView
 from services.logger.client import CustomLogger
 
@@ -21,9 +22,10 @@ class ShareCommandView(BaseView):
         list_services,
         index,
         affiliate_channel_ids,
-        lang: Literal["en", "ru"] = "en"
+        lang: Literal["en", "ru"] = "en",
+        collector: ViewCollector = None
     ):
-        super().__init__()
+        super().__init__(collector=collector)
         self.bot = bot
         self.list_services = list_services
         self.index = index

@@ -3,6 +3,7 @@ from bot_instance import get_bot
 from database.dto.psql_services import Services_Database
 import discord
 from services.messages.interaction import send_interaction_message
+from services.view_collector import ViewCollector
 from services.sqs_client import SQSClient
 from views.base_view import BaseView
 
@@ -18,9 +19,10 @@ class SessionCheckView(BaseView):
         kicker: discord.User,
         purchase_id: int,    
         channel: discord.VoiceChannel,
-        lang: Literal["en", "ru"] = "en"
+        lang: Literal["en", "ru"] = "en",
+        collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=60*60)
+        super().__init__(timeout=60*60, collector=collector)
         self.customer = customer
         self.kicker = kicker
         self.purchase_id = purchase_id
