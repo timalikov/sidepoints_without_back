@@ -78,7 +78,7 @@ class RefundReplaceManager:
 
     async def periodic_refund_replace(self):
         for index in range(5):
-            await asyncio.sleep(60)
+            await asyncio.sleep(300)
             if self.stop_event.is_set():
                 self.user_interacted = True
                 return None

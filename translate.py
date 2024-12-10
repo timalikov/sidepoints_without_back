@@ -26,13 +26,17 @@ translations = {
         'ru': 'Новый заказ: **{choice}** [30 минут]\nУ вас новый заказ на **{choice}**\nПол: **{gender}**.\nЯзык: **{language}**\nКомментарий юзера: {extra_text}',
         'en': 'New Order Alert: **{choice}** [30 minutes]\nYou have a new order for a **{choice}**\nGender: **{gender}**.\nLanguage: **{language}**\nCustomer extra request: {extra_text}',
     },
+    'order_alert_for_dispatch_channel': {
+        'ru': '**Пользователь заказывает кикеров. Пожалуйста, нажмите кнопку, чтобы продолжить заказ**\nЮзер: ** {customer_username} <@!{customer_id}>**\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
+        'en': '**User is ordering Kickers. Please click the button to proceed with the order**\nCustomer: ** {customer_username} <@!{customer_id}>**\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+    },
     'order_new_alert_new':{
-        'ru': 'Юзер: ** {customer_username} **\nЗаказ: **{choice}**\nСервер: **{server_name}**\nИгровой сервер: **{game_server}**\nЯзык: **{language}**\nПол: **{gender}**\nКомментарий юзера: {extra_text}',
-        'en': 'Customer: ** {customer_username} **\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
+        'en': ':loudspeaker: **User: {customer_username} **\n:arrow_right: **Info:** {choice}\n:arrow_right: **Server:** {server_name}\n:arrow_right: **Game server:** {game_server}\n:arrow_right: **Language:** {language}\n:arrow_right: **Gender:** {gender}\n:speech_balloon: **Customer request:** {extra_text}',
+        'ru': ':loudspeaker: **Пользователь: {customer_username} **\n:arrow_right: **Инфо:** {choice}\n:arrow_right: **Сервер:** {server_name}\n:arrow_right: **Игровой сервер:** {game_server}\n:arrow_right: **Язык:** {language}\n:arrow_right: **Пол:** {gender}\n:speech_balloon: **Комментарий заказчика:** {extra_text}',
     },
     'order_alert_title': {
-        'ru': 'Новый заказ!',
         'en': 'New Order!',
+        'ru': 'Новый заказ!',
     },
     'top_up_balance': {
         'en': 'Top up balance!',
@@ -170,13 +174,13 @@ translations = {
         'ru': "Завершено",
         'en': "Finished"
     },
-    'canceled': {
-        'ru': "Отменено",
-        'en': "Canceled"
+    'kicker_reject_order': {
+        'ru': "Извините, кикер {kicker_name} отклонил запрос на сессию.",
+        'en': "Sorry, the kicker {kicker_name} has not accepted the session."
     },
     'timeout_auto_refund': {
         'en': "Sorry, we haven't received your decision in 5 minutes. The funds will be automatically refunded to your wallet.",
-        'ru': "Извините, мы не получили ваше решение в течение 5 минут. Средства будут автоматически возвращены на ваш кошелек."
+        'ru': "Извините, мы не получили ваш ответ в течении 5 минут. Средства будут автоматически возвращены на ваш кошелек."
     },
     'refund_button': {
         'en': "Refund",
@@ -289,8 +293,8 @@ translations = {
         "ru": "Вы отклонили сессию. Сессия больше не действительна."
     },
     "kicker_not_accepted_title": {
-        "en": "Sorry, the kicker {kicker_name} has not accepted the session.",
-        "ru": "Извините, кикер {kicker_name} не принял сессию."
+        "en": "Sorry, the kicker {kicker_name} has not responded yet.",
+        "ru": "Извините, кикер {kicker_name} пока не ответил."
     },
     "refund_replace_prompt": {
         "en": "Would you like to replace the kicker?",
