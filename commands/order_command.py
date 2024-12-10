@@ -36,7 +36,7 @@ class OrderCommand(commands.Cog):
 
     @app_commands.command(
         name="order",
-        description="Use this command to post your service request and summon Kickers to take the order."
+        description="Customize your service request and summon corresponding Kickers to take your order."
     )
     @app_commands.autocomplete(choices=services_autocomplete)
     @app_commands.autocomplete(server=servers_autocomplete)

@@ -13,7 +13,6 @@ from commands.order_command import OrderCommand
 from commands.points_command import PointsCommand
 from commands.profile_command import ProfileCommand
 from commands.start_command import StartCommand
-from commands.subscribe_command import SubscribeCommand
 from commands.start_command import StartCommand
 from commands.test_command import TestCommand
 from commands.wallet_command import WalletCommand
@@ -91,7 +90,6 @@ async def on_ready():
     await bot.add_cog(ProfileCommand(bot))
     await bot.add_cog(StartCommand(bot))
     await bot.add_cog(BoostCommand(bot))
-    await bot.add_cog(SubscribeCommand(bot))
     await bot.add_cog(FindCommand(bot))
     await bot.add_cog(WalletCommand(bot))
     await _create_channels()

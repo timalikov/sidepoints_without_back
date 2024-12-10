@@ -43,4 +43,6 @@ class RejectButton(BaseButton):
                 self.view.already_pressed = True
             except AttributeError:
                 pass
-            await interaction.message.edit(embed=discord.Embed(description=translations['canceled'][self.lang]), view=None)
+            kicker_id = int(self.view.service["discord_id"])
+            kicker_name = bot.get_user(kicker_id)
+            await interaction.message.edit(embed=discord.Embed(description=translations['kicker_reject_order'][self.lang].format(kicker_name=kicker_name)), view=None)

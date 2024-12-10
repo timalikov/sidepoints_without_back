@@ -174,13 +174,13 @@ translations = {
         'ru': "Завершено",
         'en': "Finished"
     },
-    'canceled': {
-        'ru': "Отменено",
-        'en': "Canceled"
+    'kicker_reject_order': {
+        'ru': "Извините, кикер {kicker_name} отклонил запрос на сессию.",
+        'en': "Sorry, the kicker {kicker_name} has not accepted the session."
     },
     'timeout_auto_refund': {
         'en': "Sorry, we haven't received your decision in 5 minutes. The funds will be automatically refunded to your wallet.",
-        'ru': "Извините, мы не получили ваше решение в течение 5 минут. Средства будут автоматически возвращены на ваш кошелек."
+        'ru': "Извините, мы не получили ваш ответ в течении 5 минут. Средства будут автоматически возвращены на ваш кошелек."
     },
     'refund_button': {
         'en': "Refund",
@@ -293,8 +293,8 @@ translations = {
         "ru": "Вы отклонили сессию. Сессия больше не действительна."
     },
     "kicker_not_accepted_title": {
-        "en": "Sorry, the kicker {kicker_name} has not accepted the session.",
-        "ru": "Извините, кикер {kicker_name} не принял сессию."
+        "en": "Sorry, the kicker {kicker_name} has not responded yet.",
+        "ru": "Извините, кикер {kicker_name} пока не ответил."
     },
     "refund_replace_prompt": {
         "en": "Would you like to replace the kicker?",
@@ -401,12 +401,12 @@ translations = {
         "ru": "✅ Заказ подтвержден"
     },
     "service_purchased_title": {
-        "en": "Your service has been purchased:",
-        "ru": "Ваша услуга была куплена:"
+        "en": "Your service has been purchased: ",
+        "ru": "Ваша услуга была куплена: "
     },
     "service_details": {
-        "en": "Customer: <@!{customer_id}> + {customer_name}\nService: {service_name}\nPrice: {service_price}\nPlease Accept or Reject the session and DM the user directly.",
-        "ru": "Заказчик: <@!{customer_id}> + {customer_name}\nУслуга: {service_name}\nЦена: {service_price}\nПожалуйста, примите или отклоните сессию и напишите заказчику напрямую"
+        "en": "Customer: <@!{customer_id}> **{customer_name}**\nService: {service_name}\nPrice: {service_price}\nPlease Accept or Reject the session and DM the user directly.",
+        "ru": "Заказчик: <@!{customer_id}> {customer_name}\nУслуга: {service_name}\nЦена: {service_price}\nПожалуйста, примите или отклоните сессию и напишите заказчику напрямую"
     },
     "failed_to_send_message": {
         "en": "Failed to send message: {error}",
