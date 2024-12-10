@@ -4,7 +4,7 @@ import uuid
 import discord
 
 from bot_instance import get_bot
-from config import BOOST_CHANNEL_ID, GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME, MAIN_GUILD_ID, TEST_ACCOUNTS, WEB3_CHATTING_CHANNEL_NAME, YELLOW_LOGO_COLOR
+from config import BOOST_CHANNEL_ID, GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME, MAIN_GUILD_ID, TEST_ACCOUNTS, YELLOW_LOGO_COLOR
 from services.storage.bucket import ImageS3Bucket
 from translate import translations, get_lang_prefix
 
@@ -97,7 +97,7 @@ async def send_confirm_order_message(
     await send_to_channels(
         guild=guild,
         category_name=GUIDE_CATEGORY_NAME,
-        channels=[GUIDE_CHANNEL_NAME, WEB3_CHATTING_CHANNEL_NAME],
+        channels=[GUIDE_CHANNEL_NAME],
         embed=order_successful_message_embed
     )
 

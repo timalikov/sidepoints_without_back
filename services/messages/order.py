@@ -63,23 +63,42 @@ class OrderMessageManager:
         Without @everyone and buttons.
         """
         game_channel = await get_or_create_channel_by_category_and_name(
-            category_name=GUIDE_CATEGORY_NAME,
-            channel_name=GUIDE_CHANNEL_NAME,
+            category_name=ORDER_CATEGORY_NAME,
+            channel_name=ORDER_CHANNEL_NAME,
             guild=bot.get_guild(self.guild_id)
         )
         chatting_channel = await get_or_create_channel_by_category_and_name(
-            category_name=GUIDE_CATEGORY_NAME,
+            category_name=ORDER_CATEGORY_NAME,
             channel_name=WEB3_CHATTING_CHANNEL_NAME,
             guild=bot.get_guild(self.guild_id)
         )
         try:
             if self.services_db.app_choice == "ALL":
-                await game_channel.send(embed=self.public_channel_embed_message)
-                await chatting_channel.send(embed=self.public_channel_embed_message)
+                sent_message = await game_channel.send(
+                    content="@everyone",
+                    embed=self.channel_embed_message,
+                    view=self.view
+                )
+                sent_message2 = await chatting_channel.send(
+                    content="@everyone",
+                    embed=self.channel_embed_message,
+                    view=self.view
+                )
+                self.messages.append(sent_message, sent_message2)
             elif self.services_db.app_choice.lower() in CHATTING_CHANNELS:
-                await chatting_channel.send(embed=self.public_channel_embed_message)
+                sent_message = await chatting_channel.send(
+                    content="@everyone",
+                    embed=self.channel_embed_message,
+                    view=self.view
+                )
+                self.messages.append(sent_message)
             else:
-                await game_channel.send(embed=self.public_channel_embed_message)
+                sent_message = await game_channel.send(
+                    content="@everyone",
+                    embed=self.channel_embed_message,
+                    view=self.view
+                )
+                self.messages.append(sent_message)
         except discord.errors.Forbidden:
             await logger.error_discord(f"Cannot send message to channel: {game_channel.id}")
         except discord.DiscordException:
@@ -87,17 +106,14 @@ class OrderMessageManager:
 
     async def send_channel_message(self) -> None:
         channel = await get_or_create_channel_by_category_and_name(
-            category_name=ORDER_CATEGORY_NAME,
-            channel_name=ORDER_CHANNEL_NAME,
+            category_name=GUIDE_CATEGORY_NAME,
+            channel_name=GUIDE_CHANNEL_NAME,
             guild=bot.get_guild(self.guild_id)
         )
         try:
-            sent_message = await channel.send(
-                content="@everyone",
-                embed=self.channel_embed_message,
-                view=self.view
+            await channel.send(
+                embed=self.public_channel_embed_message,
             )
-            self.messages.append(sent_message)
         except discord.errors.Forbidden:
             await logger.error_discord(f"Cannot send message to channel: {channel.id}")
         except discord.DiscordException:

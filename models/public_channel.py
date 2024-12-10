@@ -14,7 +14,8 @@ from config import (
     LEADERBOARD_CATEGORY_NAME,
     LEADERBOARD_CHANNEL_NAME,
     GUIDE_CATEGORY_NAME,
-    GUIDE_CHANNEL_NAME
+    GUIDE_CHANNEL_NAME,
+    WEB3_CHATTING_CHANNEL_NAME
 )
 
 logger = CustomLogger
@@ -110,9 +111,10 @@ async def get_or_create_channel_by_category_and_name(
 
 async def create_all_required_channels(guild: discord.Guild) -> None:
     channels = [
-        (ORDER_CATEGORY_NAME, ORDER_CHANNEL_NAME),
-        (ANNOUNCEMENTS_CATEGORY_NAME, ANNOUNCEMENTS_CHANNEL_NAME),
         (GUIDE_CATEGORY_NAME, GUIDE_CHANNEL_NAME),
+        (ANNOUNCEMENTS_CATEGORY_NAME, ANNOUNCEMENTS_CHANNEL_NAME),
+        (ORDER_CATEGORY_NAME, ORDER_CHANNEL_NAME),
+        (ORDER_CATEGORY_NAME, WEB3_CHATTING_CHANNEL_NAME),
         (LEADERBOARD_CATEGORY_NAME, LEADERBOARD_CHANNEL_NAME),
     ]
     for category_name, channel_name in channels:
