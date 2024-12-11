@@ -39,7 +39,6 @@ class OrderView(BaseView):
         super().__init__(timeout=15 * 60, collector=collector)
         self.customer: discord.User = customer
         self.pressed_kickers: List[discord.User] = []
-        self.is_pressed = False
         self.services_db = services_db
         self.go_command = go_command
         self.created_at = datetime.now()
@@ -59,6 +58,7 @@ class OrderView(BaseView):
             extra_text=extra_text,
             view=self
         )
+        self.is_success_payment = False
         self.add_buttons()
 
     def add_buttons(self) -> None:
@@ -70,10 +70,10 @@ class OrderView(BaseView):
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
             if isinstance(child, OrderGoButton):
-                child.label = "Order cancelled"
+                child.label = "Order success" if self.is_success_payment else "Order cancelled"
         for message_instance in self.message_manager.messages:
             await message_instance.edit(view=self)
-        if stop_button_pressed:
+        if stop_button_pressed and not self.is_success_payment:
             stopped_message_embed = discord.Embed(
                 title=translations['order_terminated'][self.lang],
                 description=translations['you_requested_stop_summon'][self.lang],
@@ -81,7 +81,7 @@ class OrderView(BaseView):
             )
             await self.customer.send(embed=stopped_message_embed, view=None)
             return
-        if not self.is_pressed:
+        if not self.pressed_kickers and not self.is_success_payment:
             timeout_message_embed = discord.Embed(
                 title=translations['order_terminated'][self.lang],
                 description=translations['timeout_message'][self.lang],

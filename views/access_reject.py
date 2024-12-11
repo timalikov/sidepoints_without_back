@@ -65,12 +65,15 @@ class AccessRejectView(BaseView):
             await self.message.edit(view=None)
 
     async def on_timeout(self) -> None:
-        kicker_id = int(self.view.service["discord_id"])
-        kicker_name = bot.get_user(kicker_id)
         for child in self.children:
             if isinstance(child, discord.ui.Button):
                 child.disabled = True
         if not self.already_pressed:
+            try:
+                kicker_id = int(self.service["discord_id"])
+                kicker_name = bot.get_user(kicker_id)
+            except (TypeError, AttributeError):
+                kicker_name = self.service["discord_username"]
             await self.customer.send(
                 embed=discord.Embed(
                     description=translations['kicker_reject_order'][self.lang].format(kicker_name=kicker_name)

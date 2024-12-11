@@ -79,12 +79,14 @@ class OrderMessageManager:
                     embed=self.channel_embed_message,
                     view=self.view
                 )
-                sent_message2 = await chatting_channel.send(
+                self.messages.append(sent_message)
+                
+                sent_message = await chatting_channel.send(
                     content="@everyone",
                     embed=self.channel_embed_message,
                     view=self.view
                 )
-                self.messages.append(sent_message, sent_message2)
+                self.messages.append(sent_message)
             elif self.services_db.app_choice.lower() in CHATTING_CHANNELS:
                 sent_message = await chatting_channel.send(
                     content="@everyone",
