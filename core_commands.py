@@ -3,7 +3,6 @@ import discord.ext
 import discord.ext.commands
 from logging import getLogger
 
-from services.messages.base import send_confirm_order_message
 from services.storage.bucket import ImageS3Bucket
 from commands.boost_command import BoostCommand
 from commands.find_command import FindCommand
