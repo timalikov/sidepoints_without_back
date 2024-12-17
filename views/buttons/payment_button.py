@@ -6,7 +6,8 @@ from translate import translations
 from config import MAIN_GUILD_ID
 from bot_instance import get_bot
 from models.payment import send_payment, get_usdt_balance_by_discord_user
-from models.enums import PaymentStatusCodes
+from models.enums import PaymentStatusCodes, CouponType
+from models.kicker_service import build_service_price
 from services.messages.interaction import send_interaction_message
 from views.buttons.base_button import BaseButton
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
@@ -52,24 +53,34 @@ class PaymentButton(BaseButton):
         if not self.discord_server_id:
             self.discord_server_id = interaction.guild_id if interaction.guild_id else int(MAIN_GUILD_ID)
         user = self.customer if self.customer else interaction.user
+        service_price = build_service_price(self.view.service, self.view.coupon)
         payment_status_code, purchase_id = await send_payment(
             user=user,
             target_service=self.view.service,
-            discord_server_id=self.discord_server_id
+            discord_server_id=self.discord_server_id,
+            coupon=self.view.coupon
         )
         balance = await get_usdt_balance_by_discord_user(user)
-        try:
-            guild: discord.Guild = bot.get_guild(int(self.discord_server_id))
-        except ValueError:
-            guild: discord.Guild = None
+        coupon = getattr(self.view, "coupon", None)
         top_up_dropdown = TopUpDropdownMenu(lang=self.lang)
         top_up_dropdown_view = discord.ui.View(timeout=None)
         top_up_dropdown_view.add_item(top_up_dropdown)
         messages_kwargs = {
             PaymentStatusCodes.SUCCESS: {
                 "embed": discord.Embed(
-                    description=translations["success_payment"][self.lang].format(
-                        amount=self.view.service["service_price"], balance=balance
+                    description=(
+                        translations["success_payment"][self.lang].format(
+                            amount=service_price, balance=balance
+                        )
+                        if not coupon
+                        else translations["success_payment_with_coupon"][self.lang].format(
+                            amount=service_price,
+                            balance=balance,
+                            coupon_type=CouponType.by_string_name(coupon["type"]).value,
+                            original_price=self.view.service["service_price"],
+                            discount=float(self.view.service["service_price"]) - service_price,
+                            new_price=service_price
+                        )
                     ),
                     title="✅ Payment Success",
                     colour=discord.Colour.green()
@@ -102,8 +113,9 @@ class PaymentButton(BaseButton):
         if payment_status_code == PaymentStatusCodes.SUCCESS:
             custom_cache.set_purchase_id(purchase_id)
             order_view = self.view.collector.get_view(name="OrderView")
-            order_view.is_success_payment = True
-            await order_view.on_timeout()
+            if order_view:
+                order_view.is_success_payment = True
+                await order_view.on_timeout()
             from services.messages.base import send_confirm_order_message
             try:
                 kicker: discord.User = bot.get_user(int(self.view.service["discord_id"]))

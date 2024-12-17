@@ -25,10 +25,11 @@ class AccessRejectView(BaseView):
         service: dict,
         discord_server_id: int,
         purchase_id: int = None,
+        coupon: dict = None,
         lang: Literal["en", "ru"] = "en",
         collector: ViewCollector = None
     ) -> None:
-        super().__init__(timeout=60 * 5, collector=collector)
+        super().__init__(timeout=60 * 21, collector=collector)
         self.kicker = kicker
         self.customer = customer
         self.discord_server_id = discord_server_id
@@ -36,6 +37,7 @@ class AccessRejectView(BaseView):
         self.service = service
         self.service_name = service["tag"]
         self.already_pressed = False
+        self.coupon = coupon
         self.lang = lang
         self.add_buttons()
         self.refund_manager = RefundReplaceManager(
@@ -65,13 +67,10 @@ class AccessRejectView(BaseView):
             await self.message.edit(view=None)
 
     async def on_timeout(self) -> None:
-        for child in self.children:
-            if isinstance(child, discord.ui.Button):
-                child.disabled = True
+        await self.disable_all_buttons()
         if not self.already_pressed:
             try:
-                kicker_id = int(self.service["discord_id"])
-                kicker_name = bot.get_user(kicker_id)
+                kicker_name = self.kicker.name
             except (TypeError, AttributeError):
                 kicker_name = self.service["discord_username"]
             await self.customer.send(

@@ -34,7 +34,12 @@ class OrderAccessRejectDropdown(discord.ui.Select):
         index = int(self.values[0])
         service = self.services[index]
         self.view.service = service
-        embed = create_profile_embed(profile_data=service, lang=self.lang)
+        coupon = getattr(self.view, "coupon", None)
+        embed = create_profile_embed(
+            profile_data=service,
+            coupon=coupon,
+            lang=self.lang
+        )
         embed.set_footer(text="The following Kicker has responded to your order. Click Go if you want to proceed.")
         for option in self.options:
             option.default = (str(option.value) == str(index))

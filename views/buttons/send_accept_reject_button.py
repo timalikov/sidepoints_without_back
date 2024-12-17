@@ -11,6 +11,7 @@ from models.payment import (
     get_usdt_balance_by_discord_user
 )
 from models.enums import PaymentStatusCodes
+from models.kicker_service import build_service_price
 from views.buttons.base_button import BaseButton
 from views.access_reject import AccessRejectView
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
@@ -33,13 +34,14 @@ class SendAcceptRejectButton(BaseButton):
         )
         self.discord_server_id = discord_server_id
         self.lang = lang
-        self._view_variables = ["service"]
+        self._view_variables = ["service", "coupon"]
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
+        service_price = build_service_price(self.view.service, self.view.coupon)
         status = await check_user_wallet(
             user=interaction.user,
-            amount=int(self.view.service["service_price"])
+            amount=service_price
         )
         if status == PaymentStatusCodes.NOT_ENOUGH_MONEY:
             balance = await get_usdt_balance_by_discord_user(
@@ -83,11 +85,13 @@ class SendAcceptRejectButton(BaseButton):
                 embed=error_embed
             )
             return
+        coupon = getattr(self.view, "coupon", None)
         view = AccessRejectView(
             kicker=kicker,
             customer=interaction.user,
             service=self.view.service,
             discord_server_id=self.discord_server_id,
+            coupon=coupon,
             lang=self.lang,
             collector=self.view.collector
         )
@@ -102,12 +106,20 @@ class SendAcceptRejectButton(BaseButton):
                 service_price=service['service_price'] if service else 'Not found',
             )       
         )
-        message = await kicker.send(embed=kicker_embed, view=view)
-        view.message = message
+        view.message = await kicker.send(embed=kicker_embed, view=view)
+        if coupon:
+            message_embed_description = translations["order_sent_with_coupon"][self.lang].format(
+                kicker_name=kicker.name,
+                discount=float(self.view.service["service_price"]) - service_price,
+                original_price=self.view.service["service_price"],
+                new_price=service_price
+            )
+        else:
+            message_embed_description = translations["order_sent"][self.lang].format(kicker_name=kicker.name)
         message_embed = discord.Embed(
             colour=discord.Colour.dark_blue(),
             title=translations["order_in_process"][self.lang],
-            description=translations["order_sent"][self.lang].format(kicker_name=kicker.name)
+            description=message_embed_description
         )
         
         if interaction.guild:

@@ -28,6 +28,8 @@ from services.logger.client import CustomLogger
 from web3_interaction.balance_checker import get_usdt_balance
 from database.dto.psql_leaderboard import LeaderboardDatabase
 from database.dto.psql_services import Services_Database
+from views.buttons.create_wallet_button import CreateWalletButton
+from views.base_view import BaseView
 
 main_guild_id = MAIN_GUILD_ID
 bot = get_bot()
@@ -309,6 +311,27 @@ async def create_leaderboard():
             )
             embed.set_thumbnail(url=image_url)
             await channel.send(embed=embed)
+
+@tasks.loop(hours=12)
+async def send_message_for_get_coupon():
+    for guild in bot.guilds:
+        try:
+            lang = get_lang_prefix(guild.id)
+            lobby_channel = await get_or_create_channel_by_category_and_name(
+                category_name=GUIDE_CATEGORY_NAME,
+                channel_name=GUIDE_CHANNEL_NAME,
+                guild=guild
+            )
+            embed = discord.Embed(
+                title=translations["coupon_announcement_message_title"][lang],
+                description=translations["coupon_announcement_message"][lang],
+                color=discord.Color.green()
+            )
+            view = BaseView(timeout=12 * 60 * 60)
+            view.add_item(CreateWalletButton(lang=lang))
+            await lobby_channel.send(embed=embed, view=view)
+        except Exception as e:
+            logger.error("Coupon error: " + str(e))
 
 @bot.event
 async def on_member_join(member):

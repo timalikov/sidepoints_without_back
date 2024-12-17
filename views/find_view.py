@@ -10,6 +10,7 @@ from bot_instance import get_bot
 from views.buttons.boost_button import BoostButton
 from views.base_view import BaseView
 from views.buttons.chat_button import ChatButton
+from views.impls.coupon_interface import CouponInterface
 from database.dto.psql_services import Services_Database
 from views.buttons.send_accept_reject_button import SendAcceptRejectButton
 
@@ -19,7 +20,7 @@ load_dotenv()
 main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 
-class FindView(BaseView):
+class FindView(BaseView, CouponInterface):
     @classmethod
     async def create(
         cls,

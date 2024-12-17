@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 from decimal import Decimal
 import discord
 import requests
@@ -24,6 +24,7 @@ from services.common_http import handle_status_code
 from web3_interaction.balance_checker import get_usdt_balance
 from models.enums import PaymentStatusCodes
 from models.public_channel import get_or_create_channel_by_category_and_name
+from models.kicker_service import build_service_price
 
 logger = CustomLogger
 bot = get_bot()
@@ -136,8 +137,14 @@ def get_jwt_token(user: discord.User) -> str:
     return jwt_response.json().get("token")
 
 
-async def send_payment(user: discord.User, target_service: Dict, discord_server_id: int) -> PaymentStatusCodes:
-    status_check = await check_user_wallet_payment(user, target_service)
+async def send_payment(
+    user: discord.User,
+    target_service: Dict,
+    discord_server_id: int,
+    coupon: Optional[Dict] = None
+) -> PaymentStatusCodes:
+    service_price = build_service_price(target_service, coupon)
+    status_check = await check_user_wallet(user=user, amount=service_price)
     if status_check != PaymentStatusCodes.SUCCESS:
         logger.error(f"User id: {user.id} || Message: {status_check.name}")
         return status_check
@@ -148,17 +155,16 @@ async def send_payment(user: discord.User, target_service: Dict, discord_server_
         "serviceId": str(target_service["service_id"]),
         "useCustodial": True
     }
+    if coupon:
+        payment_json["couponId"] = coupon["id"]
     payment_response = requests.post(
         url=PAYMENT_LINK,
         headers=headers,
         json=payment_json
     )
-    if payment_response.status_code != 200:
-        await logger.http_error(
-            place="Payment", response=payment_response
-        )
+    success = await handle_status_code(payment_response)
+    if not success:
         return PaymentStatusCodes.SERVER_PROBLEM
-    logger.warning(payment_response.text)
     return PaymentStatusCodes.SUCCESS, payment_response.json().get("id")
 
 

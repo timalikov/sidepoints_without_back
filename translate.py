@@ -396,6 +396,10 @@ translations = {
         "en": "🔔 Your order has been sent to Kicker {kicker_name} for confirmation.\n📥  If there is no response within 5 minute, you will not be charged your balance and will be able to replace the Kicker.",
         "eu": "🔔 Ваш заказ отправлен кикеру {kicker_name} для подтверждения.\n📥  Если в течение 5 минут не будет ответа, ваш баланс не будет списан, и вы сможете заменить кикера."
     },
+    "order_sent_with_coupon": {
+        "en": "🔔 Your order has been sent to Kicker {kicker_name} for confirmation.\n🎁 You’ve applied a coupon with ${discount} discount, changing the service price from ${original_price} to ${new_price}\n📥  If there is no response within 5 minute, you will not be charged your balance and will be able to replace the Kicker.",
+        "eu": "🔔 Ваш заказ отправлен кикеру {kicker_name} для подтверждения.\n🎁 Вы применили купон, и скидка в размере ${discount} была применена, изменив стоимость услуги с ${original_price} на ${new_price}\n📥  Если в течение 5 минут не будет ответа, ваш баланс не будет списан, и вы сможете заменить кикера."
+    },
     "order_confirmed": {
         "en": "✅ Order Confirmed",
         "ru": "✅ Заказ подтвержден"
@@ -680,6 +684,10 @@ translations = {
         "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🔔Thank you for making the order!",
         "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🔔Спасибо за покупку!"
     },
+    "success_payment_with_coupon": {
+        "en": "💰Your balance: {balance} USD.\n⌛️Service price: {amount} USD/hr.\n🎁 You’ve applied a coupon ({coupon_type})\n⌛️ Original Service price: ${original_price} USD/hr\n🎉 Coupon value: ${discount} discount has been applied\n💸 Discounted price: ${new_price} USD/hr\n🔔Thank you for making the order!",
+        "ru": "💰Ваш баланс: {balance} USD.\n⌛️Цена услуги: {amount} USD/час.\n🎁 Вы применили купон ({coupon_type})\n⌛️ Изначальная стоимость услуги: ${original_price} USD/час\n🎉 Сумма скидки по купону: ${discount}\n💸 Цена со скидкой: ${new_price} USD/час\n🔔Спасибо за покупку!"
+    },
     "server_error_payment": {
         "en": "Oops, something went wrong. Please try again...",
         "ru": "Упс, что-то пошло не так. Попробуйте позже..."
@@ -844,5 +852,33 @@ translations = {
         "en": "Oops... Kicker id is broken!",
         "ru": "Упс... Идентификатор кикера повреждён!"
     },
+    "discount_100": {
+        "en": "Get a 100% discount on any service from your favorite kicker! What are you waiting for?!",
+        "ru": "Получите 100% скидку на любую услугу от вашего любимого Кикера! Чего вы ждете?!"
+    },
+    "fixed_price_offer": {
+        "en": "Any service, any kicker—now at a fixed price just for you! It’s time to order!",
+        "ru": "Любая услуга, любой Кикер — теперь по фиксированной цене только для вас! Время заказывать!"
+    },
+    "half_price_offer": {
+        "en": "We’ve broken the ice! Enjoy 50% off all our services!",
+        "ru": "Мы сломали лёд! Наслаждайтесь скидкой 50% на все наши услуги!",
+    },
+    "five_dollar_discount": {
+        "en": "Get $5 off any service! Don’t miss out on this special offer!",
+        "ru": "Получите скидку $5 на любую услугу! Не упустите эту уникальную возможность!"
+    },
+    "coupon_announcement_message_title": {
+        "en": "Coupons give away!",
+        "ru": "Розыгрыш купонов!"
+    },
+    "coupon_announcement_message": {
+        "en": "@everyone Congrats! You can now claim a $1 coupon to order any services in the Sidekick server at a $1 price. Click on the Claim button now!",
+        "ru": "@everyone Поздравляем! Теперь вы можете получить купон на $1, чтобы заказать любые услуги на сервере Sidekick всего за $1. Нажмите кнопку «Получить» прямо сейчас!"
+    },
+    "coupon_received_message": {
+        "en": "You have successfully received a coupon! It's time to purchase a service!",
+        "ru": "Вы успешно получили купон! Время заказать услугу!"
+    }
 }
 

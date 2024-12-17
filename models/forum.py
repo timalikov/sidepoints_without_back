@@ -44,7 +44,7 @@ async def create_base_forum(guild: discord.Guild) -> discord.ForumChannel:
     category = await get_or_create_category_by_name(guild=guild, category_name=FORUM_CATEGORY_NAME)
     services_db = Services_Database()
     tags = await services_db.get_all_active_tags()
-    values_list = list(tags) + ["Male", "Female"]
+    values_list = ["Male", "Female"] + list(tags) 
     available_tags = [ForumTag(name=tag) for tag in values_list]
     permissions = discord.PermissionOverwrite(
         create_instant_invite=True,
@@ -125,7 +125,8 @@ async def get_and_recreate_forum(guild: discord.Guild) -> discord.ForumChannel:
         await dto.delete_by_forum_id(forum_channel.id)
         services_db = Services_Database()
         tags = await services_db.get_all_active_tags()
-        values_list = list(tags) + ["Male", "Female"]
+        values_list = ["Male", "Female"] + list(tags)
+        await forum_channel.edit(available_tags=[])
         available_tags = [
             ForumTag(name=tag)
             for tag in values_list[:20]
