@@ -14,6 +14,7 @@ from views.buttons.next_button import NextButton
 from views.buttons.share_button import ShareButton
 from views.buttons.chat_button import ChatButton
 from views.buttons.send_accept_reject_button import SendAcceptRejectButton
+from views.impls.coupon_interface import CouponInterface
 from views.base_view import BaseView
 from database.dto.psql_services import Services_Database
 
@@ -24,7 +25,7 @@ load_dotenv()
 main_guild_id = int(os.getenv('MAIN_GUILD_ID'))
 
 
-class PlayView(BaseView):
+class PlayView(BaseView, CouponInterface):
     @classmethod
     async def create(
         cls,

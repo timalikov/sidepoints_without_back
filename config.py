@@ -25,6 +25,7 @@ SERVER_WALLET_URL = os.getenv('SERVER_WALLET_URL')
 CHECK_IN_URL = BACKEND_DOMAIN + "/api/wallets/check-in"
 CHECK_IN_AVAILABLE = BACKEND_DOMAIN + "/api/task-records/check-in-available"
 BOOST_URL = BACKEND_DOMAIN + "/api/boosts/custom"
+COUPON_URL = BACKEND_DOMAIN + "/api/coupons"
 FREE_TOP_UP_URL = os.getenv('FREE_TOP_UP_URL')
 FREE_TOP_UP_TOKEN = os.getenv('FREE_TOP_UP_TOKEN')
 

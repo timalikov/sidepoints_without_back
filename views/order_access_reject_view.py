@@ -5,6 +5,7 @@ from views.buttons.chat_button import ChatButton
 from views.buttons.boost_button import BoostButton
 from views.buttons.reject_button import RejectButton
 from views.buttons.send_accept_reject_button import SendAcceptRejectButton
+from views.impls.coupon_interface import CouponInterface
 from views.base_view import BaseView
 from services.view_collector import ViewCollector
 
@@ -13,7 +14,7 @@ from bot_instance import get_bot
 bot = get_bot()
 
 
-class OrderPlayView(BaseView):
+class OrderPlayView(BaseView, CouponInterface):
     
     def __init__(
         self,

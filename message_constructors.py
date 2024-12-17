@@ -7,12 +7,14 @@ from translate import translations
 from bot_instance import get_bot
 
 from services.utils import hide_half_string
+from models.kicker_service import build_service_price
 
 bot = get_bot()
 
 
 def create_profile_embed(
     profile_data: Dict,
+    coupon: Dict = None,
     lang: Literal["ru", "en"] = "en"
 ):
     category_name: Optional[str] = profile_data.get("service_category_name")
@@ -26,6 +28,7 @@ def create_profile_embed(
     description: str = profile_data['service_description']
     if len(description) >= 100:
         description = description[:95] + "..."
+    service_price = build_service_price(profile_data, coupon)
     embed = discord.Embed(
         title=profile_data['profile_username'],
         description=description
@@ -34,7 +37,7 @@ def create_profile_embed(
     
     embed.add_field(
         name=translations["price_field"][lang],
-        value=translations["price_value"][lang].format(price=profile_data['service_price']),
+        value=translations["price_value"][lang].format(price=service_price),
         inline=True
     )
     

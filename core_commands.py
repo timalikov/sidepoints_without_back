@@ -28,6 +28,7 @@ from background_tasks import (
     send_random_guide_message,
     check_success_top_up_balance,
     rename_kickers,
+    send_message_for_get_coupon
 )
 
 from config import (
@@ -99,6 +100,7 @@ async def on_ready():
     send_random_guide_message.start()
     check_success_top_up_balance.start()
     assign_roles_to_kickers.start()
+    send_message_for_get_coupon.start()
     await bot.tree.sync()
     
     print(f"We have logged in as {bot.user}. Is test: {'Yes' if TEST else 'No'}. Bot: {bot}")

@@ -4,10 +4,12 @@ import discord
 
 from database.dto.psql_services import Services_Database
 from message_constructors import create_profile_embed
+from models.coupons import get_coupons
 from services.messages.interaction import send_interaction_message
 from services.sqs_client import SQSClient
 from views.dropdown.boost_dropdown import BoostDropdownMenu
 from views.dropdown.access_reject_dropdown import OrderAccessRejectDropdown
+from views.dropdown.coupon_dropdown import CouponDropdownMenu
 from views.buttons.base_button import BaseButton
 from views.order_access_reject_view import OrderPlayView
 from translate import translations
@@ -60,6 +62,10 @@ class OrderGoButton(BaseButton):
         )
         view.add_item(order_dropdown)
         view.add_item(boost_dropdown)
+        coupons = await get_coupons(user=self.view.customer)
+        if coupons:
+            coupon_dropdown = CouponDropdownMenu(coupons=coupons, lang=self.lang)
+            view.add_item(coupon_dropdown)
         view.message = await self.view.customer.send(embed=embed, view=view)
 
         service_category = self.view.services_db.app_choice if self.view.services_db.app_choice == "ALL" else self.view.services_db.app_choice

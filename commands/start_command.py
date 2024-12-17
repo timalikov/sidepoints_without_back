@@ -7,7 +7,9 @@ from database.dto.psql_services import Services_Database
 from translate import get_lang_prefix, translations
 from services.messages.interaction import send_interaction_message
 from views.play_view import PlayView
+from views.dropdown.coupon_dropdown import CouponDropdownMenu
 from services.utils import save_user_id
+from models.coupons import get_coupons
 
 bot = get_bot()
 
@@ -37,6 +39,10 @@ class StartCommand(commands.Cog):
             )
             return
         view = await PlayView.create(user_choice="ALL", lang=lang, guild_id=guild_id)
+        coupons = await get_coupons(interaction.user)
+        if coupons:
+            coupon_dropdown = CouponDropdownMenu(coupons=coupons, lang=lang)
+            view.add_item(coupon_dropdown)
         if view.no_user:
             await interaction.followup.send(
                 content=translations["no_players"][lang],

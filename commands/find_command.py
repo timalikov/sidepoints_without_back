@@ -4,12 +4,15 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-from database.dto.psql_services import Services_Database
 from bot_instance import get_bot
-from services.messages.interaction import send_interaction_message
 from translate import get_lang_prefix, translations
-from views.find_view import FindView
+
+from database.dto.psql_services import Services_Database
+from models.coupons import get_coupons
 from services.utils import save_user_id
+from services.messages.interaction import send_interaction_message
+from views.dropdown.coupon_dropdown import CouponDropdownMenu
+from views.find_view import FindView
 
 bot = get_bot()
 
@@ -38,6 +41,10 @@ class FindCommand(commands.Cog):
             view = await FindView.create(user_id=user_id, guild_id=guild_id, lang=lang)
         else:
             view = await FindView.create(username=username, guild_id=guild_id, lang=lang)
+        coupons: dict = await get_coupons(interaction.user)
+        if coupons:
+            coupon_dropdown = CouponDropdownMenu(coupons=coupons, lang=lang)
+            view.add_item(coupon_dropdown)
         if view.no_user:
             await interaction.followup.send(
                 content=translations["no_players"][lang],

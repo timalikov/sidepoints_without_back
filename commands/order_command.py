@@ -21,8 +21,6 @@ from views.order_dm_view import OrderDMView
 from views.order_view import OrderView
 from models.payment import (
     get_server_wallet_by_discord_id,
-    is_wallet_exist_by_discord_id,
-    top_up_free_ten_usdt,
 )
 
 from web3_interaction.balance_checker import get_usdt_balance
@@ -89,13 +87,6 @@ class OrderCommand(commands.Cog):
             guild_id=guild_id,
             extra_text=text
         )
-
-        exists_wallet = await is_wallet_exist_by_discord_id(interaction_user_id)
-        if not exists_wallet:
-            await top_up_free_ten_usdt(
-                user=interaction_user,
-                amount=10
-            )
         wallet: str = await get_server_wallet_by_discord_id(user_id=interaction_user_id)
         balance = get_usdt_balance(wallet) if wallet else 0
         # TODO: Replace in OrderMessageManager
