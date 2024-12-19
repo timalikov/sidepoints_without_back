@@ -42,11 +42,12 @@ async def server_user_counts():
 async def send_notification():
     data = request.json
     try:
-        user_id: int = int(data["discordId"]) if data.get("type") == "message" else data["kickerDiscordId"]
+        is_review_message: bool = data.get("type") == "message"
+        user_id: int = int(data["discordId"]) if is_review_message else data["kickerDiscordId"]
         message: str = data["message"]
     except KeyError as e:
         return jsonify({"message": f"Missing key: {e}"}), 400
-    future = asyncio.run_coroutine_threadsafe(send_discord_notification(user_id=user_id, message=message), bot.loop)
+    future = asyncio.run_coroutine_threadsafe(send_discord_notification(user_id=user_id, message=message, is_review_message=is_review_message), bot.loop)
     is_user_found = future.result()
     if not is_user_found:
         return jsonify({"message": "User not found"}), 404

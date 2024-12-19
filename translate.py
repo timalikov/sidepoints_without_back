@@ -879,6 +879,18 @@ translations = {
     "coupon_received_message": {
         "en": "You have successfully received a coupon! It's time to purchase a service!",
         "ru": "Вы успешно получили купон! Время заказать услугу!"
-    }
+    },
+    "you_are_not_member": {
+        "en": "You are not a member of the server Sidekick. Please join the server to get a review: https://discord.gg/sidekick",
+        "ru": "Вы не являетесь участником сервера Sidekick. Присоединитесь к серверу, чтобы получить обзор: https://discord.gg/sidekick"
+    },
+    "private_review_channel_created": {
+        "en": "Your private review channel has been created: {invite_url}\nPlease make appointment via this link: https://calendly.com/evelyn-sidekick/new-meeting",
+        "ru": "Ваш приватный канал для обзора был создан: {invite_url}\nПожалуйста, назначьте встречу по этой ссылке: https://calendly.com/evelyn-sidekick/new-meeting"
+    },
+    "private_review_channel_tag": {
+        "en": "{role_mention} here is the new candidate for review {user}\nPlease make appointment via this link: https://calendly.com/evelyn-sidekick/new-meeting",
+        "ru": "{role_mention} вот новый кандидат на обзор {user}\nПожалуйста, назначьте встречу по этой ссылке: https://calendly.com/evelyn-sidekick/new-meeting"
+    },
 }
 

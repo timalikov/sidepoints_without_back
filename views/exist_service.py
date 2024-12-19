@@ -7,7 +7,6 @@ import discord
 from translate import translations
 from bot_instance import get_bot
 
-from database.dto.sql_profile import log_to_database
 from database.dto.psql_services import Services_Database
 from services.view_collector import ViewCollector
 from services.messages.interaction import send_interaction_message
