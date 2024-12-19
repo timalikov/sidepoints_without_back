@@ -225,21 +225,3 @@ class Profile_Database:
 
         return ordered_user_ids
 
-
-
-# Function to log interactions to the database asynchronously
-async def log_to_database(user_id, command_type):
-    await logger.error_discord("The user id to be recorded: ", user_id)
-    conn = await aiomysql.connect(
-            host=os.getenv('HOST').strip(),
-            user=os.getenv('USER_AWS').strip(),
-            password=os.getenv('PASSWORD').strip(),
-            db=os.getenv('DATABASE').strip(),
-            autocommit=True
-    )
-    async with conn.cursor() as cursor:
-        query = "INSERT INTO commands (datetime, user_id, command_type) VALUES (%s, %s, %s)"
-        data = (datetime.now(), user_id, command_type)
-        await cursor.execute(query, data)
-        await conn.commit()
-    conn.close()
