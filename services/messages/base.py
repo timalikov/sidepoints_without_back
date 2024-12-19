@@ -14,7 +14,7 @@ from views.check_reaction import CheckReactionView
 from views.order_view import OrderView
 from database.dto.psql_services import Services_Database
 from models.enums import StatusCodes
-from models.private_channel import create_private_discord_channel, send_connect_message_between_kicker_and_customer
+from models.private_channel import create_private_channel_for_user_and_role, create_private_discord_channel, send_connect_message_between_kicker_and_customer
 from models.public_channel import find_channel_by_category_and_name, get_or_create_channel_by_category_and_name
 
 bot = get_bot()
@@ -49,13 +49,46 @@ async def send_boost_message(*, image_url: str, message: str) -> StatusCodes:
         return StatusCodes.BAD, "Bot do not have right to send message!"
     return StatusCodes.SUCCESS, "ok"
 
-async def send_discord_notification(*, user_id: int, message: str) -> bool:
+
+async def send_discord_notification(*, user_id: int, message: str, is_review_message: bool) -> bool:
+    """
+    Sends a Discord notification to a user and optionally creates a private review channel.
+    """
     try:
-        user: discord.User = await bot.fetch_user(int(user_id))
-        _: discord.Message = await user.send(message)
-    except (ValueError, discord.NotFound, discord.errors.Forbidden):
+        user: discord.User = await bot.fetch_user(user_id)
+        await user.send(message)
+        
+        if is_review_message:
+            is_channel_created = await handle_create_private_channel_for_user_and_role(user=user)
+    except (ValueError, discord.NotFound, discord.Forbidden):
         return False
+    
     return True
+
+
+async def handle_create_private_channel_for_user_and_role(*, user: discord.User) -> bool:
+    guild = bot.get_guild(MAIN_GUILD_ID)
+    lang = get_lang_prefix(MAIN_GUILD_ID)
+    if not guild:
+        return False
+    
+    member = guild.get_member(user.id)
+    if not member:
+        user.send(translations["you_are_not_member"][lang])
+        return False
+
+    success, channel = await create_private_channel_for_user_and_role(
+        guild=guild,
+        user=user,
+        role_name="reviewer",
+        category_name="review_channels"
+    )
+
+    if success and channel:
+        invite = await channel.create_invite(max_uses=1, unique=True)
+        await user.send(translations["private_review_channel_created"][lang].format(invite_url=invite.url))
+    
+    return success
 
 async def send_confirm_order_message(
     *,

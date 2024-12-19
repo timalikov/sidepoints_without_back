@@ -879,6 +879,14 @@ translations = {
     "coupon_received_message": {
         "en": "You have successfully received a coupon! It's time to purchase a service!",
         "ru": "Вы успешно получили купон! Время заказать услугу!"
+    },
+    "you_are_not_member": {
+        "en": "You are not a member of the server Sidekick. Please join the server to get a review: https://discord.gg/sidekick",
+        "ru": "Вы не являетесь участником сервера Sidekick. Присоединитесь к серверу, чтобы получить обзор: https://discord.gg/sidekick"
+    },
+    "private_review_channel_created": {
+        "en": "Your private review channel has been created: {invite_url}",
+        "ru": "Ваш приватный канал для обзора был создан: {invite_url}"
     }
 }
 
