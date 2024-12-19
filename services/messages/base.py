@@ -80,13 +80,15 @@ async def handle_create_private_channel_for_user_and_role(*, user: discord.User)
     success, channel = await create_private_channel_for_user_and_role(
         guild=guild,
         user=user,
-        role_name="reviewer",
+        role_name="Reviewer",
         category_name="review_channels"
     )
 
     if success and channel:
+        role: discord.Role = discord.utils.get(guild.roles, name="Reviewer")
         invite = await channel.create_invite(max_uses=1, unique=True)
         await user.send(translations["private_review_channel_created"][lang].format(invite_url=invite.url))
+        await channel.send(translations["private_review_channel_tag"][lang].format(role_mention=role.mention, user=user.mention))
     
     return success
 

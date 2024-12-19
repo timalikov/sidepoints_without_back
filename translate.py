@@ -887,6 +887,10 @@ translations = {
     "private_review_channel_created": {
         "en": "Your private review channel has been created: {invite_url}",
         "ru": "Ваш приватный канал для обзора был создан: {invite_url}"
-    }
+    },
+    "private_review_channel_tag": {
+        "en": "{role_mention} here is the new candidate for review {user}",
+        "ru": "{role_mention} вот новый кандидат на обзор {user}"
+    },
 }
 
