@@ -6,7 +6,7 @@ from translate import translations
 from config import MAIN_GUILD_ID
 from bot_instance import get_bot
 from models.payment import send_payment, get_usdt_balance_by_discord_user
-from models.enums import PaymentStatusCodes, CouponType
+from models.enums import PaymentStatusCode, CouponType
 from models.kicker_service import build_service_price
 from services.messages.interaction import send_interaction_message
 from views.buttons.base_button import BaseButton
@@ -66,7 +66,7 @@ class PaymentButton(BaseButton):
         top_up_dropdown_view = discord.ui.View(timeout=None)
         top_up_dropdown_view.add_item(top_up_dropdown)
         messages_kwargs = {
-            PaymentStatusCodes.SUCCESS: {
+            PaymentStatusCode.SUCCESS: {
                 "embed": discord.Embed(
                     description=(
                         translations["success_payment"][self.lang].format(
@@ -76,7 +76,7 @@ class PaymentButton(BaseButton):
                         else translations["success_payment_with_coupon"][self.lang].format(
                             amount=service_price,
                             balance=balance,
-                            coupon_type=CouponType.by_string_name(coupon["type"]).value,
+                            coupon_type=CouponType.get_value(coupon),
                             original_price=self.view.service["service_price"],
                             discount=float(self.view.service["service_price"]) - service_price,
                             new_price=service_price
@@ -86,7 +86,7 @@ class PaymentButton(BaseButton):
                     colour=discord.Colour.green()
                 )
             },
-            PaymentStatusCodes.NOT_ENOUGH_MONEY: {
+            PaymentStatusCode.NOT_ENOUGH_MONEY: {
                 "embed": discord.Embed(
                     description=translations["not_enough_money_payment"][self.lang],
                     title="🔴 Not enough balance",
@@ -94,7 +94,7 @@ class PaymentButton(BaseButton):
                 ),
                 "view": top_up_dropdown_view
             },
-            PaymentStatusCodes.SERVER_PROBLEM: {
+            PaymentStatusCode.SERVER_PROBLEM: {
                 "embed": discord.Embed(
                     description=translations["server_error_payment"][self.lang],
                     colour=discord.Colour.red()
@@ -110,7 +110,7 @@ class PaymentButton(BaseButton):
                 **message_kwargs
             )
 
-        if payment_status_code == PaymentStatusCodes.SUCCESS:
+        if payment_status_code == PaymentStatusCode.SUCCESS:
             custom_cache.set_purchase_id(purchase_id)
             order_view = self.view.collector.get_view(name="OrderView")
             if order_view:

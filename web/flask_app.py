@@ -17,7 +17,7 @@ from services.messages.base import (
 )
 from models.private_channel import create_private_discord_channel
 from bot_instance import get_bot
-from models.enums import Genders, Languages
+from models.enums import Gender, Languages
 import discord
 from services.cache.client import custom_cache
 
@@ -72,7 +72,7 @@ def new_order_choice():
     description: str = data.get("description")
 
     language = language if language else Languages.UNIMPORTANT.value
-    gender: str = Genders[gender].value if gender in Genders.__members__ else Genders.UNIMPORTANT.value
+    gender: str = Gender[gender].value if gender in Gender.__members__ else Gender.UNIMPORTANT.value
 
     future = asyncio.run_coroutine_threadsafe(
         send_order_message(order_id=order_id, tag_name=tag_name, language=language, gender=gender, extra_text=description), 

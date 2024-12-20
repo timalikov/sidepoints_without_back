@@ -6,7 +6,7 @@ from config import MAIN_GUILD_ID
 from models.payment import send_payment
 from database.dto.psql_services import Services_Database
 from services.messages.interaction import send_interaction_message
-from models.enums import PaymentStatusCodes
+from models.enums import PaymentStatusCode
 from translate import translations,get_lang_prefix
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from views.buttons.payment_button import get_usdt_balance_by_discord_user
@@ -30,7 +30,7 @@ class TestPaymentCommand(commands.Cog):
         top_up_dropdown_view = discord.ui.View(timeout=None)
         top_up_dropdown_view.add_item(top_up_dropdown)
         messages_kwargs = {
-            PaymentStatusCodes.SUCCESS: {
+            PaymentStatusCode.SUCCESS: {
                 "embed": discord.Embed(
                     description=translations["success_payment"][lang].format(
                         amount=service["service_price"], balance=balance
@@ -39,7 +39,7 @@ class TestPaymentCommand(commands.Cog):
                     colour=discord.Colour.green()
                 )
             },
-            PaymentStatusCodes.NOT_ENOUGH_MONEY: {
+            PaymentStatusCode.NOT_ENOUGH_MONEY: {
                 "embed": discord.Embed(
                     description=translations["not_enough_money_payment"][lang],
                     title="🔴 Not enough balance",
@@ -47,7 +47,7 @@ class TestPaymentCommand(commands.Cog):
                 ),
                 "view": top_up_dropdown_view
             },
-            PaymentStatusCodes.SERVER_PROBLEM: {
+            PaymentStatusCode.SERVER_PROBLEM: {
                 "embed": discord.Embed(
                     description=translations["server_error_payment"][lang],
                     colour=discord.Colour.red()

@@ -3,7 +3,7 @@ from typing import List
 from discord import app_commands
 import discord
 
-from models.enums import Genders, Languages
+from models.enums import Gender, Languages
 from database.dto.psql_services import Services_Database
 
 
@@ -52,9 +52,9 @@ async def servers_autocomplete(
     ]
 
 gender_options = [
-    app_commands.Choice(name="Unimportant", value=Genders.UNIMPORTANT.value),
-    app_commands.Choice(name="Female", value=Genders.FEMALE.value),
-    app_commands.Choice(name="Male", value=Genders.MALE.value),
+    app_commands.Choice(name="Unimportant", value=Gender.UNIMPORTANT.value),
+    app_commands.Choice(name="Female", value=Gender.FEMALE.value),
+    app_commands.Choice(name="Male", value=Gender.MALE.value),
 ]
 
 language_options = [

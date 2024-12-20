@@ -1,3 +1,6 @@
+from typing import List
+
+import asyncio
 import discord
 import discord.ext
 import discord.ext.commands
@@ -18,6 +21,7 @@ from commands.test_command import TestCommand
 from commands.wallet_command import WalletCommand
 from commands.forum_command import ForumCommand
 from commands.test_payment_command import TestPaymentCommand
+from commands.coupon_command import CouponCommand
 
 from bot_instance import get_bot
 from background_tasks import (
@@ -79,20 +83,24 @@ async def _create_channels() -> None:
 @bot.event
 async def on_ready():
     delete_old_channels.start()
-    await bot.add_cog(InviteTracker(bot))
+    test_commands: List[discord.ext.commands.Cog] = [TestCommand, TestPaymentCommand]
+    production_commands: List[discord.ext.commands.Cog] = [
+        InviteTracker,
+        ForumCommand,
+        GoCommand,
+        LeaderboardCommand,
+        OrderCommand,
+        PointsCommand,
+        ProfileCommand,
+        StartCommand,
+        BoostCommand,
+        FindCommand,
+        WalletCommand,
+        CouponCommand
+    ]
     if TEST:
-        await bot.add_cog(TestCommand(bot))
-        await bot.add_cog(TestPaymentCommand(bot))
-    await bot.add_cog(ForumCommand(bot))
-    await bot.add_cog(GoCommand(bot))
-    await bot.add_cog(LeaderboardCommand(bot))
-    await bot.add_cog(OrderCommand(bot))
-    await bot.add_cog(PointsCommand(bot))
-    await bot.add_cog(ProfileCommand(bot))
-    await bot.add_cog(StartCommand(bot))
-    await bot.add_cog(BoostCommand(bot))
-    await bot.add_cog(FindCommand(bot))
-    await bot.add_cog(WalletCommand(bot))
+        await asyncio.gather(*(bot.add_cog(cog(bot)) for cog in test_commands))
+    await asyncio.gather(*(bot.add_cog(cog(bot)) for cog in production_commands))
     await _create_channels()
     rename_kickers.start()
     post_user_profiles.start()

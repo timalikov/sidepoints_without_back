@@ -4,11 +4,11 @@ import random
 from config import TASK_DESCRIPTIONS, MAIN_GUILD_ID
 from bot_instance import get_bot
 
-from button_constructors import ButtonAcceptView
 from database.dto.sql_order import Order_Database
 from database.dto.sql_subscriber import Subscribers_Database
 from services.utils import get_guild_invite_link
 from services.logger.client import CustomLogger
+from views.button_accept_view import ButtonAcceptView
 
 logger = CustomLogger
 bot = get_bot()

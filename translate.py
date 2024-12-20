@@ -860,9 +860,9 @@ translations = {
         "en": "Any service, any kicker—now at a fixed price just for you! It’s time to order!",
         "ru": "Любая услуга, любой Кикер — теперь по фиксированной цене только для вас! Время заказывать!"
     },
-    "half_price_offer": {
-        "en": "We’ve broken the ice! Enjoy 50% off all our services!",
-        "ru": "Мы сломали лёд! Наслаждайтесь скидкой 50% на все наши услуги!",
+    "discount_percentage_coupon": {
+        "en": "We’ve broken the ice! Enjoy {percent}% off all our services!",
+        "ru": "Мы сломали лёд! Наслаждайтесь скидкой {percent}% на все наши услуги!",
     },
     "five_dollar_discount": {
         "en": "Get $5 off any service! Don’t miss out on this special offer!",
@@ -879,6 +879,18 @@ translations = {
     "coupon_received_message": {
         "en": "You have successfully received a coupon! It's time to purchase a service!",
         "ru": "Вы успешно получили купон! Время заказать услугу!"
+    },
+    "coupon_success_message": {
+        "en": "Congratulations! You have successfully received a coupon! It's time to purchase a service!",
+        "ru": "Поздравляем! Вы успешно получили купон! Время заказать услугу!"
+    },
+    "coupon_already_exists_message": {
+        "en": "You already have this kind of coupon. Make a purchase and come back!",
+        "ru": "У вас уже есть такой купон. Совершите покупку и возвращайтесь!"
+    },
+    "invalid_coupon_message": {
+        "en": "Ohh sorry, this coupon is invalid. Double check and please try again.",
+        "ru": "Ой, извините, этот купон недействителен. Проверьте ещё раз и попробуйте снова."
     }
 }
 

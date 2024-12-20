@@ -3,12 +3,12 @@ from decimal import Decimal
 
 import discord
 
-from button_constructors import StopDispatchingButton
 from config import YELLOW_LOGO_COLOR
 from translate import translations
 
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from views.base_view import BaseView
+from views.buttons.stop_dispatching_button import StopDispatchingButton
 from services.view_collector import ViewCollector
 
 class OrderDMView(BaseView):

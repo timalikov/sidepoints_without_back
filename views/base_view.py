@@ -1,7 +1,9 @@
 import inspect
+from typing import Any
+from typing_extensions import Self
 
 import discord
-from discord.ui import View
+from discord.ui import View, Item
 
 from services.view_collector import ViewCollector
 
@@ -32,3 +34,11 @@ class BaseView(View):
         caller_instance: discord.ui.View = stack[1].frame.f_locals.get('self', None)
         view_collector.add_view(caller_instance)
         return view_collector
+    
+    def add_item(self, item: Item[Any]) -> Self:
+        try:
+            item.view = self
+        except:
+            raise
+        finally:
+            return super().add_item(item)
