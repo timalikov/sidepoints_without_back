@@ -891,7 +891,7 @@ translations = {
     "invalid_coupon_message": {
         "en": "Ohh sorry, this coupon is invalid. Double check and please try again.",
         "ru": "Ой, извините, этот купон недействителен. Проверьте ещё раз и попробуйте снова."
-    }
+    },
     "you_are_not_member": {
         "en": "You are not a member of the server Sidekick. Please join the server to get a review: https://discord.gg/sidekick",
         "ru": "Вы не являетесь участником сервера Sidekick. Присоединитесь к серверу, чтобы получить обзор: https://discord.gg/sidekick"
