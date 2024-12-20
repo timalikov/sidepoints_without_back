@@ -1,7 +1,10 @@
 from datetime import datetime
-from button_constructors import InformKickerButton
 import discord
+
 from config import CUSTOMER_SUPPORT_TEAM_IDS, TEAM_CHANNEL_ID
+
+from views.buttons.inform_kicker_button import InformKickerButton
+
 
 async def send_message_to_customer_support(bot: discord.Client, message: str) -> None:
     for customer_support_id in CUSTOMER_SUPPORT_TEAM_IDS:

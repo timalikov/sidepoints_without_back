@@ -10,7 +10,7 @@ from models.payment import (
     check_user_wallet,
     get_usdt_balance_by_discord_user
 )
-from models.enums import PaymentStatusCodes
+from models.enums import PaymentStatusCode
 from models.kicker_service import build_service_price
 from views.buttons.base_button import BaseButton
 from views.access_reject import AccessRejectView
@@ -43,7 +43,7 @@ class SendAcceptRejectButton(BaseButton):
             user=interaction.user,
             amount=service_price
         )
-        if status == PaymentStatusCodes.NOT_ENOUGH_MONEY:
+        if status == PaymentStatusCode.NOT_ENOUGH_MONEY:
             balance = await get_usdt_balance_by_discord_user(
                 user=interaction.user
             )

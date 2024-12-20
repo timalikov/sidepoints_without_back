@@ -5,7 +5,7 @@ from database.core_kicker_list import managers
 
 from serializers.profile_serializer import serialize_profile_data
 from database.dto.base import BasePsqlDTO
-from models.enums import Genders, Languages
+from models.enums import Gender, Languages
 from services.logger.client import CustomLogger
 
 logger = CustomLogger
@@ -30,7 +30,7 @@ class Services_Database(BasePsqlDTO):
     def __init__(
         self,
         app_choice: str = "ALL",
-        sex_choice: Genders = Genders.UNIMPORTANT.value,
+        sex_choice: Gender = Gender.UNIMPORTANT.value,
         language_choice: Languages = Languages.UNIMPORTANT.value,
         server_choice: str = None,
         user_name: str = None,

@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 from decimal import Decimal
 import discord
 import requests
@@ -22,7 +22,7 @@ from bot_instance import get_bot
 from services.logger.client import CustomLogger
 from services.common_http import handle_status_code
 from web3_interaction.balance_checker import get_usdt_balance
-from models.enums import PaymentStatusCodes
+from models.enums import PaymentStatusCode
 from models.public_channel import get_or_create_channel_by_category_and_name
 from models.kicker_service import build_service_price
 
@@ -48,7 +48,7 @@ async def top_up_free_ten_usdt(user: discord.User, amount: int) -> None:
     response: requests.Response = await create_wallet(user.id)
     success = await handle_status_code(response)
     if not success:
-        return PaymentStatusCodes.SERVER_PROBLEM
+        return PaymentStatusCode.SERVER_PROBLEM
     response_data = response.json()
     sender_address: str = response_data["address"]
     response = requests.post(
@@ -108,16 +108,16 @@ async def get_usdt_balance_by_discord_user(user: discord.User) -> float:
     return user_balance
 
 
-async def check_user_wallet(user: discord.User, amount: float) -> PaymentStatusCodes:
+async def check_user_wallet(user: discord.User, amount: float) -> PaymentStatusCode:
     user_balance: Decimal = await get_usdt_balance_by_discord_user(user)
     if isinstance(user_balance, str):
-        return PaymentStatusCodes.OPBNB_PROBLEM
+        return PaymentStatusCode.OPBNB_PROBLEM
     if user_balance < amount:
-        return PaymentStatusCodes.NOT_ENOUGH_MONEY
-    return PaymentStatusCodes.SUCCESS
+        return PaymentStatusCode.NOT_ENOUGH_MONEY
+    return PaymentStatusCode.SUCCESS
 
 
-async def check_user_wallet_payment(user: discord.User, target_service: Dict) -> PaymentStatusCodes:
+async def check_user_wallet_payment(user: discord.User, target_service: Dict) -> PaymentStatusCode:
     return await check_user_wallet(user=user, amount=target_service["service_price"])
 
 
@@ -142,12 +142,12 @@ async def send_payment(
     target_service: Dict,
     discord_server_id: int,
     coupon: Optional[Dict] = None
-) -> PaymentStatusCodes:
+) -> Tuple[PaymentStatusCode, Optional[int]]:
     service_price = build_service_price(target_service, coupon)
     status_check = await check_user_wallet(user=user, amount=service_price)
-    if status_check != PaymentStatusCodes.SUCCESS:
+    if status_check != PaymentStatusCode.SUCCESS:
         logger.error(f"User id: {user.id} || Message: {status_check.name}")
-        return status_check
+        return status_check, None
     token: str = get_jwt_token(user)
     headers: Dict = {"Authorization": f"Bearer {token}"}
     payment_json = {
@@ -164,13 +164,13 @@ async def send_payment(
     )
     success = await handle_status_code(payment_response)
     if not success:
-        return PaymentStatusCodes.SERVER_PROBLEM
-    return PaymentStatusCodes.SUCCESS, payment_response.json().get("id")
+        return PaymentStatusCode.SERVER_PROBLEM, None
+    return PaymentStatusCode.SUCCESS, payment_response.json().get("id")
 
 
-async def send_boost(user: discord.User, target_service: Dict, amount: int) -> PaymentStatusCodes:
+async def send_boost(user: discord.User, target_service: Dict, amount: int) -> PaymentStatusCode:
     status_check = await check_user_wallet(user, amount)
-    if status_check != PaymentStatusCodes.SUCCESS:
+    if status_check != PaymentStatusCode.SUCCESS:
         logger.error(f"User id: {user.id} || Message: {status_check.name}")
         return status_check
     token: str = get_jwt_token(user)
@@ -185,5 +185,5 @@ async def send_boost(user: discord.User, target_service: Dict, amount: int) -> P
     )
     success = await handle_status_code(response)
     if success:
-        return PaymentStatusCodes.SUCCESS
-    return PaymentStatusCodes.SERVER_PROBLEM
+        return PaymentStatusCode.SUCCESS
+    return PaymentStatusCode.SERVER_PROBLEM

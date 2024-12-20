@@ -1,12 +1,12 @@
 import asyncio
 import random
-from button_constructors import StopButton
 from config import MESSAGES
 import discord
 from discord.ext import tasks
 from database.dto.psql_services import Services_Database
 
 from services.logger.client import CustomLogger
+from views.buttons.stop_button import StopButton
 
 logger = CustomLogger
 

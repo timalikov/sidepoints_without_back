@@ -13,7 +13,7 @@ from bot_instance import get_bot
 from services.messages.interaction import send_interaction_message
 from views.dropdown.top_up_dropdown import TopUpDropdownMenu
 from models.public_channel import get_or_create_channel_by_category_and_name
-from models.enums import PaymentStatusCodes
+from models.enums import PaymentStatusCode
 from models.payment import send_boost
 
 bot = get_bot()
@@ -79,7 +79,7 @@ class BoostDropdownMenu(discord.ui.Select):
         guild: discord.Guild,
         lang: Literal["ru", "en"] = "en"
     ) -> Dict:
-        payment_status_code: PaymentStatusCodes = await send_boost(
+        payment_status_code: PaymentStatusCode = await send_boost(
             user=user,
             target_service=target_service,
             amount=amount
@@ -93,7 +93,7 @@ class BoostDropdownMenu(discord.ui.Select):
         top_up_dropdown_view = discord.ui.View(timeout=None)
         top_up_dropdown_view.add_item(top_up_dropdown)
         messages_kwargs = {
-            PaymentStatusCodes.SUCCESS: {
+            PaymentStatusCode.SUCCESS: {
                 "embed": discord.Embed(
                     description=translations["public_boost_announcement_message"][lang].format(
                         username=user.name,
@@ -106,7 +106,7 @@ class BoostDropdownMenu(discord.ui.Select):
                 ),
                 "ephemeral": False
             },
-            PaymentStatusCodes.NOT_ENOUGH_MONEY: {
+            PaymentStatusCode.NOT_ENOUGH_MONEY: {
                 "embed": discord.Embed(
                     description=translations["not_enough_money_payment"][lang],
                     title="🔴 Not enough balance",
@@ -115,7 +115,7 @@ class BoostDropdownMenu(discord.ui.Select):
                 "view": top_up_dropdown_view,
                 "ephemeral": True
             },
-            PaymentStatusCodes.SERVER_PROBLEM: {
+            PaymentStatusCode.SERVER_PROBLEM: {
                 "embed": discord.Embed(
                     description=translations["server_error_payment"][lang],
                     colour=discord.Colour.red()
@@ -124,5 +124,5 @@ class BoostDropdownMenu(discord.ui.Select):
             },
         }
         response = messages_kwargs.get(payment_status_code)
-        return response if response else messages_kwargs[PaymentStatusCodes.SERVER_PROBLEM]
+        return response if response else messages_kwargs[PaymentStatusCode.SERVER_PROBLEM]
 
