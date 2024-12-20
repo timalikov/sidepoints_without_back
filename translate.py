@@ -31,8 +31,8 @@ translations = {
         'en': '**User is ordering Kickers. Please click the button to proceed with the order**\nCustomer: ** {customer_username} <@!{customer_id}>**\nAlert: **{choice}**\nServer: **{server_name}**\nGame server: **{game_server}**\nLanguage: **{language}**\nGender: **{gender}**\nCustomer extra request: {extra_text}',
     },
     'order_new_alert_new':{
-        'en': ':loudspeaker: **User: {customer_username} **\n:arrow_right: **Info:** {choice}\n:arrow_right: **Server:** {server_name}\n:arrow_right: **Game server:** {game_server}\n:arrow_right: **Language:** {language}\n:arrow_right: **Gender:** {gender}\n:speech_balloon: **Customer request:** {extra_text}',
-        'ru': ':loudspeaker: **Пользователь: {customer_username} **\n:arrow_right: **Инфо:** {choice}\n:arrow_right: **Сервер:** {server_name}\n:arrow_right: **Игровой сервер:** {game_server}\n:arrow_right: **Язык:** {language}\n:arrow_right: **Пол:** {gender}\n:speech_balloon: **Комментарий заказчика:** {extra_text}',
+        'en': '<a:announce:1318096757749715006> **User: {customer_username} **\n<a:arrowgreen:1318096943284490252> **Info:** {choice}\n<a:arrowgreen:1318096943284490252> **Server:** {server_name}\n<a:arrowgreen:1318096943284490252> **Game server:** {game_server}\n<a:arrowgreen:1318096943284490252> **Language:** {language}\n<a:arrowgreen:1318096943284490252> **Gender:** {gender}\n<a:arrow_yellow:1318097105092481135> **Customer request:** {extra_text}',
+        'ru': '<a:announce:1318096757749715006> **Пользователь: {customer_username} **\n<a:arrowgreen:1318096943284490252> **Инфо:** {choice}\n<a:arrowgreen:1318096943284490252> **Сервер:** {server_name}\n<a:arrowgreen:1318096943284490252> **Игровой сервер:** {game_server}\n<a:arrowgreen:1318096943284490252> **Язык:** {language}\n<a:arrowgreen:1318096943284490252> **Пол:** {gender}\n<a:arrow_yellow:1318097105092481135> **Комментарий заказчика:** {extra_text}',
     },
     'order_alert_title': {
         'en': 'New Order!',
@@ -892,5 +892,17 @@ translations = {
         "en": "Ohh sorry, this coupon is invalid. Double check and please try again.",
         "ru": "Ой, извините, этот купон недействителен. Проверьте ещё раз и попробуйте снова."
     }
+    "you_are_not_member": {
+        "en": "You are not a member of the server Sidekick. Please join the server to get a review: https://discord.gg/sidekick",
+        "ru": "Вы не являетесь участником сервера Sidekick. Присоединитесь к серверу, чтобы получить обзор: https://discord.gg/sidekick"
+    },
+    "private_review_channel_created": {
+        "en": "Your private review channel has been created: {invite_url}\nPlease make appointment via this link: https://calendly.com/evelyn-sidekick/new-meeting",
+        "ru": "Ваш приватный канал для обзора был создан: {invite_url}\nПожалуйста, назначьте встречу по этой ссылке: https://calendly.com/evelyn-sidekick/new-meeting"
+    },
+    "private_review_channel_tag": {
+        "en": "{role_mention} here is the new candidate for review {user}\nPlease make appointment via this link: https://calendly.com/evelyn-sidekick/new-meeting",
+        "ru": "{role_mention} вот новый кандидат на обзор {user}\nПожалуйста, назначьте встречу по этой ссылке: https://calendly.com/evelyn-sidekick/new-meeting"
+    },
 }
 

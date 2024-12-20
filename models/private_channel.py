@@ -132,6 +132,7 @@ async def create_private_discord_channel(
     kicker_role: discord.Role = discord.utils.get(guild.roles, name="Kicker")  
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        kicker_role: discord.PermissionOverwrite(read_messages=True),
         challenger: discord.PermissionOverwrite(read_messages=True),
         challenged: discord.PermissionOverwrite(read_messages=True),
     }
@@ -199,7 +200,6 @@ async def create_private_discord_channel(
         await channel.send(embed=embed, view=view)
     return True, channel
 
-
 async def send_challenge_invites(
     challenger: discord.User,
     challenged: discord.User, 
@@ -256,3 +256,41 @@ async def join_or_create_private_discord_channel(
         return True, channel
     except discord.HTTPException:
         return False, "Failed to send invite links to one or more participants."
+
+async def create_private_channel_for_user_and_role(
+    guild: discord.Guild,
+    user: discord.User,
+    role_name: str,
+    category_name: str
+) -> tuple[bool, discord.abc.GuildChannel | None]:
+    """
+    Creates a private channel for a specific user and role within a guild.
+    """
+    try:
+        role = discord.utils.get(guild.roles, name=role_name)
+        if not role:
+            raise ValueError(f"Role '{role_name}' not found.")
+        
+        index = 1
+        while True:
+            current_category_name = category_name if index == 1 else f"{category_name}_{index}"
+            category = discord.utils.get(guild.categories, name=current_category_name)
+            if not category:
+                category = await guild.create_category(current_category_name)
+            if category and len(category.channels) < 50:
+                break
+            index += 1
+        
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            role: discord.PermissionOverwrite(read_messages=True),
+            user: discord.PermissionOverwrite(read_messages=True)
+        }
+
+        formatted_time = datetime.now().strftime("%H:%M_%d.%m.%y")
+        channel_name = f"{role_name}-{user.name}-{formatted_time}"
+        channel = await category.create_voice_channel(channel_name, overwrites=overwrites)
+        return True, channel
+    except (discord.DiscordException, ValueError) as e:
+        logger.error(f"Error creating private channel for {category_name}, {role_name}: {e}")
+        return False, None
