@@ -9,7 +9,6 @@ from services.messages.invite_to_private_channel import send_invitation
 from translate import get_lang_prefix, translations
 
 from message_tasks import start_all_messages
-from database.dto.psql_services import Services_Database
 from database.dto.sql_profile import Profile_Database
 from services.schedule_tasks.session_delivery_check import session_delivery_check
 from services.logger.client import CustomLogger
@@ -114,7 +113,6 @@ async def create_private_discord_channel(
     lang: Literal["en", "ru"] = "en",
 ):
     guild = bot.get_guild(guild_id)
-    services_db = Services_Database()
 
     category = None
     index = 1
