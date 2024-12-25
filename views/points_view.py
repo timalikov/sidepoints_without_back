@@ -3,6 +3,7 @@ import discord
 
 from translate import translations
 from config import (
+    INVITE_BOT_URL,
     POINTS_IMAGE_URL,
     LINK_LEADERBOARD,
     YELLOW_LOGO_COLOR,
@@ -40,15 +41,14 @@ class PointsView(BaseView):
         self.add_buttons()
 
     def add_buttons(self) -> None:
-        # Временно убираем
-        # self.add_item(
-        #     discord.ui.Button(
-        #         label="Add Sidekick to your server",
-        #         url=INVITE_BOT_URL,
-        #         style=discord.ButtonStyle.link,
-        #         row=1
-        #     )
-        # )
+        self.add_item(
+            discord.ui.Button(
+                label="Add Sidekick to your server",
+                url=INVITE_BOT_URL,
+                style=discord.ButtonStyle.link,
+                row=1
+            )
+        )
         self.add_item(
             CheckInButton(user=self.user, total_points=self.total_points, lang=self.lang, row=3)
         )

@@ -31,42 +31,16 @@ class CheckInButton(BaseButton):
             label="Daily check in",
             row=row
         )
-        self.token = get_jwt_token(user)
-        self.headers = {"Authorization": f"Bearer {self.token}"}
         self.total_points = total_points
         self.lang = lang
-        self.disabled = True
-        try:
-            response = requests.get(CHECK_IN_AVAILABLE, timeout=5, headers=self.headers)
-        except requests.Timeout:
-            logger.http_error_sync("Check in available [timeout]", response)
-        if response.status_code != 200:
-            logger.http_error_sync("Check in available", response)
-        else:
-            if response.json():
-                self.disabled = False
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
-        response = requests.post(
-            url=CHECK_IN_URL,
-            json={
-                "discordId": str(interaction.user.id)
-            },
-            headers=self.headers
+        embed = discord.Embed(
+            description=translations["task_completed_message"][self.lang].format(
+                total_points=self.total_points + 10
+            ),
+            colour=discord.Colour.green()
         )
-        is_success = await handle_status_code(response)
-        if is_success:
-            embed = discord.Embed(
-                description=translations["task_completed_message"][self.lang].format(
-                    total_points=self.total_points + 10
-                ),
-                colour=discord.Colour.green()
-            )
-        else:
-            embed = discord.Embed(
-                description=translations["already_checked_in_message"][self.lang],
-                colour=discord.Colour.red()
-            )
         await send_interaction_message(interaction=interaction, embed=embed)
 
