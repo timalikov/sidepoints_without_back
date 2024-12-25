@@ -22,7 +22,7 @@ class InviteUserButton(BaseButton):
         lang: Literal["ru", "en"] = "en"
     ):
         super().__init__(
-            label="Invite user to the SideKick Server",
+            label="Invite Friends",
             style=discord.ButtonStyle.primary,
             custom_id="invite_user",
             row=row

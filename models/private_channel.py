@@ -1,4 +1,4 @@
-from typing import Literal, Set
+from typing import Literal
 
 from datetime import datetime
 import discord
@@ -115,8 +115,6 @@ async def create_private_discord_channel(
 ):
     guild = bot.get_guild(guild_id)
     services_db = Services_Database()
-    kicker_ids: Set[int] = await services_db.get_super_kickers()
-    managers = await services_db.get_managers()
 
     category = None
     index = 1
@@ -165,17 +163,6 @@ async def create_private_discord_channel(
         guild_id=guild_id,
         lang=lang,
     )
-        
-    manager_members = []
-
-    if challenged.id in kicker_ids:
-        for manager_id in managers:
-            try:
-                manager = await bot.fetch_user(manager_id)
-                manager_members.append(manager)
-                await manager.send(manager_message)
-            except discord.HTTPException:
-                await logger.error_discord("Failed to send invite links to one or more participants.")
 
     if challenged.id not in TEST_ACCOUNTS and challenger.id not in TEST_ACCOUNTS:
         await send_message_to_customer_support(bot, manager_message)

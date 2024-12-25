@@ -1,7 +1,4 @@
-import asyncio
 from typing import List, Literal, Optional, Tuple
-
-from database.core_kicker_list import managers
 
 from serializers.profile_serializer import serialize_profile_data
 from database.dto.base import BasePsqlDTO
@@ -293,9 +290,6 @@ class Services_Database(BasePsqlDTO):
             languages.extend(i)
         return set(languages)
     
-    async def get_managers(self):
-        return managers
-
     async def get_facts(self):
         async with self.get_connection() as conn:
             query = "SELECT fact_text FROM discord_bot.entertainment_facts;"
